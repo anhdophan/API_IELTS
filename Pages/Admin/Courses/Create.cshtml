@@ -1,0 +1,59 @@
+@* Pages/Admin/Courses/Create.cshtml *@
+@page
+@model api.Pages.Admin.Courses.CreateModel
+@{
+    ViewData["Title"] = "Create Course";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<h2>Create Course</h2>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="Course.CourseId" class="control-label"></label>
+        <input asp-for="Course.CourseId" class="form-control" />
+        <span asp-validation-for="Course.CourseId" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Course.Name" class="control-label"></label>
+        <input asp-for="Course.Name" class="form-control" />
+        <span asp-validation-for="Course.Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Course.Cost" class="control-label"></label>
+        <input asp-for="Course.Cost" class="form-control" />
+        <span asp-validation-for="Course.Cost" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Course.StartDay" class="control-label"></label>
+        <input asp-for="Course.StartDay" class="form-control" type="date" />
+        <span asp-validation-for="Course.StartDay" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Course.EndDay" class="control-label"></label>
+        <input asp-for="Course.EndDay" class="form-control" type="date" />
+        <span asp-validation-for="Course.EndDay" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Course.DescriptionShort" class="control-label"></label>
+        <textarea asp-for="Course.DescriptionShort" class="form-control"></textarea>
+        <span asp-validation-for="Course.DescriptionShort" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Course.DescriptionLong" class="control-label"></label>
+        <textarea asp-for="Course.DescriptionLong" class="form-control"></textarea>
+        <span asp-validation-for="Course.DescriptionLong" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label>Ảnh đại diện</label>
+        <input type="file" asp-for="ImageUpload" class="form-control" accept="image/*" />
+    </div>
+    <div class="form-group mt-3">
+        <input type="submit" value="Create" class="btn btn-primary" />
+        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+

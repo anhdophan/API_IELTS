@@ -1,0 +1,76 @@
+@page
+@model Admin.Students.IndexModel
+@{
+    ViewData["Title"] = "Manage Students";
+}
+<style>
+    h2 {
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
+    a.button, button {
+        background-color: #3498db;
+        color: white;
+        padding: 6px 14px;
+        border: none;
+        border-radius: 4px;
+        text-decoration: none;
+        margin-right: 5px;
+        cursor: pointer;
+        font-size: 14px;
+    }
+    a.button:hover, button:hover {
+        background-color: #217dbb;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    th, td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #eaeaea;
+        text-align: left;
+    }
+    th {
+        background-color: #f5f5f5;
+        color: #333;
+    }
+    tr:hover {
+        background-color: #f0f8ff;
+    }
+    .actions {
+        display: flex;
+        gap: 5px;
+    }
+</style>
+<h2>Manage Students</h2>
+<a asp-page="Create" class="button">Create New Student</a>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Score</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var student in Model.Students)
+    {
+        <tr>
+            <td>@student.Name</td>
+            <td>@student.Email</td>
+            <td>@student.Score</td>
+            <td class="actions">
+                <form method="post" asp-page-handler="Delete" asp-route-id="@student.StudentId" style="display:inline;">
+                    <button type="submit">Delete</button>
+                </form>
+                <a asp-page="Edit" asp-route-id="@student.StudentId" class="button">Edit</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

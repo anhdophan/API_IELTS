@@ -1,0 +1,34 @@
+@page "{id:int}"
+@model api.Pages.Admin.Courses.DetailsModel
+@{
+    ViewData["Title"] = "Course Details";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h2>Course Details</h2>
+
+<div class="card">
+    <div class="card-body">
+        <h4>@Model.Course.Name</h4>
+        <p><strong>Cost:</strong> @Model.Course.Cost.ToString("C")</p>
+        <p><strong>Start:</strong> @Model.Course.StartDay.ToShortDateString()</p>
+        <p><strong>End:</strong> @Model.Course.EndDay.ToShortDateString()</p>
+        <p><strong>Description:</strong></p>
+        <p>@Model.Course.DescriptionLong</p>
+
+        @if (Model.Course.Images != null && Model.Course.Images.Any())
+        {
+            <p><strong>Images:</strong></p>
+            <div class="row">
+                @foreach (var img in Model.Course.Images)
+                {
+                    <div class="col-md-3">
+                        <img src="@img" alt="Image" class="img-thumbnail" />
+                    </div>
+                }
+            </div>
+        }
+
+        <a asp-page="Index" class="btn btn-primary mt-3">Back to List</a>
+    </div>
+</div>

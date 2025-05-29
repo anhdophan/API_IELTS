@@ -1,0 +1,73 @@
+@page "{id:int}"
+@model api.Pages.Admin.Courses.EditModel
+@{
+    ViewData["Title"] = "Edit Course";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h2>Edit Course</h2>
+
+<form method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label asp-for="Course.Name" class="form-label"></label>
+        <input asp-for="Course.Name" class="form-control" />
+        <span asp-validation-for="Course.Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Course.Cost" class="form-label"></label>
+        <input asp-for="Course.Cost" class="form-control" />
+        <span asp-validation-for="Course.Cost" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Course.StartDay" class="form-label"></label>
+        <input asp-for="Course.StartDay" class="form-control" type="date" />
+        <span asp-validation-for="Course.StartDay" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Course.EndDay" class="form-label"></label>
+        <input asp-for="Course.EndDay" class="form-control" type="date" />
+        <span asp-validation-for="Course.EndDay" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Course.DescriptionShort" class="form-label"></label>
+        <textarea asp-for="Course.DescriptionShort" class="form-control"></textarea>
+        <span asp-validation-for="Course.DescriptionShort" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Course.DescriptionLong" class="form-label"></label>
+        <textarea asp-for="Course.DescriptionLong" class="form-control"></textarea>
+        <span asp-validation-for="Course.DescriptionLong" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label>Current Image:</label><br />
+        @if (Model.Course?.Images != null && Model.Course.Images.Count > 0)
+        {
+            <img src="@Model.Course.Images[0]" alt="Course image" style="max-height: 200px;" />
+        }
+        else
+        {
+            <p>No image available</p>
+        }
+        <span class="text-muted">You can upload a new image below.</span>
+    </div>
+
+    <div class="form-group">
+        <label for="ImageUpload" class="form-label">Upload New Image (optional)</label>
+        <input type="file" class="form-control" name="ImageUpload" />
+    </div>
+
+    <div class="form-group mt-3">
+        <input type="submit" value="Save" class="btn btn-success" />
+        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
