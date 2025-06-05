@@ -235,31 +235,27 @@ namespace api.Controllers
         private async Task<List<Class>> GetAllClassesInternal()
         {
             var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Classes.json";
-
             using var httpClient = new HttpClient();
             var json = await httpClient.GetStringAsync(url);
 
             try
             {
                 var dict = JsonConvert.DeserializeObject<Dictionary<string, Class>>(json);
-                if (dict != null) return dict.Values.ToList();
+                if (dict != null)
+                    return dict.Values.Where(c => c != null).ToList();
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Failed to parse as dictionary: " + ex.Message);
-            }
+            catch { }
 
             try
             {
                 var list = JsonConvert.DeserializeObject<List<Class>>(json);
-                if (list != null) return list;
+                if (list != null)
+                    return list.Where(c => c != null).ToList(); // lọc null
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Failed to parse as list: " + ex.Message);
-            }
+            catch { }
 
             throw new Exception("Unable to parse class data from Firebase.");
         }
+
     }
 }

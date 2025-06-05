@@ -48,13 +48,25 @@ namespace api.Pages.Admin.Courses
                 {
                     response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/course/date?date={FilterDate:yyyy-MM-dd}");
                 }
-                else if (MinCost.HasValue || MaxCost.HasValue)
+               else if (MinCost.HasValue || MaxCost.HasValue)
                 {
-                    var min = MinCost?.ToString() ?? string.Empty;
-                    var max = MaxCost?.ToString() ?? string.Empty;
-                    response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/course/cost?minCost={min}&maxCost={max}");
+                    string url = "https://api-ielts-cgn8.onrender.com/api/course/cost";
+                    var queryParams = new List<string>();
+                    if (MinCost.HasValue) queryParams.Add($"minCost={MinCost.Value}");
+                    if (MaxCost.HasValue) queryParams.Add($"maxCost={MaxCost.Value}");
+
+                    if (queryParams.Count > 0)
+                    {
+                        url += "?" + string.Join("&", queryParams);
+                        response = await client.GetAsync(url);
+                    }
+                    else
+                    {
+                        // fallback nếu cả hai đều null → không gọi
+                        response = await client.GetAsync("https://api-ielts-cgn8.onrender.com/api/course/all");
+                    }
                 }
-                else
+                                else
                 {
                     response = await client.GetAsync("https://api-ielts-cgn8.onrender.com/api/course/all");
                 }
