@@ -83,18 +83,21 @@ namespace api.Controllers
         [HttpDelete("{classId}")]
         public async Task<IActionResult> DeleteClassAsync(string classId)
         {
-            await firebaseClient
-                .Child("Classes")
-                .Child(classId)
-                .DeleteAsync();
-                // Remove ClassId from Course
-            var classToDelete = await firebaseClient
-                .Child("Classes")
-                .Child(classId)
-                .OnceSingleAsync<Class>();
-
-            if (classToDelete != null)
+            try
             {
+                // Retrieve class first
+                var classToDelete = await firebaseClient
+                    .Child("Classes")
+                    .Child(classId)
+                    .OnceSingleAsync<Class>();
+
+                if (classToDelete == null)
+                {
+                    Console.WriteLine($"Class {classId} not found in Firebase.");
+                    return NotFound($"Class {classId} not found.");
+                }
+
+                // Remove ClassId from Course.ClassIds
                 var course = await firebaseClient
                     .Child("Courses")
                     .Child(classToDelete.CourseId.ToString())
@@ -102,16 +105,32 @@ namespace api.Controllers
 
                 if (course != null && course.ClassIds != null)
                 {
-                    course.ClassIds.Remove(classToDelete.ClassId);
-                    await firebaseClient
-                        .Child("Courses")
-                        .Child(classToDelete.CourseId.ToString())
-                        .PutAsync(course);
+                    if (course.ClassIds.Contains(classToDelete.ClassId))
+                    {
+                        course.ClassIds.Remove(classToDelete.ClassId);
+                        await firebaseClient
+                            .Child("Courses")
+                            .Child(course.CourseId.ToString())
+                            .PutAsync(course);
+                    }
                 }
-            }
 
-            return Ok();
+                // Now delete the class
+                await firebaseClient
+                    .Child("Classes")
+                    .Child(classId)
+                    .DeleteAsync();
+
+                Console.WriteLine($"Class {classId} and its reference in Course {classToDelete.CourseId} deleted.");
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error deleting class: " + ex.Message);
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
+
 
         // Get Class by ID
         [HttpGet("{classId}")]

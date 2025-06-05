@@ -1,3 +1,4 @@
+// Updated Index.cshtml.cs for handling deleted Course-Class relations and optimizing logic
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -23,12 +24,12 @@ namespace api.Pages.Admin.Courses
 
         [BindProperty(SupportsGet = true)]
         public double? MaxCost { get; set; }
+
+        public List<Course> Courses { get; set; } = new();
         public Dictionary<int, int> CourseClassCountMap { get; set; } = new();
 
-        public List<Course> Courses { get; set; } = new List<Course>();
-
         [TempData]
-        public string StatusMessage { get; set; }
+        public string StatusMessage { get; set; } = string.Empty;
 
         public IndexModel(IHttpClientFactory clientFactory, ILogger<IndexModel> logger)
         {
@@ -45,12 +46,12 @@ namespace api.Pages.Admin.Courses
 
                 if (FilterDate.HasValue)
                 {
-                    response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/course/date?date={FilterDate.Value:yyyy-MM-dd}");
+                    response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/course/date?date={FilterDate:yyyy-MM-dd}");
                 }
                 else if (MinCost.HasValue || MaxCost.HasValue)
                 {
-                    var min = MinCost.HasValue ? MinCost.Value.ToString() : "";
-                    var max = MaxCost.HasValue ? MaxCost.Value.ToString() : "";
+                    var min = MinCost?.ToString() ?? string.Empty;
+                    var max = MaxCost?.ToString() ?? string.Empty;
                     response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/course/cost?minCost={min}&maxCost={max}");
                 }
                 else
@@ -60,17 +61,29 @@ namespace api.Pages.Admin.Courses
 
                 response.EnsureSuccessStatusCode();
                 var json = await response.Content.ReadAsStringAsync();
-                Courses = JsonConvert.DeserializeObject<List<Course>>(json);
+                Courses = JsonConvert.DeserializeObject<List<Course>>(json) ?? new List<Course>();
 
-                // Load class counts for each course
+                // Load class counts
                 foreach (var course in Courses)
                 {
-                    var classRes = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/filter?courseId={course.CourseId}");
-                    if (classRes.IsSuccessStatusCode)
+                    try
                     {
-                        var classJson = await classRes.Content.ReadAsStringAsync();
-                        var classList = JsonConvert.DeserializeObject<List<Class>>(classJson) ?? new();
-                        CourseClassCountMap[course.CourseId] = classList.Count;
+                        var classRes = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/filter?courseId={course.CourseId}");
+                        if (classRes.IsSuccessStatusCode)
+                        {
+                            var classJson = await classRes.Content.ReadAsStringAsync();
+                            var classList = JsonConvert.DeserializeObject<List<Class>>(classJson) ?? new();
+                            CourseClassCountMap[course.CourseId] = classList.Count;
+                        }
+                        else
+                        {
+                            CourseClassCountMap[course.CourseId] = 0;
+                        }
+                    }
+                    catch (Exception classEx)
+                    {
+                        _logger.LogWarning(classEx, $"Error loading classes for Course {course.CourseId}");
+                        CourseClassCountMap[course.CourseId] = 0;
                     }
                 }
             }
@@ -85,45 +98,50 @@ namespace api.Pages.Admin.Courses
         {
             try
             {
-                using var client = _clientFactory.CreateClient();
+                var client = _clientFactory.CreateClient();
 
-                // 1. Lấy danh sách Class liên kết với CourseId
-                var classResponse = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/filter?courseId={id}");
-                if (classResponse.IsSuccessStatusCode)
+                // Attempt to fetch and delete all related classes
+                try
                 {
-                    var classJson = await classResponse.Content.ReadAsStringAsync();
-                    var relatedClasses = JsonConvert.DeserializeObject<List<Class>>(classJson) ?? new List<Class>();
-
-                    foreach (var cls in relatedClasses)
+                    var classResponse = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/filter?courseId={id}");
+                    if (classResponse.IsSuccessStatusCode)
                     {
-                        var deleteClassResponse = await client.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/Class/{cls.ClassId}");
-                        if (!deleteClassResponse.IsSuccessStatusCode)
+                        var classJson = await classResponse.Content.ReadAsStringAsync();
+                        var relatedClasses = JsonConvert.DeserializeObject<List<Class>>(classJson) ?? new();
+
+                        foreach (var cls in relatedClasses)
                         {
-                            _logger.LogWarning($"Failed to delete class {cls.ClassId} linked to Course {id}. Status: {deleteClassResponse.StatusCode}");
+                            var deleteClassResponse = await client.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/Class/{cls.ClassId}");
+                            if (!deleteClassResponse.IsSuccessStatusCode)
+                            {
+                                _logger.LogWarning($"Failed to delete Class {cls.ClassId} linked to Course {id}.");
+                            }
                         }
                     }
                 }
-
-                // 2. Tiến hành xóa Course
-                var courseResponse = await client.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/course/{id}");
-
-                if (courseResponse.IsSuccessStatusCode)
+                catch (Exception innerEx)
                 {
-                    StatusMessage = $"Course {id} and its related classes deleted successfully.";
+                    _logger.LogError(innerEx, $"Error retrieving/deleting classes for Course {id}.");
+                }
+
+                // Delete course
+                var courseRes = await client.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/course/{id}");
+                if (courseRes.IsSuccessStatusCode)
+                {
+                    StatusMessage = $"Course {id} and related classes deleted successfully.";
                 }
                 else
                 {
-                    StatusMessage = $"Failed to delete course {id}. Server returned {courseResponse.StatusCode}.";
+                    StatusMessage = $"Failed to delete Course {id}. Status: {courseRes.StatusCode}.";
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error deleting course {id}.");
-                StatusMessage = $"Unexpected error occurred while deleting course {id}.";
+                _logger.LogError(ex, $"Error deleting Course {id}.");
+                StatusMessage = $"Error deleting Course {id}.";
             }
 
             return RedirectToPage();
         }
-
     }
 }
