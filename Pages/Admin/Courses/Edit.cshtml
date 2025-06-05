@@ -4,70 +4,159 @@
     ViewData["Title"] = "Edit Course";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
+<style>
+    .edit-course-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 32px 28px 24px 28px;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    }
+    .edit-course-container h2 {
+        text-align: center;
+        margin-bottom: 28px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .form-group {
+        margin-bottom: 18px;
+    }
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #34495e;
+    }
+    .form-control {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        font-size: 1rem;
+    }
+    .text-danger {
+        font-size: 0.95em;
+    }
+    .btn-success {
+        min-width: 110px;
+        font-weight: 500;
+        border: none;
+        background: #27ae60;
+    }
+    .btn-secondary {
+        min-width: 90px;
+        margin-left: 10px;
+        border: none;
+        background: #7f8c8d;
+    }
+    .btn-success:hover, .btn-secondary:hover {
+        opacity: 0.85;
+    }
+    .img-preview {
+        display: block;
+        margin: 10px 0 10px 0;
+        max-width: 180px;
+        max-height: 180px;
+        border-radius: 8px;
+        border: 1px solid #e1e1e1;
+        object-fit: cover;
+        background: #f8f8f8;
+    }
+    .text-muted {
+        color: #888;
+        font-size: 0.97em;
+    }
+</style>
 
-<h2>Edit Course</h2>
+<div class="edit-course-container">
+    <h2>Edit Course</h2>
 
-<form method="post" enctype="multipart/form-data">
-    <div class="form-group">
-        <label asp-for="Course.Name" class="form-label"></label>
-        <input asp-for="Course.Name" class="form-control" />
-        <span asp-validation-for="Course.Name" class="text-danger"></span>
-    </div>
+    <form method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label asp-for="Course.Name" class="form-label"></label>
+            <input asp-for="Course.Name" class="form-control" />
+            <span asp-validation-for="Course.Name" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Course.Cost" class="form-label"></label>
-        <input asp-for="Course.Cost" class="form-control" />
-        <span asp-validation-for="Course.Cost" class="text-danger"></span>
-    </div>
+        <div class="form-group">
+            <label asp-for="Course.Cost" class="form-label"></label>
+            <input asp-for="Course.Cost" class="form-control" />
+            <span asp-validation-for="Course.Cost" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Course.StartDay" class="form-label"></label>
-        <input asp-for="Course.StartDay" class="form-control" type="date" />
-        <span asp-validation-for="Course.StartDay" class="text-danger"></span>
-    </div>
+        <div class="form-group">
+            <label asp-for="Course.StartDay" class="form-label"></label>
+            <input asp-for="Course.StartDay" class="form-control" type="date" />
+            <span asp-validation-for="Course.StartDay" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Course.EndDay" class="form-label"></label>
-        <input asp-for="Course.EndDay" class="form-control" type="date" />
-        <span asp-validation-for="Course.EndDay" class="text-danger"></span>
-    </div>
+        <div class="form-group">
+            <label asp-for="Course.EndDay" class="form-label"></label>
+            <input asp-for="Course.EndDay" class="form-control" type="date" />
+            <span asp-validation-for="Course.EndDay" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Course.DescriptionShort" class="form-label"></label>
-        <textarea asp-for="Course.DescriptionShort" class="form-control"></textarea>
-        <span asp-validation-for="Course.DescriptionShort" class="text-danger"></span>
-    </div>
+        <div class="form-group">
+            <label asp-for="Course.DescriptionShort" class="form-label"></label>
+            <textarea asp-for="Course.DescriptionShort" class="form-control"></textarea>
+            <span asp-validation-for="Course.DescriptionShort" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Course.DescriptionLong" class="form-label"></label>
-        <textarea asp-for="Course.DescriptionLong" class="form-control"></textarea>
-        <span asp-validation-for="Course.DescriptionLong" class="text-danger"></span>
-    </div>
+        <div class="form-group">
+            <label asp-for="Course.DescriptionLong" class="form-label"></label>
+            <textarea asp-for="Course.DescriptionLong" class="form-control"></textarea>
+            <span asp-validation-for="Course.DescriptionLong" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label>Current Image:</label><br />
-        @if (Model.Course?.Images != null && Model.Course.Images.Count > 0)
-        {
-            <img src="@Model.Course.Images[0]" alt="Course image" style="max-height: 200px;" />
-        }
-        else
-        {
-            <p>No image available</p>
-        }
-        <span class="text-muted">You can upload a new image below.</span>
-    </div>
+        <div class="form-group">
+            <label>Current Image:</label><br />
+            @if (Model.Course?.Images != null && Model.Course.Images.Count > 0)
+            {
+                <img src="@Model.Course.Images[0]" alt="Course image" class="img-preview" id="CurrentImagePreview" />
+            }
+            else
+            {
+                <p class="text-muted">No image available</p>
+            }
+            <span class="text-muted">You can upload a new image below.</span>
+        </div>
 
-    <div class="form-group">
-        <label for="ImageUpload" class="form-label">Upload New Image (optional)</label>
-        <input type="file" class="form-control" name="ImageUpload" />
-    </div>
+        <div class="form-group">
+            <label for="ImageUpload" class="form-label">Upload New Image (optional)</label>
+            <input type="file" class="form-control" name="ImageUpload" id="ImageUploadInput" accept="image/*" />
+            <img id="ImagePreview" class="img-preview" style="display:none;" alt="New image preview" />
+        </div>
 
-    <div class="form-group mt-3">
-        <input type="submit" value="Save" class="btn btn-success" />
-        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
-    </div>
-</form>
+        <div class="form-group mt-3" style="text-align:center;">
+            <input type="submit" value="Save" class="btn btn-success" />
+            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('ImageUploadInput');
+            const preview = document.getElementById('ImagePreview');
+            const currentImg = document.getElementById('CurrentImagePreview');
+            if (input) {
+                input.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (ev) {
+                            preview.src = ev.target.result;
+                            preview.style.display = 'block';
+                            if(currentImg) currentImg.style.opacity = 0.3;
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        preview.src = '';
+                        preview.style.display = 'none';
+                        if(currentImg) currentImg.style.opacity = 1;
+                    }
+                });
+            }
+        });
+    </script>
 }

@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace api.Pages.Admin.Courses
 {
-    public class IndexModel : PageModel
+    public class IndexModel : AdminPageBase
     {
         private readonly IHttpClientFactory _clientFactory;
         private readonly ILogger<IndexModel> _logger;

@@ -1,0 +1,20 @@
+@page "{id:int}"
+@model api.Pages.Admin.Classes.DeleteModel
+@{
+    ViewData["Title"] = "Delete Class";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h2>Delete Class</h2>
+
+<div class="alert alert-warning">
+    Are you sure you want to delete the class <strong>@Model.Class.Name</strong> (ID: @Model.Class.ClassId)?
+</div>
+
+<form method="post">
+    <input type="hidden" asp-for="Class.ClassId" />
+    <div class="form-group">
+        <input type="submit" value="Yes, Delete" class="btn btn-danger" />
+        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>

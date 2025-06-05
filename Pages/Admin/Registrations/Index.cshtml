@@ -1,0 +1,43 @@
+@page
+@model api.Pages.Admin.Registrations.IndexModel
+@{
+    ViewData["Title"] = "Registrations";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<h2 class="mt-4">Registration List</h2>
+<hr />
+<a asp-page="./Create" class="btn btn-success mb-3">+ New Registration</a>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>Student ID</th>
+            <th>Course ID</th>
+            <th>Email</th>
+            <th>Date</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in Model.Registrations)
+    {
+        <tr>
+            <td>@item.RegistrationId</td>
+            <td>@item.StudentId</td>
+            <td>@item.CourseId</td>
+            <td>@item.Email</td>
+            <td>@item.RegistrationDate.ToShortDateString()</td>
+            <td>@item.Status</td>
+            <td>
+                <a asp-page="Details" asp-route-id="@item.RegistrationId" class="btn btn-sm btn-info">Details</a>
+                <a asp-page="Edit" asp-route-id="@item.RegistrationId" class="btn btn-sm btn-primary">Edit</a>
+                <form method="post" asp-page-handler="Delete" asp-route-id="@item.RegistrationId" style="display:inline;" onsubmit="return confirm('Confirm delete?');">
+                    <button class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

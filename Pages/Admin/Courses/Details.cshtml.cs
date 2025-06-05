@@ -7,7 +7,7 @@ using api.Models;
 
 namespace api.Pages.Admin.Courses
 {
-    public class DetailsModel : PageModel
+    public class DetailsModel : AdminPageBase
     {
         private readonly HttpClient _httpClient;
 

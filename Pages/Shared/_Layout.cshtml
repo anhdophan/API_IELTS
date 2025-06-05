@@ -51,11 +51,11 @@
         </div>
         <a class="@(IsActive("/Admin/Exam") ? "active" : null)" asp-page="/Admin/Exam/Index"><i class="fa-solid fa-pen"></i> Exam</a>
         <a class="@(IsActive("/Admin/Question") ? "active" : null)" asp-page="/Admin/Question/Index"><i class="fa-solid fa-question"></i> Question</a>
-        <a class="@(IsActive("/Admin/Registration") ? "active" : null)" asp-page="/Admin/Registration/Index"><i class="fa-solid fa-user-check"></i> Registration</a>
+        <a class="@(IsActive("/Admin/Registrations") ? "active" : null)" asp-page="/Admin/Registrations/Index"><i class="fa-solid fa-user-check"></i> Registration</a>
 
         <hr class="bg-white" />
         <h6 class="px-3">Users</h6>
-        <a class="@(IsActive("/Admin/Student") ? "active" : null)" asp-page="/Admin/Student/Index"><i class="fa-solid fa-user-graduate"></i> Student</a>
+        <a class="@(IsActive("/Admin/Students") ? "active" : null)" asp-page="/Admin/Students/Index"><i class="fa-solid fa-user-graduate"></i> Student</a>
         <a class="@(IsActive("/Admin/Teacher") ? "active" : null)" asp-page="/Admin/Teacher/Index"><i class="fa-solid fa-chalkboard-teacher"></i> Teacher</a>
 
         <hr class="bg-white" />

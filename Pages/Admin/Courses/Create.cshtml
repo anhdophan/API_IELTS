@@ -5,55 +5,129 @@
     ViewData["Title"] = "Create Course";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
+<style>
+    .create-course-container {
+        max-width: 600px;
+        margin: 30px auto;
+        background: #fff;
+        padding: 32px 28px 24px 28px;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    }
+    .create-course-container h2 {
+        text-align: center;
+        margin-bottom: 28px;
+        font-weight: 600;
+        color: #2c3e50;
+    }
+    .form-group {
+        margin-bottom: 18px;
+    }
+    .form-control {
+        border-radius: 6px;
+        border: 1px solid #ced4da;
+        font-size: 1rem;
+    }
+    label.control-label {
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: #34495e;
+    }
+    .text-danger {
+        font-size: 0.95em;
+    }
+    .btn-primary {
+        min-width: 110px;
+        font-weight: 500;
+    }
+    .btn-secondary {
+        min-width: 90px;
+        margin-left: 10px;
+    }
+    .img-preview {
+        display: block;
+        margin: 10px auto 0 auto;
+        max-width: 180px;
+        max-height: 180px;
+        border-radius: 8px;
+        border: 1px solid #e1e1e1;
+        object-fit: cover;
+        background: #f8f8f8;
+    }
+</style>
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('ImageUploadInput');
+            const preview = document.getElementById('ImagePreview');
+            if (input) {
+                input.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (ev) {
+                            preview.src = ev.target.result;
+                            preview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        preview.src = '';
+                        preview.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
 }
 
-<h2>Create Course</h2>
-
-<form method="post" enctype="multipart/form-data">
-    <div class="form-group">
-        <label asp-for="Course.CourseId" class="control-label"></label>
-        <input asp-for="Course.CourseId" class="form-control" />
-        <span asp-validation-for="Course.CourseId" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Course.Name" class="control-label"></label>
-        <input asp-for="Course.Name" class="form-control" />
-        <span asp-validation-for="Course.Name" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Course.Cost" class="control-label"></label>
-        <input asp-for="Course.Cost" class="form-control" />
-        <span asp-validation-for="Course.Cost" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Course.StartDay" class="control-label"></label>
-        <input asp-for="Course.StartDay" class="form-control" type="date" />
-        <span asp-validation-for="Course.StartDay" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Course.EndDay" class="control-label"></label>
-        <input asp-for="Course.EndDay" class="form-control" type="date" />
-        <span asp-validation-for="Course.EndDay" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Course.DescriptionShort" class="control-label"></label>
-        <textarea asp-for="Course.DescriptionShort" class="form-control"></textarea>
-        <span asp-validation-for="Course.DescriptionShort" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Course.DescriptionLong" class="control-label"></label>
-        <textarea asp-for="Course.DescriptionLong" class="form-control"></textarea>
-        <span asp-validation-for="Course.DescriptionLong" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label>Ảnh đại diện</label>
-        <input type="file" asp-for="ImageUpload" class="form-control" accept="image/*" />
-    </div>
-    <div class="form-group mt-3">
-        <input type="submit" value="Create" class="btn btn-primary" />
-        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
-    </div>
-</form>
+<div class="create-course-container">
+    <h2>Create Course</h2>
+    <form method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label asp-for="Course.CourseId" class="control-label"></label>
+            <input asp-for="Course.CourseId" class="form-control" />
+            <span asp-validation-for="Course.CourseId" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Course.Name" class="control-label"></label>
+            <input asp-for="Course.Name" class="form-control" />
+            <span asp-validation-for="Course.Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Course.Cost" class="control-label"></label>
+            <input asp-for="Course.Cost" class="form-control" />
+            <span asp-validation-for="Course.Cost" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Course.StartDay" class="control-label"></label>
+            <input asp-for="Course.StartDay" class="form-control" type="date" />
+            <span asp-validation-for="Course.StartDay" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Course.EndDay" class="control-label"></label>
+            <input asp-for="Course.EndDay" class="form-control" type="date" />
+            <span asp-validation-for="Course.EndDay" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Course.DescriptionShort" class="control-label"></label>
+            <textarea asp-for="Course.DescriptionShort" class="form-control"></textarea>
+            <span asp-validation-for="Course.DescriptionShort" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Course.DescriptionLong" class="control-label"></label>
+            <textarea asp-for="Course.DescriptionLong" class="form-control"></textarea>
+            <span asp-validation-for="Course.DescriptionLong" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>Ảnh đại diện</label>
+            <input type="file" asp-for="ImageUpload" class="form-control" accept="image/*" id="ImageUploadInput" />
+            <img id="ImagePreview" class="img-preview" style="display:none;" alt="Image preview" />
+        </div>
+        <div class="form-group mt-3" style="text-align:center;">
+            <input type="submit" value="Create" class="btn btn-primary" />
+            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
 

@@ -1,0 +1,15 @@
+@page "{id:int}"
+@model api.Pages.Admin.Registrations.DetailsModel
+@{
+    ViewData["Title"] = "Registration Details";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<h2>Registration Details</h2>
+<hr />
+<div class="mb-3"><strong>ID:</strong> @Model.Registration.RegistrationId</div>
+<div class="mb-3"><strong>Student ID:</strong> @Model.Registration.StudentId</div>
+<div class="mb-3"><strong>Course ID:</strong> @Model.Registration.CourseId</div>
+<div class="mb-3"><strong>Email:</strong> @Model.Registration.Email</div>
+<div class="mb-3"><strong>Date:</strong> @Model.Registration.RegistrationDate</div>
+<div class="mb-3"><strong>Status:</strong> @Model.Registration.Status</div>
+<a asp-page="Index" class="btn btn-secondary">Back</a>

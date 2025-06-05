@@ -7,7 +7,7 @@ using api.Models;
 
 namespace api.Pages.Admin.Courses
 {
-    public class DeleteModel : PageModel
+    public class DeleteModel : AdminPageBase
     {
         [BindProperty]
         public Course Course { get; set; }

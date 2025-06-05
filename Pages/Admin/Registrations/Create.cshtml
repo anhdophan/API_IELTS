@@ -1,0 +1,91 @@
+@page
+@model api.Pages.Admin.Registrations.CreateModel
+@{
+    ViewData["Title"] = "Create Registration";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        async function loadClasses() {
+            const courseId = document.getElementById("course-select").value;
+            const classSelect = document.getElementById("class-select");
+
+            classSelect.innerHTML = '<option value="">Loading...</option>';
+            if (!courseId) return;
+
+            const response = await fetch(`/api/Registration/course/${courseId}/classes`);
+            if (response.ok) {
+                const classes = await response.json();
+                classSelect.innerHTML = '<option value="">Select Class</option>';
+                for (const cls of classes) {
+                    const option = document.createElement("option");
+                    option.value = cls.classId;
+                    option.text = cls.name;
+                    classSelect.appendChild(option);
+                }
+            } else {
+                classSelect.innerHTML = '<option value="">No class available</option>';
+            }
+        }
+    </script>
+}
+
+<h2>Create Registration</h2>
+<form method="post">
+    <div class="form-group">
+        <label>Student ID</label>
+        <input asp-for="Student.StudentId" class="form-control" />
+        <span asp-validation-for="Student.StudentId" class="text-danger" />
+    </div>
+
+    <div class="form-group">
+        <label>Name</label>
+        <input asp-for="Student.Name" class="form-control" />
+        <span asp-validation-for="Student.Name" class="text-danger" />
+    </div>
+
+    <div class="form-group">
+        <label>Email</label>
+        <input asp-for="Student.Email" class="form-control" />
+        <span asp-validation-for="Student.Email" class="text-danger" />
+    </div>
+
+    <div class="form-group">
+        <label>Phone Number</label>
+        <input asp-for="Student.PhoneNumber" class="form-control" />
+        <span asp-validation-for="Student.PhoneNumber" class="text-danger" />
+    </div>
+
+    <div class="form-group">
+        <label>Score</label>
+        <input asp-for="Student.Score" class="form-control" />
+        <span asp-validation-for="Student.Score" class="text-danger" />
+    </div>
+
+    <div class="form-group">
+        <label>Course</label>
+        <select asp-for="Registration.CourseId" class="form-control" id="course-select" onchange="loadClasses()">
+            <option value="">-- Select Course --</option>
+            @foreach (var course in Model.CoursesWithClass)
+            {
+                <option value="@course.CourseId">@course.Name</option>
+            }
+        </select>
+        <span asp-validation-for="Registration.CourseId" class="text-danger" />
+    </div>
+
+    <div class="form-group">
+        <label>Class</label>
+        <select asp-for="SelectedClassId" class="form-control" id="class-select">
+            <option value="">-- Select Class --</option>
+        </select>
+        <span class="text-danger" asp-validation-for="SelectedClassId" />
+    </div>
+
+    <div class="form-group mt-3">
+        <input type="submit" value="Register" class="btn btn-primary" />
+        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>

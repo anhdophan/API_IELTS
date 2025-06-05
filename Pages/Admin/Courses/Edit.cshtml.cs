@@ -14,7 +14,7 @@ using System.Collections.Generic;
 
 namespace api.Pages.Admin.Courses
 {
-    public class EditModel : PageModel
+    public class EditModel : AdminPageBase
     {
         private readonly HttpClient _httpClient;
         private readonly IConfiguration _config;

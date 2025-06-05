@@ -14,7 +14,7 @@ using System.IO;
 
 namespace api.Pages.Admin.Courses
 {
-    public class CreateModel : PageModel
+    public class CreateModel : AdminPageBase
     {
         private readonly IConfiguration _config;
 

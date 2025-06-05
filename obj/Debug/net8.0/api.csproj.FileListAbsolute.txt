@@ -75,3 +75,4 @@ D:/Web_Mobi_Project/API/api/bin/Debug/net8.0/System.Reactive.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.RazorAssemblyInfo.cache
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.RazorAssemblyInfo.cs
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/CloudinaryDotNet.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.sourcelink.json

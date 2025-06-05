@@ -1,0 +1,27 @@
+@page "{id:int}"
+@model api.Pages.Admin.Classes.DetailsModel
+@{
+    ViewData["Title"] = "Class Details";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h2>Class Details</h2>
+
+<div class="mb-3">
+    <strong>Class ID:</strong> @Model.Class.ClassId <br />
+    <strong>Name:</strong> @Model.Class.Name <br />
+    <strong>Course:</strong> @Model.CourseName <br />
+    <strong>Teacher:</strong> @(Model.TeacherName ?? "Chưa có giảng viên") <br />
+    <strong>Start Date:</strong> @Model.Class.StartDate.ToShortDateString() <br />
+    <strong>End Date:</strong> @Model.Class.EndDate.ToShortDateString() <br />
+    <strong>Schedule:</strong>
+    <ul>
+        @foreach (var sched in Model.Class.Schedule)
+        {
+            <li>@sched.DayOfWeek: @sched.StartTime - @sched.EndTime</li>
+        }
+    </ul>
+</div>
+
+<a asp-page="Edit" asp-route-id="@Model.Class.ClassId" class="btn btn-primary">Edit</a>
+<a asp-page="Index" class="btn btn-secondary">Back to List</a>

@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSession();
 builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient("apiClient", client =>
@@ -24,8 +25,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseSession();
+app.UseRouting();
+app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
+
+
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapRazorPages();
+    endpoints.MapGet("/", context => {
+    context.Response.Redirect("/Admin/Login_Admin");
+    return Task.CompletedTask;
+    });
+});
 
 app.Run();

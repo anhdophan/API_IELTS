@@ -13,5 +13,7 @@ namespace api.Models
         public string DescriptionShort { get; set; }
         public string DescriptionLong { get; set; }
         public List<string> Images { get; set; } // Store multiple image URLs or paths
+        
+         public List<int> ClassIds { get; set; } = new();
     }
 }

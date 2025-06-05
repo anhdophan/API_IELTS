@@ -33,13 +33,36 @@ namespace api.Controllers
             if (existing != null)
                 return Conflict($"Class with ID {cls.ClassId} already exists.");
 
+            // Save new class
             await firebaseClient
                 .Child("Classes")
                 .Child(cls.ClassId.ToString())
                 .PutAsync(cls);
 
+            // Update Course to include this ClassId
+            var course = await firebaseClient
+                .Child("Courses")
+                .Child(cls.CourseId.ToString())
+                .OnceSingleAsync<Course>();
+
+            if (course != null)
+            {
+                if (course.ClassIds == null)
+                    course.ClassIds = new List<int>();
+
+                if (!course.ClassIds.Contains(cls.ClassId))
+                {
+                    course.ClassIds.Add(cls.ClassId);
+                    await firebaseClient
+                        .Child("Courses")
+                        .Child(cls.CourseId.ToString())
+                        .PutAsync(course);
+                }
+            }
+
             return Ok(cls);
         }
+
 
         // Update Class
         [HttpPut("{classId}")]
@@ -64,6 +87,29 @@ namespace api.Controllers
                 .Child("Classes")
                 .Child(classId)
                 .DeleteAsync();
+                // Remove ClassId from Course
+            var classToDelete = await firebaseClient
+                .Child("Classes")
+                .Child(classId)
+                .OnceSingleAsync<Class>();
+
+            if (classToDelete != null)
+            {
+                var course = await firebaseClient
+                    .Child("Courses")
+                    .Child(classToDelete.CourseId.ToString())
+                    .OnceSingleAsync<Course>();
+
+                if (course != null && course.ClassIds != null)
+                {
+                    course.ClassIds.Remove(classToDelete.ClassId);
+                    await firebaseClient
+                        .Child("Courses")
+                        .Child(classToDelete.CourseId.ToString())
+                        .PutAsync(course);
+                }
+            }
+
             return Ok();
         }
 
@@ -91,9 +137,10 @@ namespace api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Failed to parse classes from Firebase. Error: {ex.Message}");
+                return BadRequest($"Failed to get classes: {ex.Message}");
             }
         }
+
 
         // Filter by CourseId or TeacherId
         [HttpGet("filter")]
@@ -167,34 +214,33 @@ namespace api.Controllers
 
         // Internal method to get all classes as Dictionary
         private async Task<List<Class>> GetAllClassesInternal()
-{
-    var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Classes.json";
-
-    using (var httpClient = new HttpClient())
-    {
-        var json = await httpClient.GetStringAsync(url);
-
-        try
         {
-            // TH1: Dữ liệu là object: { "123": {...}, "456": {...} }
-            var dict = JsonConvert.DeserializeObject<Dictionary<string, Class>>(json);
-            if (dict != null)
-                return dict.Values.ToList();
+            var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Classes.json";
+
+            using var httpClient = new HttpClient();
+            var json = await httpClient.GetStringAsync(url);
+
+            try
+            {
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, Class>>(json);
+                if (dict != null) return dict.Values.ToList();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to parse as dictionary: " + ex.Message);
+            }
+
+            try
+            {
+                var list = JsonConvert.DeserializeObject<List<Class>>(json);
+                if (list != null) return list;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Failed to parse as list: " + ex.Message);
+            }
+
+            throw new Exception("Unable to parse class data from Firebase.");
         }
-        catch { }
-
-        try
-        {
-            // TH2: Dữ liệu là array: [ {...}, {...} ]
-            var list = JsonConvert.DeserializeObject<List<Class>>(json);
-            if (list != null)
-                return list;
-        }
-        catch { }
-
-        throw new Exception("Failed to parse data as Dictionary<string, Class> or List<Class>.");
-    }
-}
-
     }
 }

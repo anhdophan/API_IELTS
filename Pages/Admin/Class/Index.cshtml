@@ -1,0 +1,48 @@
+@page
+@model api.Pages.Admin.Classes.IndexModel
+@{
+    ViewData["Title"] = "Class List";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+<h2>Classes</h2>
+<a asp-page="./Create" class="btn btn-success mb-3">Create New Class</a>
+
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Class ID</th>
+            <th>Name</th>
+            <th>Course ID</th>
+            <th>Teacher ID</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Schedule</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var cls in Model.Classes)
+    {
+        <tr>
+            <td>@cls.ClassId</td>
+            <td>@cls.Name</td>
+            <td>@cls.CourseId</td>
+            <td>
+                @(cls.TeacherId == 0 ? "Chưa có giảng viên" : cls.TeacherId.ToString())
+            </td>
+            <td>@cls.StartDate.ToShortDateString()</td>
+            <td>@cls.EndDate.ToShortDateString()</td>
+           
+            <td>
+ @string.Join(", ", cls.Schedule.Select(s => $"{s.DayOfWeek}: {s.StartTime}-{s.EndTime}"))
+            </td>
+            <td>
+                <a asp-page="Edit" asp-route-id="@cls.ClassId" class="btn btn-sm btn-primary">Edit</a>
+                <a asp-page="Details" asp-route-id="@cls.ClassId" class="btn btn-sm btn-info">Details</a>
+                <a asp-page="Delete" asp-route-id="@cls.ClassId" class="btn btn-sm btn-danger">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

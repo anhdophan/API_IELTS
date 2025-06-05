@@ -1,0 +1,38 @@
+@page "{id:int}"
+@model api.Pages.Admin.Registrations.EditModel
+@{
+    ViewData["Title"] = "Edit Registration";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<h2>Edit Registration</h2>
+<form method="post">
+    <div class="form-group">
+        <label asp-for="Registration.RegistrationId"></label>
+        <input asp-for="Registration.RegistrationId" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Registration.StudentId"></label>
+        <input asp-for="Registration.StudentId" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Registration.CourseId"></label>
+        <input asp-for="Registration.CourseId" class="form-control" readonly />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Registration.Email"></label>
+        <input asp-for="Registration.Email" class="form-control" />
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Registration.Status"></label>
+        <select asp-for="Registration.Status" class="form-control" asp-items="Html.GetEnumSelectList<api.Models.RegistrationStatus>()"></select>
+    </div>
+
+    <div class="form-group mt-3">
+        <input type="submit" class="btn btn-success" value="Save" />
+        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
