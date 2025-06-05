@@ -30,7 +30,7 @@ namespace api.Pages.Admin.Students
             var client = _clientFactory.CreateClient();
             var json = JsonConvert.SerializeObject(Student);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var res = await client.PostAsync("http://localhost:5035/api/Student", content);
+            var res = await client.PostAsync("https://api-ielts-cgn8.onrender.com/api/Student", content);
 
             if (res.IsSuccessStatusCode)
                 return RedirectToPage("Index");

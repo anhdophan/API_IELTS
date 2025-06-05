@@ -31,7 +31,7 @@ namespace api.Pages.Admin.Students
             try
             {
                 var client = _clientFactory.CreateClient();
-                var response = await client.GetAsync("http://localhost:5035/api/Student/all");
+                var response = await client.GetAsync("https://api-ielts-cgn8.onrender.com/api/Student/all");
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
@@ -49,7 +49,7 @@ namespace api.Pages.Admin.Students
             try
             {
                 var client = _clientFactory.CreateClient();
-                var response = await client.DeleteAsync($"http://localhost:5035/api/Student/{id}");
+                var response = await client.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/Student/{id}");
 
                 if (response.IsSuccessStatusCode)
                 {

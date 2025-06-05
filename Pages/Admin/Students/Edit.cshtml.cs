@@ -23,7 +23,7 @@ namespace api.Pages.Admin.Students
         public async Task<IActionResult> OnGetAsync(int id)
         {
             var client = _clientFactory.CreateClient();
-            var response = await client.GetAsync($"http://localhost:5035/api/Student/{id}");
+            var response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Student/{id}");
             if (!response.IsSuccessStatusCode)
                 return NotFound();
 
@@ -41,7 +41,7 @@ namespace api.Pages.Admin.Students
             var json = JsonConvert.SerializeObject(Student);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await client.PutAsync($"http://localhost:5035/api/Student/{Student.StudentId}", content);
+            var response = await client.PutAsync($"https://api-ielts-cgn8.onrender.com/api/Student/{Student.StudentId}", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");

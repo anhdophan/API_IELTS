@@ -87,7 +87,7 @@ namespace api.Pages.Admin.Courses
 
             Course.Images = new List<string> { imageUrl };
 
-            var res = await _httpClient.PutAsJsonAsync($"api/course/{Course.CourseId}", Course);
+            var res = await _httpClient.PutAsJsonAsync($"https://api-ielts-cgn8.onrender.com/api/course/{Course.CourseId}", Course);
             if (!res.IsSuccessStatusCode)
                 return BadRequest();
 

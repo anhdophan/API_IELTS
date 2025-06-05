@@ -65,7 +65,7 @@ namespace api.Pages.Admin.Classes
             var client = _clientFactory.CreateClient();
             var json = JsonConvert.SerializeObject(Class);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("https://api-ielts-cgn8.onrender.com//api/Class", content);
+            var response = await client.PostAsync("https://api-ielts-cgn8.onrender.com/api/Class", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");
