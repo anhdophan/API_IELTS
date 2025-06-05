@@ -112,8 +112,16 @@ namespace api.Controllers
         {
             try
             {
-                var courses = await GetAllCoursesInternal();
-                return Ok(courses);
+                var allCourses = await firebaseClient
+                    .Child("Courses")
+                    .OnceAsync<Course>();
+
+                var list = allCourses
+                    .Where(c => c.Object != null)
+                    .Select(c => c.Object)
+                    .ToList();
+
+                return Ok(list);
             }
             catch (Exception ex)
             {
@@ -155,7 +163,7 @@ namespace api.Controllers
             {
                 var dict = JsonConvert.DeserializeObject<Dictionary<string, Course>>(json);
                 if (dict != null)
-                    return dict.Values.ToList();
+                    return dict.Values.Where(c => c != null).ToList();
             }
             catch { }
 
@@ -163,7 +171,7 @@ namespace api.Controllers
             {
                 var list = JsonConvert.DeserializeObject<List<Course>>(json);
                 if (list != null)
-                    return list;
+                    return list.Where(c => c != null).ToList();
             }
             catch { }
 
