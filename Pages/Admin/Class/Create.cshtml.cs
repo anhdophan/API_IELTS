@@ -81,7 +81,7 @@ namespace api.Pages.Admin.Classes
             var courses = JsonConvert.DeserializeObject<List<Course>>(courseRes) ?? new();
             CourseList = new SelectList(courses, "CourseId", "Name");
 
-            var teacherRes = await client.GetStringAsync("https://api-ielts-cgn8.onrender.com//api/Teacher/all");
+            var teacherRes = await client.GetStringAsync("https://api-ielts-cgn8.onrender.com/api/Teacher/all");
             var teachers = JsonConvert.DeserializeObject<List<Teacher>>(teacherRes) ?? new();
             teachers.Insert(0, new Teacher { TeacherId = 0, Name = "Chưa có giảng viên" });
             TeacherList = new SelectList(teachers, "TeacherId", "Name");

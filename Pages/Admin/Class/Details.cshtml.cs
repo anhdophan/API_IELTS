@@ -21,7 +21,7 @@ namespace api.Pages.Admin.Classes
         public async Task<IActionResult> OnGetAsync(int id)
         {
             var client = _clientFactory.CreateClient();
-            var clsRes = await client.GetAsync($"https://api-ielts-cgn8.onrender.com//api/Class/{id}");
+            var clsRes = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/{id}");
             if (!clsRes.IsSuccessStatusCode) return NotFound();
 
             var json = await clsRes.Content.ReadAsStringAsync();

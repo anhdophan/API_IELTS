@@ -23,17 +23,18 @@ namespace api.Pages.Admin.Courses
 
         [BindProperty(SupportsGet = true)]
         public double? MaxCost { get; set; }
+        public Dictionary<int, int> CourseClassCountMap { get; set; } = new();
+
+        public List<Course> Courses { get; set; } = new List<Course>();
+
+        [TempData]
+        public string StatusMessage { get; set; }
 
         public IndexModel(IHttpClientFactory clientFactory, ILogger<IndexModel> logger)
         {
             _clientFactory = clientFactory;
             _logger = logger;
         }
-
-        public List<Course> Courses { get; set; } = new List<Course>();
-
-        [TempData]
-        public string StatusMessage { get; set; }
 
         public async Task OnGetAsync()
         {
@@ -60,6 +61,18 @@ namespace api.Pages.Admin.Courses
                 response.EnsureSuccessStatusCode();
                 var json = await response.Content.ReadAsStringAsync();
                 Courses = JsonConvert.DeserializeObject<List<Course>>(json);
+
+                // Load class counts for each course
+                foreach (var course in Courses)
+                {
+                    var classRes = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/filter?courseId={course.CourseId}");
+                    if (classRes.IsSuccessStatusCode)
+                    {
+                        var classJson = await classRes.Content.ReadAsStringAsync();
+                        var classList = JsonConvert.DeserializeObject<List<Class>>(classJson) ?? new();
+                        CourseClassCountMap[course.CourseId] = classList.Count;
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -68,29 +81,49 @@ namespace api.Pages.Admin.Courses
             }
         }
 
-
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             try
             {
-                var client = _clientFactory.CreateClient();
-                var response = await client.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/course/{id}");
+                using var client = _clientFactory.CreateClient();
 
-                if (response.IsSuccessStatusCode)
+                // 1. Lấy danh sách Class liên kết với CourseId
+                var classResponse = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/filter?courseId={id}");
+                if (classResponse.IsSuccessStatusCode)
                 {
-                    StatusMessage = $"Course {id} deleted successfully.";
+                    var classJson = await classResponse.Content.ReadAsStringAsync();
+                    var relatedClasses = JsonConvert.DeserializeObject<List<Class>>(classJson) ?? new List<Class>();
+
+                    foreach (var cls in relatedClasses)
+                    {
+                        var deleteClassResponse = await client.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/Class/{cls.ClassId}");
+                        if (!deleteClassResponse.IsSuccessStatusCode)
+                        {
+                            _logger.LogWarning($"Failed to delete class {cls.ClassId} linked to Course {id}. Status: {deleteClassResponse.StatusCode}");
+                        }
+                    }
+                }
+
+                // 2. Tiến hành xóa Course
+                var courseResponse = await client.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/course/{id}");
+
+                if (courseResponse.IsSuccessStatusCode)
+                {
+                    StatusMessage = $"Course {id} and its related classes deleted successfully.";
                 }
                 else
                 {
-                    StatusMessage = $"Failed to delete course {id}.";
+                    StatusMessage = $"Failed to delete course {id}. Server returned {courseResponse.StatusCode}.";
                 }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error deleting course {id}.");
-                StatusMessage = $"Error deleting course {id}.";
+                StatusMessage = $"Unexpected error occurred while deleting course {id}.";
             }
+
             return RedirectToPage();
         }
+
     }
 }

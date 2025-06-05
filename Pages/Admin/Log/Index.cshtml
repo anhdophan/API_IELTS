@@ -1,0 +1,29 @@
+@page
+@model api.Pages.Admin.Logs.IndexModel
+@{
+    ViewData["Title"] = "Admin Logs";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<h2>Admin Logs</h2>
+<hr />
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Action</th>
+            <th>Performed By</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var log in Model.Logs)
+    {
+        <tr>
+            <td>@log.Timestamp.ToLocalTime()</td>
+            <td>@log.Action</td>
+            <td>@log.PerformedBy</td>
+            <td>@log.Description</td>
+        </tr>
+    }
+    </tbody>
+</table>

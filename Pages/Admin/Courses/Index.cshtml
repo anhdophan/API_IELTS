@@ -129,10 +129,11 @@
         <a href="/Admin/Courses" class="btn btn-secondary ml-2">Clear</a>
     </form>
 
-    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+   @if (Model?.StatusMessage != null)
     {
         <div class="status-message">@Model.StatusMessage</div>
     }
+
 
     <table class="table table-bordered table-hover">
         <thead class="thead-light">
@@ -146,29 +147,51 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var course in Model.Courses)
-            {
-                <tr>
-                    <td>@course.CourseId</td>
-                    <td>@course.Name</td>
-                    <td>@course.Cost</td>
-                    <td>@course.StartDay.ToShortDateString()</td>
-                    <td>@course.EndDay.ToShortDateString()</td>
-                    <td>
-                        <a asp-page="Edit" asp-route-id="@course.CourseId" class="btn btn-sm btn-primary">Edit</a>
-                        <a asp-page="Details" asp-route-id="@course.CourseId" class="btn btn-sm btn-info">Details</a>
-                        <form method="post" asp-page-handler="Delete" asp-route-id="@course.CourseId" 
-                              style="display:inline;" 
-                              onsubmit="return confirm('Are you sure you want to delete this course?');">
-                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-            }
+            @if (Model.Courses != null)
+                {
+                    foreach (var course in Model.Courses)
+                    {
+                        <tr>
+                            <td>@course.CourseId</td>
+                            <td>@course.Name</td>
+                            <td>@course.Cost</td>
+                            <td>@course.StartDay.ToShortDateString()</td>
+                            <td>@course.EndDay.ToShortDateString()</td>
+                            <td>
+                                <a asp-page="Edit" asp-route-id="@course.CourseId" class="btn btn-sm btn-primary">Edit</a>
+                                <a asp-page="Details" asp-route-id="@course.CourseId" class="btn btn-sm btn-info">Details</a>
+                               <form method="post" asp-page-handler="Delete" asp-route-id="@course.CourseId" 
+                                    data-course-name="@course.Name"
+                                    data-course-id="@course.CourseId"
+                                    data-class-count="@Model.CourseClassCountMap.ContainsKey(course.CourseId) ? Model.CourseClassCountMap[course.CourseId] : 0"
+                                    onsubmit="return confirmDelete(this);"
+                                    style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-danger">No courses found or an error occurred.</td>
+                    </tr>
+                }
+
         </tbody>
     </table>
 </div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+     <script></script>
+        function confirmDelete(form) {
+            const courseName = form.getAttribute('data-course-name');
+            const classCount = form.getAttribute('data-class-count') || 0;
+            const message = `Are you sure you want to delete course "${courseName}"?\nThis will also delete ${classCount} related class(es).`;
+            return confirm(message);
+        }
+    </script>
 }
