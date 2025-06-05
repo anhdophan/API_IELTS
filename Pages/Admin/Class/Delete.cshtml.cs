@@ -22,7 +22,7 @@ namespace api.Pages.Admin.Classes
         public async Task<IActionResult> OnGetAsync(int id)
         {
             var client = _clientFactory.CreateClient();
-            var response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com//api/Class/{id}");
+            var response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/{id}");
 
             if (!response.IsSuccessStatusCode)
                 return NotFound();

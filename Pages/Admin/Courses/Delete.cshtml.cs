@@ -15,7 +15,7 @@ namespace api.Pages.Admin.Courses
         public async Task<IActionResult> OnGetAsync(int id)
         {
             using var http = new HttpClient();
-            var res = await http.GetAsync($"/api/course/{id}");
+            var res = await http.GetAsync($"https://api-ielts-cgn8.onrender.com/api/course/{id}");
             if (!res.IsSuccessStatusCode) return NotFound();
             Course = await res.Content.ReadFromJsonAsync<Course>();
             return Page();
@@ -24,7 +24,7 @@ namespace api.Pages.Admin.Courses
         public async Task<IActionResult> OnPostAsync()
         {
             using var http = new HttpClient();
-            var res = await http.DeleteAsync($"/api/course/{Course.CourseId}");
+            var res = await http.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/course/{Course.CourseId}");
             if (!res.IsSuccessStatusCode) return BadRequest();
             return RedirectToPage("Index");
         }

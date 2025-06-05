@@ -20,7 +20,7 @@ namespace api.Pages.Admin.Courses
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
-            var res = await _httpClient.GetAsync($"api/course/{id}");
+            var res = await _httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/course/{id}");
             if (!res.IsSuccessStatusCode)
                 return NotFound();
 

@@ -37,7 +37,7 @@ namespace api.Pages.Admin.Classes
             await LoadDropdownsAsync();
 
             var client = _clientFactory.CreateClient();
-            var res = await client.GetAsync($"https://api-ielts-cgn8.onrender.com//api/Class/{id}");
+            var res = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/{id}");
             if (!res.IsSuccessStatusCode) return NotFound();
 
             var json = await res.Content.ReadAsStringAsync();
@@ -72,7 +72,7 @@ namespace api.Pages.Admin.Classes
             var client = _clientFactory.CreateClient();
             var json = JsonConvert.SerializeObject(Class);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PutAsync($"https://api-ielts-cgn8.onrender.com//api/Class/{Class.ClassId}", content);
+            var response = await client.PutAsync($"https://api-ielts-cgn8.onrender.com/api/Class/{Class.ClassId}", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");
