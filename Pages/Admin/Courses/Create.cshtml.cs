@@ -84,7 +84,7 @@ namespace api.Pages.Admin.Courses
             var json = JsonConvert.SerializeObject(Course);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync("http://localhost:5035/api/Course", content);
+            var response = await httpClient.PostAsync("https://api-ielts-cgn8.onrender.com/api/Course", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");

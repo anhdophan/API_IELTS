@@ -37,7 +37,7 @@ namespace api.Pages.Admin.Classes
             await LoadDropdownsAsync();
 
             var client = _clientFactory.CreateClient();
-            var res = await client.GetAsync($"http://localhost:5035/api/Class/{id}");
+            var res = await client.GetAsync($"https://api-ielts-cgn8.onrender.com//api/Class/{id}");
             if (!res.IsSuccessStatusCode) return NotFound();
 
             var json = await res.Content.ReadAsStringAsync();
@@ -72,7 +72,7 @@ namespace api.Pages.Admin.Classes
             var client = _clientFactory.CreateClient();
             var json = JsonConvert.SerializeObject(Class);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
-            var response = await client.PutAsync($"http://localhost:5035/api/Class/{Class.ClassId}", content);
+            var response = await client.PutAsync($"https://api-ielts-cgn8.onrender.com//api/Class/{Class.ClassId}", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");
@@ -84,11 +84,11 @@ namespace api.Pages.Admin.Classes
         private async Task LoadDropdownsAsync()
         {
             var client = _clientFactory.CreateClient();
-            var courseRes = await client.GetStringAsync("http://localhost:5035/api/Course/all");
+            var courseRes = await client.GetStringAsync("https://api-ielts-cgn8.onrender.com/api/Course/all");
             var courses = JsonConvert.DeserializeObject<List<Course>>(courseRes) ?? new();
             CourseList = new SelectList(courses, "CourseId", "Name");
 
-            var teacherRes = await client.GetStringAsync("http://localhost:5035/api/Teacher/all");
+            var teacherRes = await client.GetStringAsync("https://api-ielts-cgn8.onrender.com//api/Teacher/all");
             var teachers = JsonConvert.DeserializeObject<List<Teacher>>(teacherRes) ?? new();
             teachers.Insert(0, new Teacher { TeacherId = 0, Name = "Chưa có giảng viên" });
             TeacherList = new SelectList(teachers, "TeacherId", "Name");

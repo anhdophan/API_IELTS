@@ -26,7 +26,7 @@ namespace api.Pages.Admin.Classes
             try
             {
                 var client = _clientFactory.CreateClient();
-                var res = await client.GetAsync("http://localhost:5035/api/Class/all");
+                var res = await client.GetAsync("https://api-ielts-cgn8.onrender.com/api/Class/all");
                 res.EnsureSuccessStatusCode();
 
                 var json = await res.Content.ReadAsStringAsync();

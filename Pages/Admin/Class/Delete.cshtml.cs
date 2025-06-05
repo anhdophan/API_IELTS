@@ -22,7 +22,7 @@ namespace api.Pages.Admin.Classes
         public async Task<IActionResult> OnGetAsync(int id)
         {
             var client = _clientFactory.CreateClient();
-            var response = await client.GetAsync($"http://localhost:5035/api/Class/{id}");
+            var response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com//api/Class/{id}");
 
             if (!response.IsSuccessStatusCode)
                 return NotFound();
@@ -36,7 +36,7 @@ namespace api.Pages.Admin.Classes
         public async Task<IActionResult> OnPostAsync(int id)
         {
             var client = _clientFactory.CreateClient();
-            var response = await client.DeleteAsync($"http://localhost:5035/api/Class/{id}");
+            var response = await client.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/Class/{id}");
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");

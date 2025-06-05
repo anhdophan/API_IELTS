@@ -44,17 +44,17 @@ namespace api.Pages.Admin.Courses
 
                 if (FilterDate.HasValue)
                 {
-                    response = await client.GetAsync($"http://localhost:5035/api/course/date?date={FilterDate.Value:yyyy-MM-dd}");
+                    response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/course/date?date={FilterDate.Value:yyyy-MM-dd}");
                 }
                 else if (MinCost.HasValue || MaxCost.HasValue)
                 {
                     var min = MinCost.HasValue ? MinCost.Value.ToString() : "";
                     var max = MaxCost.HasValue ? MaxCost.Value.ToString() : "";
-                    response = await client.GetAsync($"http://localhost:5035/api/course/cost?minCost={min}&maxCost={max}");
+                    response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/course/cost?minCost={min}&maxCost={max}");
                 }
                 else
                 {
-                    response = await client.GetAsync("http://localhost:5035/api/course/all");
+                    response = await client.GetAsync("https://api-ielts-cgn8.onrender.com/api/course/all");
                 }
 
                 response.EnsureSuccessStatusCode();
@@ -74,7 +74,7 @@ namespace api.Pages.Admin.Courses
             try
             {
                 var client = _clientFactory.CreateClient();
-                var response = await client.DeleteAsync($"http://localhost:5035/api/course/{id}");
+                var response = await client.DeleteAsync($"https://api-ielts-cgn8.onrender.com/api/course/{id}");
 
                 if (response.IsSuccessStatusCode)
                 {
