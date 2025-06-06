@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Firebase.Database;
@@ -9,6 +10,7 @@ using Firebase.Database.Query;
 using Newtonsoft.Json;
 using api.Services;
 using api.Models;
+using Microsoft.Extensions.Logging;
 
 namespace api.Controllers
 {
@@ -16,7 +18,16 @@ namespace api.Controllers
     [Route("api/[controller]")]
     public class CourseController : ControllerBase
     {
-        private readonly FirebaseClient firebaseClient = FirebaseService.Client;
+        private readonly FirebaseClient firebaseClient;
+        private readonly ILogger<CourseController> _logger;
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public CourseController(ILogger<CourseController> logger, IHttpClientFactory httpClientFactory)
+        {
+            firebaseClient = FirebaseService.Client;
+            _logger = logger;
+            _httpClientFactory = httpClientFactory;
+        }
 
         private async Task LogAdminAction(string action, string performedBy, string description)
         {
@@ -112,26 +123,18 @@ namespace api.Controllers
         {
             try
             {
-                var allCourses = await firebaseClient
-                    .Child("Courses")
-                    .OnceAsync<Course>();
-
-                if (allCourses == null)
-                {
-                    return Ok(new List<Course>()); // Return empty list instead of null
-                }
-
-                var list = allCourses
-                    .Where(c => c?.Object != null) // Null check for both item and Object
-                    .Select(c => c.Object)
-                    .ToList();
-
-                return Ok(list);
+                var courses = await GetAllCoursesInternal();
+                return Ok(courses);
+            }
+            catch (ApplicationException ex)
+            {
+                _logger.LogError(ex, "Application error in GetAllCoursesAsync");
+                return StatusCode(500, "Failed to retrieve courses. Please try again later.");
             }
             catch (Exception ex)
             {
-                await LogAdminAction("GetAllCoursesError", "system", ex.Message);
-                return StatusCode(500, "Internal server error while retrieving courses.");
+                _logger.LogError(ex, "Unexpected error in GetAllCoursesAsync");
+                return StatusCode(500, "An unexpected error occurred while retrieving courses.");
             }
         }
 
@@ -160,42 +163,102 @@ namespace api.Controllers
 
         private async Task<List<Course>> GetAllCoursesInternal()
         {
-            var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Courses.json";
-
-            using var httpClient = new HttpClient();
-            var json = await httpClient.GetStringAsync(url);
-
-            if (string.IsNullOrWhiteSpace(json) || json == "null")
-            {
-                return new List<Course>();
-            }
-
             try
             {
-                var dict = JsonConvert.DeserializeObject<Dictionary<string, Course>>(json);
-                if (dict != null)
+                // Try getting courses directly from Firebase first
+                var firebaseCourses = await firebaseClient
+                    .Child("Courses")
+                    .OnceAsync<Course>();
+
+                if (firebaseCourses != null && firebaseCourses.Any())
                 {
-                    return dict.Values.Where(c => c != null).ToList();
+                    var courses = firebaseCourses
+                        .Select(fc => fc.Object)
+                        .Where(c => c != null)
+                        .ToList();
+                    _logger.LogInformation($"Successfully retrieved {courses.Count} courses from Firebase directly");
+                    return courses;
                 }
-            }
-            catch (JsonException)
-            {
+
+                // Fallback to HTTP client if Firebase direct access fails
+                var client = _httpClientFactory.CreateClient();
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                
+                var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Courses.json";
+                var response = await client.GetAsync(url);
+                
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync();
+
+                if (string.IsNullOrWhiteSpace(json) || json == "null")
+                {
+                    _logger.LogWarning("No courses found in database");
+                    return new List<Course>();
+                }
+
+                // Try parsing as Dictionary first
                 try
                 {
-                    var list = JsonConvert.DeserializeObject<List<Course>>(json);
-                    if (list != null)
+                    var dict = JsonConvert.DeserializeObject<Dictionary<string, Course>>(json, new JsonSerializerSettings 
+                    { 
+                        NullValueHandling = NullValueHandling.Ignore,
+                        DateFormatHandling = DateFormatHandling.IsoDateFormat
+                    });
+
+                    if (dict != null && dict.Any())
                     {
-                        return list.Where(c => c != null).ToList();
+                        var courses = dict.Values
+                            .Where(c => c != null && c.CourseId != 0)
+                            .ToList();
+                        _logger.LogInformation($"Successfully retrieved {courses.Count} courses from dictionary");
+                        return courses;
                     }
                 }
-                catch (JsonException)
+                catch (JsonException ex)
                 {
-                    // Log the error
-                    await LogAdminAction("ParseError", "system", "Failed to parse course data");
-                }
-            }
+                    _logger.LogWarning(ex, "Failed to parse as dictionary, attempting array parse");
+                    
+                    // Try parsing as array
+                    try
+                    {
+                        var array = JsonConvert.DeserializeObject<Course[]>(json, new JsonSerializerSettings 
+                        { 
+                            NullValueHandling = NullValueHandling.Ignore,
+                            DateFormatHandling = DateFormatHandling.IsoDateFormat
+                        });
 
-            return new List<Course>(); // Return empty list as fallback
+                        if (array != null && array.Any())
+                        {
+                            var courses = array
+                                .Where(c => c != null && c.CourseId != 0)
+                                .ToList();
+                            _logger.LogInformation($"Successfully retrieved {courses.Count} courses from array");
+                            return courses;
+                        }
+                    }
+                    catch (JsonException innerEx)
+                    {
+                        _logger.LogError(innerEx, "Failed to parse course data in both formats");
+                        await LogAdminAction("ParseError", "system", $"Failed to parse course data: {innerEx.Message}");
+                        throw new ApplicationException("Failed to parse course data", innerEx);
+                    }
+                }
+
+                _logger.LogWarning("No valid courses found after parsing attempts");
+                return new List<Course>();
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogError(ex, "HTTP request failed while retrieving courses");
+                await LogAdminAction("GetCoursesError", "system", $"HTTP request failed: {ex.Message}");
+                throw new ApplicationException("Failed to retrieve courses from database", ex);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unexpected error in GetAllCoursesInternal");
+                await LogAdminAction("GetCoursesError", "system", $"Unexpected error: {ex.Message}");
+                throw;
+            }
         }
 
     }

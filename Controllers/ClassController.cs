@@ -9,6 +9,7 @@ using api.Services;
 using api.Models;
 using Newtonsoft.Json;
 using System.Net.Http;
+using Microsoft.Extensions.Logging;
 
 namespace api.Controllers
 {
@@ -17,6 +18,12 @@ namespace api.Controllers
     public class ClassController : ControllerBase
     {
         private readonly FirebaseClient firebaseClient = FirebaseService.Client;
+        private readonly ILogger<ClassController> _logger;
+
+        public ClassController(ILogger<ClassController> logger)
+        {
+            _logger = logger;
+        }
 
         // Create Class
         [HttpPost]
@@ -152,11 +159,17 @@ namespace api.Controllers
             try
             {
                 var classes = await GetAllClassesInternal();
+                if (classes == null || !classes.Any())
+                {
+                    _logger.LogInformation("No classes found");
+                    return Ok(new List<Class>());
+                }
                 return Ok(classes);
             }
             catch (Exception ex)
             {
-                return BadRequest($"Failed to get classes: {ex.Message}");
+                _logger.LogError(ex, "Failed to retrieve classes");
+                return StatusCode(500, "Internal server error while retrieving classes");
             }
         }
 
@@ -236,26 +249,49 @@ namespace api.Controllers
         {
             var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Classes.json";
             using var httpClient = new HttpClient();
-            var json = await httpClient.GetStringAsync(url);
-
+            
             try
             {
-                var dict = JsonConvert.DeserializeObject<Dictionary<string, Class>>(json);
-                if (dict != null)
-                    return dict.Values.Where(c => c != null).ToList();
-            }
-            catch { }
+                var response = await httpClient.GetAsync(url);
+                response.EnsureSuccessStatusCode();
+                
+                var json = await response.Content.ReadAsStringAsync();
+                
+                if (string.IsNullOrWhiteSpace(json) || json == "null")
+                {
+                    _logger.LogInformation("No classes data found in Firebase");
+                    return new List<Class>();
+                }
 
-            try
+                try
+                {
+                    var dict = JsonConvert.DeserializeObject<Dictionary<string, Class>>(json);
+                    if (dict != null)
+                    {
+                        _logger.LogInformation($"Successfully parsed {dict.Count} classes from dictionary");
+                        return dict.Values.Where(c => c != null).ToList();
+                    }
+                }
+                catch (JsonException)
+                {
+                    _logger.LogWarning("Failed to parse as Dictionary, attempting List parse");
+                    var list = JsonConvert.DeserializeObject<List<Class>>(json);
+                    if (list != null)
+                    {
+                        _logger.LogInformation($"Successfully parsed {list.Count} classes from list");
+                        return list.Where(c => c != null).ToList();
+                    }
+                }
+
+                throw new ApplicationException("Failed to parse class data from Firebase");
+            }
+            catch (HttpRequestException ex)
             {
-                var list = JsonConvert.DeserializeObject<List<Class>>(json);
-                if (list != null)
-                    return list.Where(c => c != null).ToList(); // lọc null
+                _logger.LogError(ex, "Failed to fetch classes from Firebase");
+                throw new ApplicationException("Failed to connect to Firebase", ex);
             }
-            catch { }
-
-            throw new Exception("Unable to parse class data from Firebase.");
         }
+
 
     }
 }
