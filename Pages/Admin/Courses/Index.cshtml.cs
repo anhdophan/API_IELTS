@@ -70,7 +70,7 @@ namespace api.Pages.Admin.Courses
                 {
                     response = await client.GetAsync("https://api-ielts-cgn8.onrender.com/api/course/all");
                 }
-
+                Courses = Courses.Where(c => c != null).ToList();
                 response.EnsureSuccessStatusCode();
                 var json = await response.Content.ReadAsStringAsync();
                 Courses = JsonConvert.DeserializeObject<List<Course>>(json) ?? new List<Course>();

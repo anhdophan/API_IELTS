@@ -156,6 +156,7 @@ namespace api.Controllers
         private async Task<List<Course>> GetAllCoursesInternal()
         {
             var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Courses.json";
+
             using var httpClient = new HttpClient();
             var json = await httpClient.GetStringAsync(url);
 
@@ -163,7 +164,7 @@ namespace api.Controllers
             {
                 var dict = JsonConvert.DeserializeObject<Dictionary<string, Course>>(json);
                 if (dict != null)
-                    return dict.Values.Where(c => c != null).ToList();
+                    return dict.Values.Where(c => c != null).ToList(); // lọc null
             }
             catch { }
 
@@ -171,11 +172,12 @@ namespace api.Controllers
             {
                 var list = JsonConvert.DeserializeObject<List<Course>>(json);
                 if (list != null)
-                    return list.Where(c => c != null).ToList();
+                    return list.Where(c => c != null).ToList(); // lọc null ở đây
             }
             catch { }
 
             throw new Exception("Failed to parse data as Dictionary<string, Course> or List<Course>.");
         }
+
     }
 }
