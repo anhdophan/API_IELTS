@@ -43,66 +43,91 @@ namespace api.Pages.Admin.Courses
             {
                 var client = _clientFactory.CreateClient();
                 HttpResponseMessage response;
+                string baseUrl = "https://api-ielts-cgn8.onrender.com/api/course";
 
+                // Build the appropriate URL based on filters
+                string url;
                 if (FilterDate.HasValue)
                 {
-                    response = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/course/date?date={FilterDate:yyyy-MM-dd}");
+                    url = $"{baseUrl}/date?date={FilterDate:yyyy-MM-dd}";
                 }
-               else if (MinCost.HasValue || MaxCost.HasValue)
+                else if (MinCost.HasValue || MaxCost.HasValue)
                 {
-                    string url = "https://api-ielts-cgn8.onrender.com/api/course/cost";
                     var queryParams = new List<string>();
                     if (MinCost.HasValue) queryParams.Add($"minCost={MinCost.Value}");
                     if (MaxCost.HasValue) queryParams.Add($"maxCost={MaxCost.Value}");
+                    url = queryParams.Count > 0 
+                        ? $"{baseUrl}/cost?{string.Join("&", queryParams)}"
+                        : $"{baseUrl}/all";
+                }
+                else
+                {
+                    url = $"{baseUrl}/all";
+                }
 
-                    if (queryParams.Count > 0)
+                // Make the request
+                try
+                {
+                    response = await client.GetAsync(url);
+                    
+                    if (response.IsSuccessStatusCode)
                     {
-                        url += "?" + string.Join("&", queryParams);
-                        response = await client.GetAsync(url);
+                        var json = await response.Content.ReadAsStringAsync();
+                        var courses = JsonConvert.DeserializeObject<List<Course>>(json);
+                        Courses = courses?.Where(c => c != null).ToList() ?? new List<Course>();
+
+                        // Load class counts only if we have courses
+                        if (Courses.Any())
+                        {
+                            await LoadClassCounts(client);
+                        }
                     }
                     else
                     {
-                        // fallback nếu cả hai đều null → không gọi
-                        response = await client.GetAsync("https://api-ielts-cgn8.onrender.com/api/course/all");
+                        _logger.LogWarning($"API returned status code: {response.StatusCode}");
+                        StatusMessage = "Unable to load courses. Please try again later.";
+                        Courses = new List<Course>();
                     }
                 }
-                                else
+                catch (HttpRequestException ex)
                 {
-                    response = await client.GetAsync("https://api-ielts-cgn8.onrender.com/api/course/all");
-                }
-                Courses = Courses.Where(c => c != null).ToList();
-                response.EnsureSuccessStatusCode();
-                var json = await response.Content.ReadAsStringAsync();
-                Courses = JsonConvert.DeserializeObject<List<Course>>(json) ?? new List<Course>();
-
-                // Load class counts
-                foreach (var course in Courses)
-                {
-                    try
-                    {
-                        var classRes = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/filter?courseId={course.CourseId}");
-                        if (classRes.IsSuccessStatusCode)
-                        {
-                            var classJson = await classRes.Content.ReadAsStringAsync();
-                            var classList = JsonConvert.DeserializeObject<List<Class>>(classJson) ?? new();
-                            CourseClassCountMap[course.CourseId] = classList.Count;
-                        }
-                        else
-                        {
-                            CourseClassCountMap[course.CourseId] = 0;
-                        }
-                    }
-                    catch (Exception classEx)
-                    {
-                        _logger.LogWarning(classEx, $"Error loading classes for Course {course.CourseId}");
-                        CourseClassCountMap[course.CourseId] = 0;
-                    }
+                    _logger.LogError(ex, "HTTP request failed");
+                    StatusMessage = "Connection error. Please check your internet connection.";
+                    Courses = new List<Course>();
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error loading courses.");
-                StatusMessage = "Error loading courses.";
+                _logger.LogError(ex, "Error in OnGetAsync");
+                StatusMessage = "An unexpected error occurred.";
+                Courses = new List<Course>();
+            }
+        }
+
+        // Add this helper method for loading class counts
+        private async Task LoadClassCounts(HttpClient client)
+        {
+            foreach (var course in Courses)
+            {
+                try
+                {
+                    var classRes = await client.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/filter?courseId={course.CourseId}");
+                    if (classRes.IsSuccessStatusCode)
+                    {
+                        var classJson = await classRes.Content.ReadAsStringAsync();
+                        var classList = JsonConvert.DeserializeObject<List<Class>>(classJson);
+                        CourseClassCountMap[course.CourseId] = classList?.Count ?? 0;
+                    }
+                    else
+                    {
+                        CourseClassCountMap[course.CourseId] = 0;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, $"Error loading classes for Course {course.CourseId}");
+                    CourseClassCountMap[course.CourseId] = 0;
+                }
             }
         }
 

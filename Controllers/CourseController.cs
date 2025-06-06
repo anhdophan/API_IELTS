@@ -116,8 +116,13 @@ namespace api.Controllers
                     .Child("Courses")
                     .OnceAsync<Course>();
 
+                if (allCourses == null)
+                {
+                    return Ok(new List<Course>()); // Return empty list instead of null
+                }
+
                 var list = allCourses
-                    .Where(c => c.Object != null)
+                    .Where(c => c?.Object != null) // Null check for both item and Object
                     .Select(c => c.Object)
                     .ToList();
 
@@ -126,7 +131,7 @@ namespace api.Controllers
             catch (Exception ex)
             {
                 await LogAdminAction("GetAllCoursesError", "system", ex.Message);
-                return BadRequest("Failed to parse courses from Firebase.");
+                return StatusCode(500, "Internal server error while retrieving courses.");
             }
         }
 
@@ -160,23 +165,37 @@ namespace api.Controllers
             using var httpClient = new HttpClient();
             var json = await httpClient.GetStringAsync(url);
 
+            if (string.IsNullOrWhiteSpace(json) || json == "null")
+            {
+                return new List<Course>();
+            }
+
             try
             {
                 var dict = JsonConvert.DeserializeObject<Dictionary<string, Course>>(json);
                 if (dict != null)
-                    return dict.Values.Where(c => c != null).ToList(); // lọc null
+                {
+                    return dict.Values.Where(c => c != null).ToList();
+                }
             }
-            catch { }
-
-            try
+            catch (JsonException)
             {
-                var list = JsonConvert.DeserializeObject<List<Course>>(json);
-                if (list != null)
-                    return list.Where(c => c != null).ToList(); // lọc null ở đây
+                try
+                {
+                    var list = JsonConvert.DeserializeObject<List<Course>>(json);
+                    if (list != null)
+                    {
+                        return list.Where(c => c != null).ToList();
+                    }
+                }
+                catch (JsonException)
+                {
+                    // Log the error
+                    await LogAdminAction("ParseError", "system", "Failed to parse course data");
+                }
             }
-            catch { }
 
-            throw new Exception("Failed to parse data as Dictionary<string, Course> or List<Course>.");
+            return new List<Course>(); // Return empty list as fallback
         }
 
     }
