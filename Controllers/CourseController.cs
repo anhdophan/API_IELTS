@@ -165,25 +165,7 @@ namespace api.Controllers
         {
             try
             {
-                // Try getting courses directly from Firebase first
-                var firebaseCourses = await firebaseClient
-                    .Child("Courses")
-                    .OnceAsync<Course>();
-
-                if (firebaseCourses != null && firebaseCourses.Any())
-                {
-                    var courses = firebaseCourses
-                        .Select(fc => fc.Object)
-                        .Where(c => c != null)
-                        .ToList();
-                    _logger.LogInformation($"Successfully retrieved {courses.Count} courses from Firebase directly");
-                    return courses;
-                }
-
-                // Fallback to HTTP client if Firebase direct access fails
                 var client = _httpClientFactory.CreateClient();
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-                
                 var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Courses.json";
                 var response = await client.GetAsync(url);
                 
@@ -196,55 +178,29 @@ namespace api.Controllers
                     return new List<Course>();
                 }
 
-                // Try parsing as Dictionary first
                 try
                 {
-                    var dict = JsonConvert.DeserializeObject<Dictionary<string, Course>>(json, new JsonSerializerSettings 
+                    // Try parsing as array first since we know the data is coming as an array
+                    var courses = JsonConvert.DeserializeObject<List<Course>>(json, new JsonSerializerSettings 
                     { 
                         NullValueHandling = NullValueHandling.Ignore,
                         DateFormatHandling = DateFormatHandling.IsoDateFormat
                     });
 
-                    if (dict != null && dict.Any())
+                    if (courses != null && courses.Any())
                     {
-                        var courses = dict.Values
-                            .Where(c => c != null && c.CourseId != 0)
-                            .ToList();
-                        _logger.LogInformation($"Successfully retrieved {courses.Count} courses from dictionary");
-                        return courses;
+                        _logger.LogInformation($"Successfully retrieved {courses.Count} courses");
+                        return courses.Where(c => c != null && c.CourseId >= 0).ToList();
                     }
                 }
                 catch (JsonException ex)
                 {
-                    _logger.LogWarning(ex, "Failed to parse as dictionary, attempting array parse");
-                    
-                    // Try parsing as array
-                    try
-                    {
-                        var array = JsonConvert.DeserializeObject<Course[]>(json, new JsonSerializerSettings 
-                        { 
-                            NullValueHandling = NullValueHandling.Ignore,
-                            DateFormatHandling = DateFormatHandling.IsoDateFormat
-                        });
-
-                        if (array != null && array.Any())
-                        {
-                            var courses = array
-                                .Where(c => c != null && c.CourseId != 0)
-                                .ToList();
-                            _logger.LogInformation($"Successfully retrieved {courses.Count} courses from array");
-                            return courses;
-                        }
-                    }
-                    catch (JsonException innerEx)
-                    {
-                        _logger.LogError(innerEx, "Failed to parse course data in both formats");
-                        await LogAdminAction("ParseError", "system", $"Failed to parse course data: {innerEx.Message}");
-                        throw new ApplicationException("Failed to parse course data", innerEx);
-                    }
+                    _logger.LogError(ex, "Failed to parse courses as array");
+                    await LogAdminAction("ParseError", "system", $"Failed to parse course data: {ex.Message}");
+                    throw new ApplicationException("Failed to parse course data", ex);
                 }
 
-                _logger.LogWarning("No valid courses found after parsing attempts");
+                _logger.LogWarning("No valid courses found after parsing");
                 return new List<Course>();
             }
             catch (HttpRequestException ex)
