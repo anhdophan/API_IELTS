@@ -153,15 +153,15 @@ namespace api.Controllers
             return Ok(filtered);
         }
 
-       private async Task<List<Class>> GetAllClassesInternal()
+        private async Task<List<Course>> GetAllCoursesInternal()
         {
-            var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Classes.json";
+            var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Courses.json";
             using var httpClient = new HttpClient();
             var json = await httpClient.GetStringAsync(url);
 
             try
             {
-                var dict = JsonConvert.DeserializeObject<Dictionary<string, Class>>(json);
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, Course>>(json);
                 if (dict != null)
                     return dict.Values.Where(c => c != null).ToList();
             }
@@ -169,14 +169,13 @@ namespace api.Controllers
 
             try
             {
-                var list = JsonConvert.DeserializeObject<List<Class>>(json);
+                var list = JsonConvert.DeserializeObject<List<Course>>(json);
                 if (list != null)
-                    return list.Where(c => c != null).ToList(); // lọc null
+                    return list.Where(c => c != null).ToList();
             }
             catch { }
 
-            throw new Exception("Unable to parse class data from Firebase.");
+            throw new Exception("Failed to parse data as Dictionary<string, Course> or List<Course>.");
         }
-
     }
 }
