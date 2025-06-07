@@ -41,8 +41,57 @@
                 <a asp-page="Edit" asp-route-id="@cls.ClassId" class="btn btn-sm btn-primary">Edit</a>
                 <a asp-page="Details" asp-route-id="@cls.ClassId" class="btn btn-sm btn-info">Details</a>
                 <a asp-page="Delete" asp-route-id="@cls.ClassId" class="btn btn-sm btn-danger">Delete</a>
+                <button type="button" class="btn btn-sm btn-warning" onclick="showStudyDays(@cls.ClassId)">View Study Days</button>
             </td>
         </tr>
     }
     </tbody>
 </table>
+
+<!-- Study Days Modal -->
+<div class="modal fade" id="studyDaysModal" tabindex="-1" aria-labelledby="studyDaysModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="studyDaysModalLabel">Study Days</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div id="studyDaysContent">Loading...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+    function showStudyDays(classId) {
+        const modal = new bootstrap.Modal(document.getElementById('studyDaysModal'));
+        document.getElementById('studyDaysContent').innerHTML = "Loading...";
+        fetch(`/api/Class/${classId}/studydays`)
+            .then(res => res.ok ? res.json() : Promise.reject(res.statusText))
+            .then(days => {
+                if (!days.length) {
+                    document.getElementById('studyDaysContent').innerHTML = "<div class='alert alert-warning'>No study days found.</div>";
+                    return;
+                }
+                let html = `<table class="table table-bordered"><thead>
+                    <tr><th>Date</th><th>Day</th><th>Start</th><th>End</th></tr></thead><tbody>`;
+                for (const d of days) {
+                    html += `<tr>
+                        <td>${d.date ? new Date(d.date).toLocaleDateString() : ""}</td>
+                        <td>${d.dayOfWeek}</td>
+                        <td>${d.startTime}</td>
+                        <td>${d.endTime}</td>
+                    </tr>`;
+                }
+                html += "</tbody></table>";
+                document.getElementById('studyDaysContent').innerHTML = html;
+            })
+            .catch(err => {
+                document.getElementById('studyDaysContent').innerHTML = `<div class='alert alert-danger'>Failed to load study days: ${err}</div>`;
+            });
+        modal.show();
+    }
+</script>
+}

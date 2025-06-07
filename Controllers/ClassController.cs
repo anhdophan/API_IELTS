@@ -244,6 +244,97 @@ namespace api.Controllers
             return Ok(cls);
         }
 
+        // Get Study Sessions for Class
+        [HttpGet("{classId}/studysessions")]
+        public async Task<ActionResult<List<StudySession>>> GetStudySessionsForClass(string classId, [FromQuery] List<DateTime> examDates)
+        {
+            var cls = await firebaseClient
+                .Child("Classes")
+                .Child(classId)
+                .OnceSingleAsync<Class>();
+
+            if (cls == null)
+                return NotFound("Class not found.");
+
+            // You can pass examDates as query string: ?examDates=2025-07-01&examDates=2025-08-15
+            var sessions = ScheduleHelper.GenerateStudySessions(cls, examDates);
+
+            return Ok(sessions);
+        }
+
+        // Create or Update Study Session Material
+        [HttpPost("{classId}/studysession-material")]
+        public async Task<IActionResult> CreateStudySessionMaterial(string classId, [FromBody] StudySessionMaterialDto dto)
+        {
+            // Get the class
+            var cls = await firebaseClient
+                .Child("Classes")
+                .Child(classId)
+                .OnceSingleAsync<Class>();
+
+            if (cls == null)
+                return NotFound("Class not found.");
+
+            // Generate a unique key for the session (date + start time)
+            var key = $"{dto.Date:yyyy-MM-dd}_{dto.StartTime}";
+
+            // Add or update the material/exam for this session
+            if (cls.StudySessionMaterials == null)
+                cls.StudySessionMaterials = new Dictionary<string, StudySessionMaterialDto>();
+
+            cls.StudySessionMaterials[key] = dto;
+
+            // Save back to Firebase
+            await firebaseClient
+                .Child("Classes")
+                .Child(classId)
+                .PutAsync(cls);
+
+            return Ok(cls.StudySessionMaterials[key]);
+        }
+
+        // Get Study Days for Class
+        [HttpGet("{classId}/studydays")]
+        public async Task<ActionResult<List<object>>> GetStudyDaysForClass(string classId)
+        {
+            var cls = await firebaseClient
+                .Child("Classes")
+                .Child(classId)
+                .OnceSingleAsync<Class>();
+
+            if (cls == null)
+                return NotFound("Class not found.");
+
+            var dayOfWeekMap = new Dictionary<string, DayOfWeek>(StringComparer.OrdinalIgnoreCase)
+            {
+                {"Sunday", DayOfWeek.Sunday},
+                {"Monday", DayOfWeek.Monday},
+                {"Tuesday", DayOfWeek.Tuesday},
+                {"Wednesday", DayOfWeek.Wednesday},
+                {"Thursday", DayOfWeek.Thursday},
+                {"Friday", DayOfWeek.Friday},
+                {"Saturday", DayOfWeek.Saturday}
+            };
+
+            var studyDays = new List<object>();
+            for (var date = cls.StartDate.Date; date <= cls.EndDate.Date; date = date.AddDays(1))
+            {
+                foreach (var sched in cls.Schedule)
+                {
+                    if (dayOfWeekMap.TryGetValue(sched.DayOfWeek, out var dow) && date.DayOfWeek == dow)
+                    {
+                        studyDays.Add(new {
+                            Date = date,
+                            DayOfWeek = sched.DayOfWeek,
+                            StartTime = sched.StartTime,
+                            EndTime = sched.EndTime
+                        });
+                    }
+                }
+            }
+            return Ok(studyDays);
+        }
+
         // Internal method to get all classes as Dictionary
         private async Task<List<Class>> GetAllClassesInternal()
         {

@@ -13,5 +13,6 @@ namespace api.Models
         public DateTime EndDate { get; set; }
         public List<int> StudentIds { get; set; } = new();
         public List<ClassSchedule> Schedule { get; set; } = new();
+        public Dictionary<string, StudySessionMaterialDto> StudySessionMaterials { get; set; } = new();
     }
 }
