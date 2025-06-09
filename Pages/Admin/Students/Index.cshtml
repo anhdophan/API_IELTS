@@ -22,6 +22,7 @@
             <th>Email</th>
             <th>Phone</th>
             <th>Score</th>
+            <th>Avatar</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -35,6 +36,16 @@
             <td>@student.Email</td>
             <td>@student.PhoneNumber</td>
             <td>@student.Score</td>
+            <td>
+                @if (!string.IsNullOrEmpty(student.Avatar))
+                {
+                    <img src="@student.Avatar" alt="Avatar" style="width:40px;height:40px;border-radius:50%;" />
+                }
+                else
+                {
+                    <span>No Avatar</span>
+                }
+            </td>
             <td>
                 <a asp-page="Details" asp-route-id="@student.StudentId" class="btn btn-sm btn-info">Details</a>
                 <a asp-page="Edit" asp-route-id="@student.StudentId" class="btn btn-sm btn-primary">Edit</a>

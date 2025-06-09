@@ -14,5 +14,6 @@ namespace api.Models
         public string StudyingCourse { get; set; }
         public double Score { get; set; }
         public string Class { get; set; }
+        public string Avatar { get; set; } 
     }
 }
