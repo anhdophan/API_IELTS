@@ -4,49 +4,138 @@
     ViewData["Title"] = "Teachers";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
-<h2>Teacher List</h2>
-<form method="get" class="form-inline mb-3">
-    <input type="text" name="SearchName" value="@Model.SearchName" placeholder="Search by name" class="form-control mr-2" />
-    <input type="text" name="SearchEmail" value="@Model.SearchEmail" placeholder="Search by email" class="form-control mr-2" />
-    <button type="submit" class="btn btn-primary mr-2">Search</button>
-    <a asp-page="./Index" class="btn btn-secondary">Clear</a>
-</form>
 
-<p>
-    <a asp-page="Create" class="btn btn-success">Add New Teacher</a>
-</p>
-
-@if (!string.IsNullOrEmpty(Model.StatusMessage))
-{
-    <div class="alert alert-info">@Model.StatusMessage</div>
-}
-
-<table class="table table-bordered table-striped">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Username</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var teacher in Model.Teachers)
-    {
-        <tr>
-            <td>@teacher.TeacherId</td>
-            <td>@teacher.Name</td>
-            <td>@teacher.Email</td>
-            <td>@teacher.PhoneNumber</td>
-            <td>@teacher.Username</td>
-            <td>
-                <a asp-page="Edit" asp-route-id="@teacher.TeacherId" class="btn btn-primary btn-sm">Edit</a>
-                <a asp-page="Details" asp-route-id="@teacher.TeacherId" class="btn btn-info btn-sm">Details</a>
-                <a asp-page="Delete" asp-route-id="@teacher.TeacherId" class="btn btn-danger btn-sm">Delete</a>
-            </td>
-        </tr>
+<style>
+    .teacher-container {
+        max-width: 1100px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 32px;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
     }
-    </tbody>
-</table>
+
+    .teacher-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .teacher-header h2 {
+        font-weight: 700;
+        color: #2c3e50;
+    }
+
+    .search-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .search-form input[type="text"] {
+        flex: 1;
+        min-width: 200px;
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 1em;
+    }
+
+    .search-form button, .search-form a {
+        min-width: 90px;
+        font-weight: 500;
+        border-radius: 6px;
+        padding: 6px 14px;
+    }
+
+    .table th, .table td {
+        vertical-align: middle !important;
+        padding: 12px 10px;
+    }
+
+    .btn-sm {
+        font-size: 0.95em;
+        border-radius: 6px;
+        padding: 6px 12px;
+        margin-right: 4px;
+    }
+
+    .btn-primary {
+        background: #3498db;
+        border: none;
+    }
+
+    .btn-info {
+        background: #1abc9c;
+        border: none;
+    }
+
+    .btn-danger {
+        background: #e74c3c;
+        border: none;
+    }
+
+    .btn-success {
+        background: #27ae60;
+        border: none;
+    }
+
+    .btn:hover {
+        opacity: 0.88;
+    }
+
+    .alert-info {
+        margin-top: 10px;
+    }
+</style>
+
+<div class="teacher-container">
+    <div class="teacher-header">
+        <h2>Teacher List</h2>
+        <a asp-page="Create" class="btn btn-success">Add New Teacher</a>
+    </div>
+
+    <form method="get" class="search-form">
+        <input type="text" name="SearchName" value="@Model.SearchName" placeholder="Search by name" />
+        <input type="text" name="SearchEmail" value="@Model.SearchEmail" placeholder="Search by email" />
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a asp-page="./Index" class="btn btn-secondary">Clear</a>
+    </form>
+
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
+    {
+        <div class="alert alert-info">@Model.StatusMessage</div>
+    }
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Username</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var teacher in Model.Teachers)
+        {
+            <tr>
+                <td>@teacher.TeacherId</td>
+                <td>@teacher.Name</td>
+                <td>@teacher.Email</td>
+                <td>@teacher.PhoneNumber</td>
+                <td>@teacher.Username</td>
+                <td>
+                    <a asp-page="Edit" asp-route-id="@teacher.TeacherId" class="btn btn-sm btn-primary">Edit</a>
+                    <a asp-page="Details" asp-route-id="@teacher.TeacherId" class="btn btn-sm btn-info">Details</a>
+                    <a asp-page="Delete" asp-route-id="@teacher.TeacherId" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
