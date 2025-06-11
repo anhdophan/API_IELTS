@@ -1,0 +1,24 @@
+@page "{id:int}"
+@model api.Pages.Admin.Teachers.DetailsModel
+@{
+    ViewData["Title"] = "Teacher Details";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<h2>Teacher Details</h2>
+<div>
+    <dl class="row">
+        <dt class="col-sm-2">ID</dt>
+        <dd class="col-sm-10">@Model.Teacher.TeacherId</dd>
+        <dt class="col-sm-2">Name</dt>
+        <dd class="col-sm-10">@Model.Teacher.Name</dd>
+        <dt class="col-sm-2">Email</dt>
+        <dd class="col-sm-10">@Model.Teacher.Email</dd>
+        <dt class="col-sm-2">Phone</dt>
+        <dd class="col-sm-10">@Model.Teacher.PhoneNumber</dd>
+        <dt class="col-sm-2">Username</dt>
+        <dd class="col-sm-10">@Model.Teacher.Username</dd>
+        <dt class="col-sm-2">Subjects</dt>
+    </dl>
+    <a asp-page="Edit" asp-route-id="@Model.Teacher.TeacherId" class="btn btn-primary">Edit</a>
+    <a asp-page="Index" class="btn btn-secondary">Back</a>
+</div>

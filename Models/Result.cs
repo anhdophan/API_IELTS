@@ -9,5 +9,7 @@ namespace api.Models
         public int ExamId { get; set; }
         public double Score { get; set; }
         public string Remark { get; set; }
+
+        public DateTime Timestamp { get; set; } 
     }
 }

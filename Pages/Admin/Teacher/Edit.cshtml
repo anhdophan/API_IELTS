@@ -1,0 +1,39 @@
+@page "{id:int}"
+@model api.Pages.Admin.Teachers.EditModel
+@{
+    ViewData["Title"] = "Edit Teacher";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<h2>Edit Teacher</h2>
+<form method="post">
+    <input type="hidden" asp-for="Teacher.TeacherId" />
+    <div class="form-group">
+        <label asp-for="Teacher.Name"></label>
+        <input asp-for="Teacher.Name" class="form-control" />
+        <span asp-validation-for="Teacher.Name" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Teacher.Email"></label>
+        <input asp-for="Teacher.Email" class="form-control" />
+        <span asp-validation-for="Teacher.Email" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Teacher.PhoneNumber"></label>
+        <input asp-for="Teacher.PhoneNumber" class="form-control" />
+        <span asp-validation-for="Teacher.PhoneNumber" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Teacher.Username"></label>
+        <input asp-for="Teacher.Username" class="form-control" />
+        <span asp-validation-for="Teacher.Username" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <label asp-for="Teacher.Password"></label>
+        <input asp-for="Teacher.Password" class="form-control" />
+        <span asp-validation-for="Teacher.Password" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+</form>
+<partial name="_ValidationScriptsPartial" />

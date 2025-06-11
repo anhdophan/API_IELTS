@@ -1,0 +1,52 @@
+@page
+@model api.Pages.Admin.Teachers.IndexModel
+@{
+    ViewData["Title"] = "Teachers";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<h2>Teacher List</h2>
+<form method="get" class="form-inline mb-3">
+    <input type="text" name="SearchName" value="@Model.SearchName" placeholder="Search by name" class="form-control mr-2" />
+    <input type="text" name="SearchEmail" value="@Model.SearchEmail" placeholder="Search by email" class="form-control mr-2" />
+    <button type="submit" class="btn btn-primary mr-2">Search</button>
+    <a asp-page="./Index" class="btn btn-secondary">Clear</a>
+</form>
+
+<p>
+    <a asp-page="Create" class="btn btn-success">Add New Teacher</a>
+</p>
+
+@if (!string.IsNullOrEmpty(Model.StatusMessage))
+{
+    <div class="alert alert-info">@Model.StatusMessage</div>
+}
+
+<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Username</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var teacher in Model.Teachers)
+    {
+        <tr>
+            <td>@teacher.TeacherId</td>
+            <td>@teacher.Name</td>
+            <td>@teacher.Email</td>
+            <td>@teacher.PhoneNumber</td>
+            <td>@teacher.Username</td>
+            <td>
+                <a asp-page="Edit" asp-route-id="@teacher.TeacherId" class="btn btn-primary btn-sm">Edit</a>
+                <a asp-page="Details" asp-route-id="@teacher.TeacherId" class="btn btn-info btn-sm">Details</a>
+                <a asp-page="Delete" asp-route-id="@teacher.TeacherId" class="btn btn-danger btn-sm">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

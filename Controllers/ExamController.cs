@@ -24,15 +24,16 @@ namespace api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
+            if (exam.Questions == null || exam.Questions.Count == 0)
+                return BadRequest("Exam must contain at least one question.");
+
             var existing = await firebaseClient
                 .Child("Exams")
                 .Child(exam.ExamId.ToString())
                 .OnceSingleAsync<Exam>();
 
             if (existing != null)
-            {
                 return Conflict($"Exam with ID {exam.ExamId} already exists.");
-            }
 
             await firebaseClient
                 .Child("Exams")
@@ -41,6 +42,7 @@ namespace api.Controllers
 
             return Ok(exam);
         }
+
 
         // Update Exam
         [HttpPut("{examId}")]
@@ -124,6 +126,8 @@ namespace api.Controllers
         [HttpPost("{examId}/submit")]
         public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitExamRequest request)
         {
+            if (examId != request.ExamId)
+                return BadRequest("ExamId in route and body must match.");
             var exam = await firebaseClient
                 .Child("Exams")
                 .Child(examId.ToString())
@@ -159,11 +163,12 @@ namespace api.Controllers
 
             var result = new Result
             {
-                ResultId = Guid.NewGuid().GetHashCode(),
+                ResultId = int.Parse(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().Substring(5, 8)),
                 StudentId = request.StudentId,
                 ExamId = examId,
                 Score = score,
-                Remark = $"You got {score} out of {questionCount}"
+                Remark = $"You got {score} out of {questionCount}",
+                Timestamp = DateTime.UtcNow // 🆕 thêm thời gian nộp
             };
 
             await firebaseClient

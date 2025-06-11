@@ -4,56 +4,124 @@
     ViewData["Title"] = "Class List";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
-
-<h2>Classes</h2>
-<a asp-page="./Create" class="btn btn-success mb-3">Create New Class</a>
-
-<table class="table table-bordered table-hover">
-    <thead>
-        <tr>
-            <th>Class ID</th>
-            <th>Name</th>
-            <th>Course ID</th>
-            <th>Teacher ID</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Schedule</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var cls in Model.Classes)
-    {
-        <tr>
-            <td>@cls.ClassId</td>
-            <td>@cls.Name</td>
-            <td>@cls.CourseId</td>
-            <td>
-                @(cls.TeacherId == 0 ? "Chưa có giảng viên" : cls.TeacherId.ToString())
-            </td>
-            <td>@cls.StartDate.ToShortDateString()</td>
-            <td>@cls.EndDate.ToShortDateString()</td>
-           
-            <td>
- @string.Join(", ", cls.Schedule.Select(s => $"{s.DayOfWeek}: {s.StartTime}-{s.EndTime}"))
-            </td>
-            <td>
-                <a asp-page="Edit" asp-route-id="@cls.ClassId" class="btn btn-sm btn-primary">Edit</a>
-                <a asp-page="Details" asp-route-id="@cls.ClassId" class="btn btn-sm btn-info">Details</a>
-                <a asp-page="Delete" asp-route-id="@cls.ClassId" class="btn btn-sm btn-danger">Delete</a>
-                <button type="button" class="btn btn-sm btn-warning" onclick="showStudyDays(@cls.ClassId)">View Study Days</button>
-            </td>
-        </tr>
+<style>
+    .class-container {
+        max-width: 1100px;
+        margin: 40px auto;
+        background: #fff;
+        padding: 32px;
+        border-radius: 14px;
+        box-shadow: 0 2px 18px rgba(0,0,0,0.08);
     }
-    </tbody>
-</table>
+    .class-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 28px;
+    }
+    .table th, .table td {
+        vertical-align: middle !important;
+        padding: 12px 10px;
+    }
+    .filter-form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        margin-bottom: 24px;
+    }
+    .filter-form .form-group {
+        flex: 1;
+        min-width: 180px;
+    }
+</style>
+
+<div class="class-container">
+    <div class="class-header">
+        <h2>Class List</h2>
+        <a asp-page="./Create" class="btn btn-success">+ Create New Class</a>
+    </div>
+
+    <form method="get" class="filter-form">
+        <div class="form-group">
+            <label for="SearchName">Class Name</label>
+            <input type="text" name="SearchName" value="@Model.SearchName" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="TeacherId">Teacher ID</label>
+            <input type="number" name="TeacherId" value="@(Model.TeacherId ?? 0)" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="StartFrom">Start From</label>
+            <input type="date" name="StartFrom" value="@(Model.StartFrom?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label for="EndTo">End To</label>
+            <input type="date" name="EndTo" value="@(Model.EndTo?.ToString("yyyy-MM-dd"))" class="form-control" />
+        </div>
+        <div class="form-group d-flex align-items-end">
+            <button type="submit" class="btn btn-primary me-2">Filter</button>
+            <a href="/Admin/Classes" class="btn btn-secondary">Clear</a>
+        </div>
+    </form>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Class ID</th>
+                <th>Name</th>
+                <th>Course ID</th>
+                <th>Teacher ID</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Schedule</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var cls in Model.Classes)
+        {
+            <tr>
+                <td>@cls.ClassId</td>
+                <td>@cls.Name</td>
+                <td>@cls.CourseId</td>
+                <td>
+                    @{
+                        if (cls.TeacherId == '0')
+                        {
+                            @:Chưa có giảng viên
+                        }
+                        else if (Model.TeacherNameMap.TryGetValue(cls.TeacherId, out var teacherName))
+                        {
+                            @teacherName
+                        }
+                        else
+                        {
+                            @($"ID: {cls.TeacherId}")
+                        }
+                    }
+                </td>
+
+                <td>@cls.StartDate.ToShortDateString()</td>
+                <td>@cls.EndDate.ToShortDateString()</td>
+                <td>@string.Join(", ", cls.Schedule.Select(s => $"{s.DayOfWeek}: {s.StartTime}-{s.EndTime}"))</td>
+                <td>
+                    <a asp-page="Edit" asp-route-id="@cls.ClassId" class="btn btn-sm btn-primary">Edit</a>
+                    <a asp-page="Details" asp-route-id="@cls.ClassId" class="btn btn-sm btn-info">Details</a>
+                    <a asp-page="Delete" asp-route-id="@cls.ClassId" class="btn btn-sm btn-danger">Delete</a>
+                    <button type="button" class="btn btn-sm btn-warning" onclick="showStudyDays(@cls.ClassId)">Study Days</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
 
 <!-- Study Days Modal -->
 <div class="modal fade" id="studyDaysModal" tabindex="-1" aria-labelledby="studyDaysModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="studyDaysModalLabel">Study Days</h5>
+        <h5 class="modal-title">Study Days</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
