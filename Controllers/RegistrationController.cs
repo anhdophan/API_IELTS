@@ -8,6 +8,7 @@ using Firebase.Database.Query;
 using api.Services;
 using api.Models;
 using Newtonsoft.Json;
+using System.Net.Http;
 
 namespace api.Controllers
 {
@@ -16,6 +17,12 @@ namespace api.Controllers
     public class RegistrationController : ControllerBase
     {
         private readonly FirebaseClient firebaseClient = FirebaseService.Client;
+        private readonly IHttpClientFactory _httpClientFactory;
+
+        public RegistrationController(IHttpClientFactory httpClientFactory)
+        {
+            _httpClientFactory = httpClientFactory;
+        }
 
         public class RegistrationRequest
         {
@@ -174,19 +181,21 @@ namespace api.Controllers
 
         // List all classes of a course for student to choose
         [HttpGet("course/{courseId}/classes")]
-        public async Task<ActionResult<List<Class>>> GetClassesByCourseAsync(int courseId)
+        public async Task<IActionResult> GetClassesByCourseAsync(int courseId)
         {
-            var classes = await firebaseClient
-                .Child("Classes")
-                .OnceAsync<Class>();
+            var client = _httpClientFactory.CreateClient();
+            var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Classes.json";
+            var response = await client.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            var json = await response.Content.ReadAsStringAsync();
 
-            var classList = new List<Class>();
-            foreach (var c in classes)
-            {
-                if (c.Object.CourseId == courseId)
-                    classList.Add(c.Object);
-            }
-            return Ok(classList);
+            // Deserialize thành List<Class>
+            var allClasses = JsonConvert.DeserializeObject<List<Class>>(json) ?? new List<Class>();
+
+            // Lọc theo CourseId
+            var filtered = allClasses.Where(c => c != null && c.CourseId == courseId).ToList();
+
+            return Ok(filtered);
         }
 
         // Register student for a specific class
@@ -204,55 +213,23 @@ namespace api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            if (!request.Submit)
-                return BadRequest("Registration not submitted.");
-
-            var student = request.Student;
-            student.Username = student.Email;
-            student.Password = student.Email + "123";
-            if (student.Score == 0) student.Score = 0;
-            if (string.IsNullOrEmpty(student.Class)) student.Class = "";
-
-            await firebaseClient
-                .Child("Students")
-                .Child(student.StudentId.ToString())
-                .PutAsync(student);
-
             var registration = new Registration
             {
                 RegistrationId = Guid.NewGuid().GetHashCode(),
-                StudentId = student.StudentId,
+                StudentId = 0, // Chưa có student
                 CourseId = request.CourseId,
                 RegistrationDate = DateTime.UtcNow,
-                Email = student.Email,
+                Email = request.Student.Email,
                 Status = RegistrationStatus.Unread
             };
 
+            // Lưu registration vào Firebase hoặc DB
             await firebaseClient
                 .Child("Registrations")
                 .Child(registration.RegistrationId.ToString())
                 .PutAsync(registration);
 
-            var classObj = await firebaseClient
-                .Child("Classes")
-                .Child(request.ClassId.ToString())
-                .OnceSingleAsync<Class>();
-
-            if (classObj != null)
-            {
-                if (classObj.StudentIds == null)
-                    classObj.StudentIds = new List<int>();
-
-                if (!classObj.StudentIds.Contains(student.StudentId))
-                    classObj.StudentIds.Add(student.StudentId);
-
-                await firebaseClient
-                    .Child("Classes")
-                    .Child(request.ClassId.ToString())
-                    .PutAsync(classObj);
-            }
-
-            return Ok(new { student, registration, classId = request.ClassId });
+            return Ok(new { registration });
         }
 
         // Private helper: get all registrations from Firebase (support Dictionary or List JSON)

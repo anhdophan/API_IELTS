@@ -4,72 +4,128 @@
     ViewData["Title"] = "Edit Student";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
-<h2>Edit Student</h2>
 
-<form method="post" enctype="multipart/form-data">
-    <input type="hidden" asp-for="Student.StudentId" />
-    <div class="form-group">
-        <label asp-for="Student.Name"></label>
-        <input asp-for="Student.Name" class="form-control" />
-        <span asp-validation-for="Student.Name" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Student.Email"></label>
-        <input asp-for="Student.Email" class="form-control" />
-        <span asp-validation-for="Student.Email" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Student.PhoneNumber"></label>
-        <input asp-for="Student.PhoneNumber" class="form-control" />
-        <span asp-validation-for="Student.PhoneNumber" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Student.Class"></label>
-        <input asp-for="Student.Class" class="form-control" />
-        <span asp-validation-for="Student.Class" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Student.Score"></label>
-        <input asp-for="Student.Score" class="form-control" />
-        <span asp-validation-for="Student.Score" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Student.Username"></label>
-        <input asp-for="Student.Username" class="form-control" />
-        <span asp-validation-for="Student.Username" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Student.Password"></label>
-        <input asp-for="Student.Password" class="form-control" type="password" />
-        <span asp-validation-for="Student.Password" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Student.StudyingCourse"></label>
-        <input asp-for="Student.StudyingCourse" class="form-control" />
-        <span asp-validation-for="Student.StudyingCourse" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label asp-for="Student.Avatar"></label>
-        <input asp-for="Student.Avatar" class="form-control" readonly />
-        <span asp-validation-for="Student.Avatar" class="text-danger"></span>
-    </div>
-    <div class="form-group">
-        <label>Avatar</label>
-        <input type="file" name="AvatarUpload" class="form-control" accept="image/*" id="AvatarUploadInput" />
-        <img id="AvatarPreview" class="img-preview" style="display:none;" alt="Avatar preview" />
-    </div>
-    @if (!string.IsNullOrEmpty(Model.Student.Avatar))
-    {
-        <div class="mb-2">
-            <img src="@Model.Student.Avatar" alt="Current Avatar" style="width:80px;height:80px;border-radius:50%;" />
+@section Styles {
+    <style>
+        .edit-student-container {
+            max-width: 700px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .edit-student-container h2 {
+            margin-bottom: 24px;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .img-preview, .current-avatar {
+            margin-top: 10px;
+            max-width: 100px;
+            height: auto;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+        }
+
+        .form-actions {
+            margin-top: 28px;
+        }
+    </style>
+}
+
+<div class="edit-student-container">
+    <h2>Edit Student</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Student.StudentId" />
+
+        <div class="form-group">
+            <label asp-for="Student.Name"></label>
+            <input asp-for="Student.Name" class="form-control" />
+            <span asp-validation-for="Student.Name" class="text-danger"></span>
         </div>
-    }
-    <div class="form-group mt-3">
-        <input type="submit" value="Save" class="btn btn-success" />
-        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
-    </div>
-</form>
-<div asp-validation-summary="All" class="text-danger"></div>
+
+        <div class="form-group">
+            <label asp-for="Student.Email"></label>
+            <input asp-for="Student.Email" class="form-control" />
+            <span asp-validation-for="Student.Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Student.PhoneNumber"></label>
+            <input asp-for="Student.PhoneNumber" class="form-control" />
+            <span asp-validation-for="Student.PhoneNumber" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Student.Class"></label>
+            <input asp-for="Student.Class" class="form-control" />
+            <span asp-validation-for="Student.Class" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Student.Score"></label>
+            <input asp-for="Student.Score" class="form-control" />
+            <span asp-validation-for="Student.Score" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Student.Username"></label>
+            <input asp-for="Student.Username" class="form-control" />
+            <span asp-validation-for="Student.Username" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Student.Password"></label>
+            <input asp-for="Student.Password" class="form-control" type="password" />
+            <span asp-validation-for="Student.Password" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Student.StudyingCourse"></label>
+            <input asp-for="Student.StudyingCourse" class="form-control" />
+            <span asp-validation-for="Student.StudyingCourse" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Student.Avatar"></label>
+            <input asp-for="Student.Avatar" class="form-control" readonly />
+            <span asp-validation-for="Student.Avatar" class="text-danger"></span>
+        </div>
+
+        <div class="form-group">
+            <label>Upload New Avatar</label>
+            <input type="file" name="AvatarUpload" class="form-control" accept="image/*" id="AvatarUploadInput" />
+            <img id="AvatarPreview" class="img-preview" style="display:none;" alt="Avatar preview" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(Model.Student.Avatar))
+        {
+            <div class="mb-2">
+                <label>Current Avatar:</label><br />
+                <img src="@Model.Student.Avatar" alt="Current Avatar" class="current-avatar" />
+            </div>
+        }
+
+        <div class="form-actions">
+            <input type="submit" value="Save" class="btn btn-success" />
+            <a asp-page="Index" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
+    </form>
+
+    <div asp-validation-summary="All" class="text-danger mt-3"></div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

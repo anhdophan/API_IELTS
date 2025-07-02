@@ -3,14 +3,65 @@
 @{
     ViewData["Title"] = "Create Class";
     Layout = "~/Pages/Shared/_Layout.cshtml";
+
 }
+
+@section Styles {
+    <style>
+        .form-section {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-section h2 {
+            margin-bottom: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .form-group label {
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select {
+            min-height: 42px;
+        }
+
+        .schedule-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .schedule-row select,
+        .schedule-row input {
+            flex: 1;
+        }
+
+        .schedule-row .btn-danger {
+            padding: 6px 10px;
+        }
+
+        .btn-secondary.btn-sm {
+            font-size: 0.9em;
+            padding: 6px 10px;
+        }
+    </style>
+}
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
         function addScheduleRow() {
             const container = document.getElementById("schedule-container");
             const row = document.createElement("div");
-            row.classList.add("d-flex", "gap-2", "mb-2");
+            row.classList.add("schedule-row");
 
             row.innerHTML = `
                 <select name="DayOfWeeks" class="form-select" required>
@@ -27,57 +78,59 @@
     </script>
 }
 
-<h2>Create Class</h2>
+<div class="form-section">
+    <h2>Create New Class</h2>
 
-<form method="post">
-    <div class="form-group">
-        <label asp-for="Class.ClassId"></label>
-        <input asp-for="Class.ClassId" class="form-control" />
-        <span asp-validation-for="Class.ClassId" class="text-danger"></span>
-    </div>
+    <form method="post">
+        <div class="form-group mb-3">
+            <label asp-for="Class.ClassId"></label>
+            <input asp-for="Class.ClassId" class="form-control" />
+            <span asp-validation-for="Class.ClassId" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Class.Name"></label>
-        <input asp-for="Class.Name" class="form-control" />
-        <span asp-validation-for="Class.Name" class="text-danger"></span>
-    </div>
+        <div class="form-group mb-3">
+            <label asp-for="Class.Name"></label>
+            <input asp-for="Class.Name" class="form-control" />
+            <span asp-validation-for="Class.Name" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Class.CourseId">Course</label>
-        <select asp-for="Class.CourseId" asp-items="Model.CourseList" class="form-control">
-            <option value="">Select Course</option>
-        </select>
-        <span asp-validation-for="Class.CourseId" class="text-danger"></span>
-    </div>
+        <div class="form-group mb-3">
+            <label asp-for="Class.CourseId">Course</label>
+            <select asp-for="Class.CourseId" asp-items="Model.CourseList" class="form-select">
+                <option value="">Select Course</option>
+            </select>
+            <span asp-validation-for="Class.CourseId" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Class.TeacherId">Teacher</label>
-        <select asp-for="Class.TeacherId" asp-items="Model.TeacherList" class="form-control">
-            <option value="0">Chưa có giảng viên</option>
-        </select>
-        <span asp-validation-for="Class.TeacherId" class="text-danger"></span>
-    </div>
+        <div class="form-group mb-3">
+            <label asp-for="Class.TeacherId">Teacher</label>
+            <select asp-for="Class.TeacherId" asp-items="Model.TeacherList" class="form-select">
+                <option value="0">Chưa có giảng viên</option>
+            </select>
+            <span asp-validation-for="Class.TeacherId" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Class.StartDate"></label>
-        <input asp-for="Class.StartDate" class="form-control" type="date" />
-        <span asp-validation-for="Class.StartDate" class="text-danger"></span>
-    </div>
+        <div class="form-group mb-3">
+            <label asp-for="Class.StartDate"></label>
+            <input asp-for="Class.StartDate" class="form-control" type="date" />
+            <span asp-validation-for="Class.StartDate" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label asp-for="Class.EndDate"></label>
-        <input asp-for="Class.EndDate" class="form-control" type="date" />
-        <span asp-validation-for="Class.EndDate" class="text-danger"></span>
-    </div>
+        <div class="form-group mb-3">
+            <label asp-for="Class.EndDate"></label>
+            <input asp-for="Class.EndDate" class="form-control" type="date" />
+            <span asp-validation-for="Class.EndDate" class="text-danger"></span>
+        </div>
 
-    <div class="form-group">
-        <label>Schedule (day + time)</label>
-        <div id="schedule-container"></div>
-        <button type="button" onclick="addScheduleRow()" class="btn btn-secondary btn-sm mt-2">+ Add Schedule</button>
-    </div>
+        <div class="form-group mb-4">
+            <label>Schedule (Day + Time)</label>
+            <div id="schedule-container"></div>
+            <button type="button" onclick="addScheduleRow()" class="btn btn-secondary btn-sm mt-2">+ Add Schedule</button>
+        </div>
 
-    <div class="form-group mt-3">
-        <input type="submit" value="Create" class="btn btn-primary" />
-        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
-    </div>
-</form>
+        <div class="form-group d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Create</button>
+            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

@@ -1,11 +1,77 @@
 {
   "Version": 1,
-  "Hash": "pyaMSCEWRZ4nvKCja2XnniyJFEBxfxA7VVvbHvFd6MQ=",
+  "Hash": "Ybb8Y3Htve+D0Peojx/mHTUnSf5eBjQvQIgg6R4w8cs=",
   "Source": "api",
   "BasePath": "_content/api",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
+  "DiscoveryPatterns": [
+    {
+      "Name": "api/wwwroot",
+      "Source": "api",
+      "ContentRoot": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/",
+      "BasePath": "_content/api",
+      "Pattern": "**"
+    }
+  ],
+  "Assets": [
+    {
+      "Identity": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/css/home.css",
+      "SourceId": "api",
+      "SourceType": "Discovered",
+      "ContentRoot": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/",
+      "BasePath": "_content/api",
+      "RelativePath": "css/home.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/css/home.css"
+    },
+    {
+      "Identity": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/images/lt_logo_white.png",
+      "SourceId": "api",
+      "SourceType": "Discovered",
+      "ContentRoot": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/",
+      "BasePath": "_content/api",
+      "RelativePath": "images/lt_logo_white.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/images/lt_logo_white.png"
+    },
+    {
+      "Identity": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/images/lt_logo.png",
+      "SourceId": "api",
+      "SourceType": "Discovered",
+      "ContentRoot": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/",
+      "BasePath": "_content/api",
+      "RelativePath": "images/lt_logo.png",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/images/lt_logo.png"
+    }
+  ]
 }

@@ -1,0 +1,266 @@
+@page
+@model api.Pages.User.IndexModel
+@{
+    Layout = "~/Pages/Shared/_LayoutCustomer.cshtml";
+    ViewData["Title"] = "Trang chủ";
+}
+
+@section Styles {
+    <style>
+        .main-header {
+            background: linear-gradient(to bottom, #fff, #fecaca);
+            padding: 60px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            color: #1f2937;
+        }
+
+        .main-header h1 span {
+            color: #dc2626;
+        }
+
+        .main-header p {
+            font-size: 1.2rem;
+            color: #1f2937;
+        }
+
+        .main-header .header-img {
+            position: absolute;
+            right: 0;
+            top: 0;
+            height: 100%;
+            max-height: 380px;
+            z-index: 0;
+        }
+
+        .main-header .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        .featured-courses {
+            padding: 60px 0;
+            text-align: center;
+            background-color: #ffffff;
+        }
+
+        .featured-courses h2 {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: #dc2626;
+        }
+
+        .course-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        .course-card {
+            width: 200px;
+            background: linear-gradient(to bottom right, #4b0082, #8a2be2);
+            color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .course-card:hover {
+            transform: scale(1.03);
+        }
+
+        .course-card img {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+
+        .course-card .card-body {
+            padding: 16px;
+            text-align: center;
+        }
+
+        .course-card .card-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .course-card .card-text {
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .course-card .cta-btn {
+            background-color: #fff;
+            color: #8a2be2;
+            border: none;
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 30px;
+            transition: 0.3s;
+            font-size: 0.8rem;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .course-card .cta-btn:hover {
+            background-color: #f43f5e;
+            color: white;
+        }
+    </style>
+}
+
+<header class="main-header">
+    <img src="https://w.ladicdn.com/s700x750/5b57f38472976020da8e5611/bui-minh-anh-1-20230921083948-_ukt-.png" alt="banner" class="header-img" />
+    <div class="container">
+        <h1>Luyện thi <span>IELTS</span> chất lượng cao</h1>
+        <p>Đội ngũ giảng viên chuyên môn, phương pháp hiệu quả, học phí hợp lý</p>
+    </div>
+</header>
+
+<section class="featured-courses container">
+    <h2>Các khóa học nổi bật</h2>
+    <div class="course-grid">
+        @foreach (var course in Model.Courses.Take(6))
+        {
+            <div class="course-card" data-aos="fade-up">
+                <img src="@(course.Images.FirstOrDefault())" alt="@course.Name" />
+                <div class="card-body">
+                    <h5 class="card-title">@course.Name</h5>
+                    <p class="card-text">@course.DescriptionShort</p>
+                    <!-- <a asp-page="Details" asp-route-id="@course.CourseId" class="btn btn-info">Xem chi tiết</a> -->
+                    <button type="button" class="btn btn-success" onclick="showRegistrationForm(@course.CourseId, '@course.Name')">Đăng ký</button>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<div class="modal fade" id="registrationModal" tabindex="-1" aria-labelledby="registrationModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="registrationModalLabel">Đăng ký khoá học: <span id="modalCourseName"></span></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="registrationForm">
+          <input type="hidden" id="regCourseId" name="CourseId" />
+          <div class="mb-3">
+            <label>Email</label>
+            <input type="email" class="form-control" id="regEmail" required />
+          </div>
+          <div class="mb-3">
+            <label>Họ tên</label>
+            <input type="text" class="form-control" id="regName" required />
+          </div>
+          <div class="mb-3">
+            <label>Số điện thoại</label>
+            <input type="text" class="form-control" id="regPhone" required />
+          </div>
+          <div class="mb-3">
+            <label>Chọn lớp</label>
+            <select class="form-select" id="regClassId" required onchange="loadClassSchedule()"></select>
+          </div>
+          <div id="classScheduleBox" style="display:none;">
+            <label>Lịch học lớp:</label>
+            <div id="classSchedule"></div>
+          </div>
+          <button type="submit" class="btn btn-primary">Gửi đăng ký</button>
+        </form>
+        <div id="regResult" class="mt-3"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+@section Scripts {
+<script>
+let selectedCourseId = null;
+let classList = [];
+
+function showRegistrationForm(courseId, courseName) {
+    selectedCourseId = courseId;
+    document.getElementById('modalCourseName').innerText = courseName;
+    document.getElementById('regCourseId').value = courseId;
+    document.getElementById('registrationForm').reset();
+    document.getElementById('regResult').innerHTML = '';
+    document.getElementById('classScheduleBox').style.display = 'none';
+    loadClassesForCourse(courseId);
+    new bootstrap.Modal(document.getElementById('registrationModal')).show();
+}
+
+function loadClassesForCourse(courseId) {
+    fetch(`/api/Registration/course/${courseId}/classes`)
+        .then(res => res.json())
+        .then(classes => {
+            classList = classes;
+            let select = document.getElementById('regClassId');
+            select.innerHTML = '<option value="">-- Chọn lớp --</option>';
+            for (const c of classes) {
+                select.innerHTML += `<option value="${c.classId}">${c.name}</option>`;
+            }
+        });
+}
+
+function loadClassSchedule() {
+    let classId = document.getElementById('regClassId').value;
+    if (!classId) {
+        document.getElementById('classScheduleBox').style.display = 'none';
+        return;
+    }
+    fetch(`/api/Class/${classId}/studydays`)
+        .then(res => res.json())
+        .then(days => {
+            let html = `<ul>`;
+            for (const d of days) {
+                html += `<li>${new Date(d.date).toLocaleDateString()} (${d.dayOfWeek}) ${d.startTime} - ${d.endTime}</li>`;
+            }
+            html += `</ul>`;
+            document.getElementById('classSchedule').innerHTML = html;
+            document.getElementById('classScheduleBox').style.display = '';
+        });
+}
+
+document.getElementById('registrationForm').onsubmit = function(e) {
+    e.preventDefault();
+    let data = {
+        submit: true,
+        courseId: selectedCourseId,
+        classId: parseInt(document.getElementById('regClassId').value),
+        student: {
+            name: document.getElementById('regName').value,
+            email: document.getElementById('regEmail').value,
+            phoneNumber: document.getElementById('regPhone').value
+        }
+    };
+    fetch('/api/Registration/register-with-class', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+    })
+    .then(res => res.ok ? res.json() : res.text().then(t => {throw t}))
+    .then(result => {
+        document.getElementById('regResult').innerHTML = `<div class="alert alert-success">Đăng ký thành công!</div>`;
+    })
+    .catch(err => {
+        document.getElementById('regResult').innerHTML = `<div class="alert alert-danger">Đăng ký thất bại: ${err}</div>`;
+    });
+};
+</script>
+}

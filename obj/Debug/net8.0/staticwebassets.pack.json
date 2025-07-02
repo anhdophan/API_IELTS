@@ -1,0 +1,33 @@
+{
+  "Files": [
+    {
+      "Id": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/css/home.css",
+      "PackagePath": "staticwebassets/css/home.css"
+    },
+    {
+      "Id": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/images/lt_logo.png",
+      "PackagePath": "staticwebassets/images/lt_logo.png"
+    },
+    {
+      "Id": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/images/lt_logo_white.png",
+      "PackagePath": "staticwebassets/images/lt_logo_white.png"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.api.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.build.api.props",
+      "PackagePath": "build\\api.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildMultiTargeting.api.props",
+      "PackagePath": "buildMultiTargeting\\api.props"
+    },
+    {
+      "Id": "obj/Debug/net8.0/staticwebassets/msbuild.buildTransitive.api.props",
+      "PackagePath": "buildTransitive\\api.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

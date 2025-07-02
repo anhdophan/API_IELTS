@@ -37,11 +37,13 @@ D:/Web_Mobi_Project/API/api/bin/Debug/net8.0/Newtonsoft.Json.dll
 D:/Web_Mobi_Project/API/api/bin/Debug/net8.0/System.Reactive.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/appsettings.Development.json
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/appsettings.json
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/api.staticwebassets.runtime.json
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/api
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/api.deps.json
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/api.runtimeconfig.json
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/api.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/api.pdb
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/CloudinaryDotNet.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Firebase.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/LiteDB.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Microsoft.AspNetCore.OpenApi.dll
@@ -58,6 +60,9 @@ D:/Web_Mobi_Project/API/api/bin/Debug/net8.0/System.Reactive.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.csproj.CoreCompileInputs.cache
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.MvcApplicationPartsAssemblyInfo.cs
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.MvcApplicationPartsAssemblyInfo.cache
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.RazorAssemblyInfo.cache
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.RazorAssemblyInfo.cs
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.sourcelink.json
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/staticwebassets.build.json
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/staticwebassets.development.json
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/staticwebassets/msbuild.api.Microsoft.AspNetCore.StaticWebAssets.props
@@ -72,7 +77,3 @@ D:/Web_Mobi_Project/API/api/bin/Debug/net8.0/System.Reactive.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.pdb
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.genruntimeconfig.cache
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/ref/api.dll
-/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.RazorAssemblyInfo.cache
-/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.RazorAssemblyInfo.cs
-/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/CloudinaryDotNet.dll
-/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.sourcelink.json

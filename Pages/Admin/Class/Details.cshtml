@@ -5,23 +5,64 @@
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
 
-<h2>Class Details</h2>
+@section Styles {
+<style>
+    .details-container {
+        max-width: 750px;
+        margin: 40px auto;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
 
-<div class="mb-3">
-    <strong>Class ID:</strong> @Model.Class.ClassId <br />
-    <strong>Name:</strong> @Model.Class.Name <br />
-    <strong>Course:</strong> @Model.CourseName <br />
-    <strong>Teacher:</strong> @(Model.TeacherName ?? "Chưa có giảng viên") <br />
-    <strong>Start Date:</strong> @Model.Class.StartDate.ToShortDateString() <br />
-    <strong>End Date:</strong> @Model.Class.EndDate.ToShortDateString() <br />
-    <strong>Schedule:</strong>
-    <ul>
-        @foreach (var sched in Model.Class.Schedule)
-        {
-            <li>@sched.DayOfWeek: @sched.StartTime - @sched.EndTime</li>
-        }
-    </ul>
+    .details-container h2 {
+        margin-bottom: 24px;
+    }
+
+    .details-row {
+        margin-bottom: 15px;
+        font-size: 1rem;
+    }
+
+    .details-label {
+        font-weight: 600;
+        width: 150px;
+        display: inline-block;
+    }
+
+    .schedule-list {
+        padding-left: 20px;
+    }
+
+    .details-actions {
+        margin-top: 30px;
+    }
+</style>
+}
+
+<div class="details-container">
+    <h2>Class Details</h2>
+
+    <div class="details-row"><span class="details-label">Class ID:</span> @Model.Class.ClassId</div>
+    <div class="details-row"><span class="details-label">Name:</span> @Model.Class.Name</div>
+    <div class="details-row"><span class="details-label">Course:</span> @Model.CourseName</div>
+    <div class="details-row"><span class="details-label">Teacher:</span> @(Model.TeacherName ?? "Chưa có giảng viên")</div>
+    <div class="details-row"><span class="details-label">Start Date:</span> @Model.Class.StartDate.ToShortDateString()</div>
+    <div class="details-row"><span class="details-label">End Date:</span> @Model.Class.EndDate.ToShortDateString()</div>
+
+    <div class="details-row">
+        <span class="details-label">Schedule:</span>
+        <ul class="schedule-list">
+            @foreach (var sched in Model.Class.Schedule)
+            {
+                <li>@sched.DayOfWeek: @sched.StartTime - @sched.EndTime</li>
+            }
+        </ul>
+    </div>
+
+    <div class="details-actions">
+        <a asp-page="Edit" asp-route-id="@Model.Class.ClassId" class="btn btn-primary me-2">Edit</a>
+        <a asp-page="Index" class="btn btn-secondary">Back to List</a>
+    </div>
 </div>
-
-<a asp-page="Edit" asp-route-id="@Model.Class.ClassId" class="btn btn-primary">Edit</a>
-<a asp-page="Index" class="btn btn-secondary">Back to List</a>

@@ -46,7 +46,7 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapRazorPages();
     endpoints.MapGet("/", context => {
-    context.Response.Redirect("/Admin/Login_Admin");
+    context.Response.Redirect("/User");
     return Task.CompletedTask;
     });
 });
