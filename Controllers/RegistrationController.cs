@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Firebase.Database;
-using Firebase.Database.Query;
-using api.Services;
 using api.Models;
-using Newtonsoft.Json;
 using System.Net.Http;
+using api.Services;
+using Firebase.Database.Query;
+using Newtonsoft.Json;
 
 namespace api.Controllers
 {
@@ -198,11 +198,17 @@ namespace api.Controllers
             return Ok(filtered);
         }
 
-        // Register student for a specific class
+        public class SimpleStudentInfo
+        {
+            public string Name { get; set; }
+            public string PhoneNumber { get; set; }
+            public string Email { get; set; }
+        }
+
         public class RegistrationWithClassRequest
         {
             public bool Submit { get; set; }
-            public Student Student { get; set; }
+            public SimpleStudentInfo Student { get; set; }
             public int CourseId { get; set; }
             public int ClassId { get; set; }
         }
@@ -210,8 +216,13 @@ namespace api.Controllers
         [HttpPost("register-with-class")]
         public async Task<IActionResult> RegisterStudentWithClassAsync([FromBody] RegistrationWithClassRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (request.Student == null ||
+                string.IsNullOrWhiteSpace(request.Student.Name) ||
+                string.IsNullOrWhiteSpace(request.Student.Email) ||
+                string.IsNullOrWhiteSpace(request.Student.PhoneNumber))
+            {
+                return BadRequest("Vui lòng nhập đầy đủ họ tên, email và số điện thoại.");
+            }
 
             var registration = new Registration
             {
@@ -223,7 +234,6 @@ namespace api.Controllers
                 Status = RegistrationStatus.Unread
             };
 
-            // Lưu registration vào Firebase hoặc DB
             await firebaseClient
                 .Child("Registrations")
                 .Child(registration.RegistrationId.ToString())
