@@ -27,6 +27,17 @@ namespace api.Controllers
             if (exam.Questions == null || exam.Questions.Count == 0)
                 return BadRequest("Exam must contain at least one question.");
 
+            // Kiểm tra từng câu hỏi có tồn tại không (nếu muốn)
+            foreach (var eq in exam.Questions)
+            {
+                var q = await firebaseClient
+                    .Child("Questions")
+                    .Child(eq.QuestionId.ToString())
+                    .OnceSingleAsync<Question>();
+                if (q == null)
+                    return BadRequest($"Question {eq.QuestionId} does not exist.");
+            }
+
             var existing = await firebaseClient
                 .Child("Exams")
                 .Child(exam.ExamId.ToString())
@@ -139,26 +150,35 @@ namespace api.Controllers
             if (exam.Questions == null || exam.Questions.Count == 0)
                 return BadRequest("Exam has no questions.");
 
-            int score = 0;
-            int questionCount = exam.Questions.Count;
+            double score = 0;
+            double totalScore = exam.Questions.Sum(q => q.Score);
 
-            for (int i = 0; i < questionCount; i++)
+            for (int i = 0; i < exam.Questions.Count; i++)
             {
                 if (i >= request.Answers.Count) break;
 
-                var q = exam.Questions[i];
+                var eq = exam.Questions[i];
+                var q = await firebaseClient
+                    .Child("Questions")
+                    .Child(eq.QuestionId.ToString())
+                    .OnceSingleAsync<Question>();
+
                 var userAnswer = request.Answers[i];
 
+                bool correct = false;
                 if (q.IsMultipleChoice)
                 {
                     if (int.TryParse(userAnswer, out int idx) && q.CorrectAnswerIndex == idx)
-                        score++;
+                        correct = true;
                 }
                 else
                 {
                     if (string.Equals(q.CorrectInputAnswer?.Trim(), userAnswer?.Trim(), StringComparison.OrdinalIgnoreCase))
-                        score++;
+                        correct = true;
                 }
+
+                if (correct)
+                    score += eq.Score;
             }
 
             var result = new Result
@@ -167,8 +187,8 @@ namespace api.Controllers
                 StudentId = request.StudentId,
                 ExamId = examId,
                 Score = score,
-                Remark = $"You got {score} out of {questionCount}",
-                Timestamp = DateTime.UtcNow // 🆕 thêm thời gian nộp
+                Remark = $"You got {score} out of {totalScore}",
+                Timestamp = DateTime.UtcNow
             };
 
             await firebaseClient

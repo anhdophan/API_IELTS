@@ -1,43 +1,60 @@
 @page
+@using api.Models
 @model api.Pages.Admin.Registrations.IndexModel
 @{
     ViewData["Title"] = "Registrations";
     Layout = "~/Pages/Shared/_Layout.cshtml";
 }
-<h2 class="mt-4">Registration List</h2>
-<hr />
-<a asp-page="./Create" class="btn btn-success mb-3">+ New Registration</a>
+<div class="teacher-container">
+    <div class="teacher-header">
+        <h2>Registration List</h2>
+        <a asp-page="Create" class="btn btn-success">Add New Registration</a>
+    </div>
 
-<table class="table table-bordered table-hover">
-    <thead class="table-light">
-        <tr>
-            <th>ID</th>
-            <th>Student ID</th>
-            <th>Course ID</th>
-            <th>Email</th>
-            <th>Date</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach (var item in Model.Registrations)
+    @if (!string.IsNullOrEmpty(Model.StatusMessage))
     {
-        <tr>
-            <td>@item.RegistrationId</td>
-            <td>@item.StudentId</td>
-            <td>@item.CourseId</td>
-            <td>@item.Email</td>
-            <td>@item.RegistrationDate.ToShortDateString()</td>
-            <td>@item.Status</td>
-            <td>
-                <a asp-page="Details" asp-route-id="@item.RegistrationId" class="btn btn-sm btn-info">Details</a>
-                <a asp-page="Edit" asp-route-id="@item.RegistrationId" class="btn btn-sm btn-primary">Edit</a>
-                <form method="post" asp-page-handler="Delete" asp-route-id="@item.RegistrationId" style="display:inline;" onsubmit="return confirm('Confirm delete?');">
-                    <button class="btn btn-sm btn-danger">Delete</button>
-                </form>
-            </td>
-        </tr>
+        <div class="alert alert-info">@Model.StatusMessage</div>
     }
-    </tbody>
-</table>
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>StudentId</th>
+                <th>CourseId</th>
+                <th>Email</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var reg in Model.Registrations)
+        {
+            <tr>
+                <td>@reg.RegistrationId</td>
+                <td>@reg.StudentId</td>
+                <td>@reg.CourseId</td>
+                <td>@reg.Email</td>
+                <td>@reg.RegistrationDate.ToString("yyyy-MM-dd")</td>
+                <td>@reg.Status</td>
+                <td>
+                    @if (reg.Status == RegistrationStatus.Unread)
+                    {
+                        <form method="post" asp-page-handler="Confirm" asp-route-id="@reg.RegistrationId" style="display:inline;">
+                            <button type="submit" class="btn btn-success btn-sm">Confirm</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Confirmed</span>
+                    }
+                    <a asp-page="Edit" asp-route-id="@reg.RegistrationId" class="btn btn-sm btn-primary">Edit</a>
+                    <a asp-page="Details" asp-route-id="@reg.RegistrationId" class="btn btn-sm btn-info">Details</a>
+                    <a asp-page="Delete" asp-route-id="@reg.RegistrationId" class="btn btn-sm btn-danger">Delete</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

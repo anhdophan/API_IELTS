@@ -32,23 +32,26 @@ namespace api.Pages.Admin.Registrations
         {
             var client = _clientFactory.CreateClient();
 
+            // Lấy thông tin đăng ký
             var res = await client.GetAsync($"http://localhost:5035/api/Registration/{id}");
             if (!res.IsSuccessStatusCode) return RedirectToPage();
 
             var reg = JsonConvert.DeserializeObject<Registration>(await res.Content.ReadAsStringAsync());
             if (reg == null) return RedirectToPage();
 
+            // Tạo Student từ thông tin đăng ký
             var student = new Student
             {
-                StudentId = reg.StudentId,
-                Name = "",
+                StudentId = reg.StudentId == 0 ? new Random().Next(100000, 999999) : reg.StudentId,
+                Name = "", // Nếu bạn lưu tên trong Registration thì lấy ra, còn không thì để rỗng
                 Email = reg.Email,
                 Username = reg.Email,
                 Password = reg.Email + "123",
-                PhoneNumber = "",
-                Class = "",
+                PhoneNumber = "", // Nếu có thì lấy ra
+                Class = "", // Nếu có thì lấy ra
                 StudyingCourse = reg.CourseId.ToString(),
-                Score = 0
+                Score = 0,
+                Avatar = "https://ui-avatars.com/api/?name=Student" // hoặc link ảnh mặc định khác
             };
 
             var studentJson = JsonConvert.SerializeObject(student);
@@ -56,8 +59,21 @@ namespace api.Pages.Admin.Registrations
             var result = await client.PostAsync("http://localhost:5035/api/Student", content);
 
             StatusMessage = result.IsSuccessStatusCode
-                ? $"Tạo học sinh từ đăng ký #{id} thành công."
-                : $"Không thể tạo học sinh từ đăng ký #{id}.";
+                ? $"Xác nhận đăng ký #{id} thành công, đã tạo học sinh."
+                : $"Không thể xác nhận đăng ký #{id}.";
+
+            return RedirectToPage();
+        }
+
+        public async Task<IActionResult> OnPostConfirmAsync(int id)
+        {
+            var client = _clientFactory.CreateClient();
+            var response = await client.PostAsync($"http://localhost:5035/api/Registration/{id}/confirm", null);
+
+            if (response.IsSuccessStatusCode)
+                StatusMessage = "Xác nhận thành công!";
+            else
+                StatusMessage = "Xác nhận thất bại!";
 
             return RedirectToPage();
         }

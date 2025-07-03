@@ -1,0 +1,42 @@
+@page "{id:int}"
+@model api.Pages.Admin.Questions.EditModel
+@{
+    ViewData["Title"] = "Edit Question";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<h2>Edit Question</h2>
+<form method="post">
+    <div class="form-group">
+        <label asp-for="Question.QuestionId"></label>
+        <input asp-for="Question.QuestionId" class="form-control" readonly />
+    </div>
+    <div class="form-group">
+        <label asp-for="Question.Content"></label>
+        <textarea asp-for="Question.Content" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <label>IELTS Levels (comma separated, e.g. 4, 4.5, 5):</label>
+        <input asp-for="LevelsInput" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Question.IsMultipleChoice"></label>
+        <input asp-for="Question.IsMultipleChoice" type="checkbox" />
+    </div>
+    <div class="form-group">
+        <label>Choices (one per line, only for multiple choice):</label>
+        <textarea asp-for="Question.Choices" class="form-control"></textarea>
+    </div>
+    <div class="form-group">
+        <label asp-for="Question.CorrectAnswerIndex"></label>
+        <input asp-for="Question.CorrectAnswerIndex" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Question.CorrectInputAnswer"></label>
+        <input asp-for="Question.CorrectInputAnswer" class="form-control" />
+    </div>
+    <div class="form-group mt-3" style="text-align:center;">
+        <input type="submit" value="Save" class="btn btn-primary" />
+        <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
+<partial name="_ValidationScriptsPartial" />

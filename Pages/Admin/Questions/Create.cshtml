@@ -1,0 +1,49 @@
+@page
+@model api.Pages.Admin.Questions.CreateModel
+@{
+    ViewData["Title"] = "Create Question";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<div class="create-course-container">
+    <h2>Create Question</h2>
+    <form method="post">
+        <div class="form-group">
+            <label asp-for="Question.QuestionId" class="control-label"></label>
+            <input asp-for="Question.QuestionId" class="form-control" />
+            <span asp-validation-for="Question.QuestionId" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Question.Content" class="control-label"></label>
+            <textarea asp-for="Question.Content" class="form-control"></textarea>
+            <span asp-validation-for="Question.Content" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label>IELTS Levels (comma separated, e.g. 4, 4.5, 5):</label>
+            <input asp-for="LevelsInput" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Question.IsMultipleChoice" class="control-label"></label>
+            <input asp-for="Question.IsMultipleChoice" type="checkbox" />
+        </div>
+        <div class="form-group">
+            <label>Choices (one per line, only for multiple choice):</label>
+            <textarea asp-for="Question.Choices" class="form-control"></textarea>
+            <span asp-validation-for="Question.Choices" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Question.CorrectAnswerIndex" class="control-label"></label>
+            <input asp-for="Question.CorrectAnswerIndex" class="form-control" />
+            <span asp-validation-for="Question.CorrectAnswerIndex" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Question.CorrectInputAnswer" class="control-label"></label>
+            <input asp-for="Question.CorrectInputAnswer" class="form-control" />
+            <span asp-validation-for="Question.CorrectInputAnswer" class="text-danger"></span>
+        </div>
+        <div class="form-group mt-3" style="text-align:center;">
+            <input type="submit" value="Create" class="btn btn-primary" />
+            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+<partial name="_ValidationScriptsPartial" />

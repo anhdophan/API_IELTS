@@ -227,11 +227,14 @@ namespace api.Controllers
             var registration = new Registration
             {
                 RegistrationId = Guid.NewGuid().GetHashCode(),
-                StudentId = 0, // Chưa có student
+                StudentId = 0,
                 CourseId = request.CourseId,
+                ClassId = request.ClassId, // Lưu ClassId
                 RegistrationDate = DateTime.UtcNow,
                 Email = request.Student.Email,
-                Status = RegistrationStatus.Unread
+                PhoneNumber = request.Student.PhoneNumber,
+                Status = RegistrationStatus.Unread,
+                StudentName = request.Student.Name
             };
 
             await firebaseClient
@@ -240,6 +243,50 @@ namespace api.Controllers
                 .PutAsync(registration);
 
             return Ok(new { registration });
+        }
+
+        [HttpPost("{registrationId}/confirm")]
+        public async Task<IActionResult> ConfirmRegistrationAsync(string registrationId)
+        {
+            // Lấy registration
+            var registration = await firebaseClient
+                .Child("Registrations")
+                .Child(registrationId)
+                .OnceSingleAsync<Registration>();
+
+            if (registration == null)
+                return NotFound("Registration not found.");
+
+            // Tạo Student (Username = Email, Password = Email+123, Avatar mặc định)
+            var student = new Student
+            {
+                StudentId = new Random().Next(100000, 999999),
+                Name = registration.StudentName,
+                Email = registration.Email,
+                Username = registration.Email,
+                Password = registration.Email + "123",
+                PhoneNumber = registration.PhoneNumber,
+                Class = registration.ClassId.ToString(),
+                StudyingCourse = registration.CourseId.ToString(),
+                Score = 0,
+                Avatar = "https://ui-avatars.com/api/?name=Student"
+            };
+
+            await firebaseClient
+                .Child("Students")
+                .Child(student.StudentId.ToString())
+                .PutAsync(student);
+
+            // Cập nhật trạng thái Registration sang Confirm và lưu StudentId
+            registration.Status = RegistrationStatus.Confirm;
+            registration.StudentId = student.StudentId;
+
+            await firebaseClient
+                .Child("Registrations")
+                .Child(registrationId)
+                .PutAsync(registration);
+
+            return Ok(new { student, registration });
         }
 
         // Private helper: get all registrations from Firebase (support Dictionary or List JSON)

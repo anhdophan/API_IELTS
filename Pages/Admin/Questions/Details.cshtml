@@ -1,0 +1,52 @@
+@page "{id:int}"
+@model api.Pages.Admin.Questions.DetailsModel
+@{
+    ViewData["Title"] = "Question Details";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<h2>Question Details</h2>
+<div class="form-group">
+    <label>ID:</label>
+    <span>@Model.Question.QuestionId</span>
+</div>
+<div class="form-group">
+    <label>Content:</label>
+    <span>@Model.Question.Content</span>
+</div>
+<div class="form-group">
+    <label>IELTS Levels:</label>
+    <span>@(Model.Question.Levels != null ? string.Join(", ", Model.Question.Levels) : "")</span>
+</div>
+<div class="form-group">
+    <label>Type:</label>
+    <span>@(Model.Question.IsMultipleChoice ? "Multiple Choice" : "Input")</span>
+</div>
+@if (Model.Question.IsMultipleChoice && Model.Question.Choices != null)
+{
+    <div class="form-group">
+        <label>Choices:</label>
+        <ul>
+            @for (int i = 0; i < Model.Question.Choices.Count; i++)
+            {
+                <li>
+                    @Model.Question.Choices[i]
+                    @if (i == Model.Question.CorrectAnswerIndex)
+                    {
+                        <strong> (Correct)</strong>
+                    }
+                </li>
+            }
+        </ul>
+    </div>
+}
+@if (!Model.Question.IsMultipleChoice && !string.IsNullOrEmpty(Model.Question.CorrectInputAnswer))
+{
+    <div class="form-group">
+        <label>Correct Answer:</label>
+        <span>@Model.Question.CorrectInputAnswer</span>
+    </div>
+}
+<div class="form-group mt-3">
+    <a asp-page="Edit" asp-route-id="@Model.Question.QuestionId" class="btn btn-primary">Edit</a>
+    <a asp-page="Index" class="btn btn-secondary">Back to List</a>
+</div>

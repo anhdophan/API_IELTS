@@ -1,0 +1,60 @@
+@page
+@model api.Pages.Admin.Questions.IndexModel
+@{
+    ViewData["Title"] = "Questions";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+<div class="courses-container">
+    <div class="courses-header">
+        <h2>Question List</h2>
+        <a asp-page="./Create" class="btn btn-success mb-3">Add New Question</a>
+    </div>
+    <hr />
+    @if (Model?.StatusMessage != null)
+    {
+        <div class="status-message">@Model.StatusMessage</div>
+    }
+    <table class="table table-bordered table-hover">
+        <thead class="thead-light">
+            <tr>
+                <th>ID</th>
+                <th>Content</th>
+                <th>Levels</th>
+                <th>Type</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Questions != null)
+            {
+                foreach (var q in Model.Questions)
+                {
+                    <tr>
+                        <td>@q.QuestionId</td>
+                        <td>@q.Content</td>
+                        <td>
+                            @if (q.Levels != null)
+                            {
+                                @string.Join(", ", q.Levels)
+                            }
+                        </td>
+                        <td>@(q.IsMultipleChoice ? "Multiple Choice" : "Input")</td>
+                        <td>
+                            <a asp-page="Edit" asp-route-id="@q.QuestionId" class="btn btn-sm btn-primary">Edit</a>
+                            <a asp-page="Details" asp-route-id="@q.QuestionId" class="btn btn-sm btn-info">Details</a>
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@q.QuestionId" style="display:inline;" onsubmit="return confirm('Delete this question?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-danger">No questions found or an error occurred.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
