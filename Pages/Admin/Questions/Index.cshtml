@@ -19,8 +19,9 @@
             <tr>
                 <th>ID</th>
                 <th>Content</th>
-                <th>Levels</th>
+                <th>Level</th>
                 <th>Type</th>
+                <th>Created By</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -32,13 +33,9 @@
                     <tr>
                         <td>@q.QuestionId</td>
                         <td>@q.Content</td>
-                        <td>
-                            @if (q.Levels != null)
-                            {
-                                @string.Join(", ", q.Levels)
-                            }
-                        </td>
+                        <td>@q.Level</td>
                         <td>@(q.IsMultipleChoice ? "Multiple Choice" : "Input")</td>
+                        <td>@q.CreatedById</td>
                         <td>
                             <a asp-page="Edit" asp-route-id="@q.QuestionId" class="btn btn-sm btn-primary">Edit</a>
                             <a asp-page="Details" asp-route-id="@q.QuestionId" class="btn btn-sm btn-info">Details</a>
@@ -52,7 +49,7 @@
             else
             {
                 <tr>
-                    <td colspan="5" class="text-center text-danger">No questions found or an error occurred.</td>
+                    <td colspan="6" class="text-center text-danger">No questions found or an error occurred.</td>
                 </tr>
             }
         </tbody>

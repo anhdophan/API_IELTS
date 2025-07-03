@@ -15,24 +15,28 @@
         <textarea asp-for="Question.Content" class="form-control"></textarea>
     </div>
     <div class="form-group">
-        <label>IELTS Levels (comma separated, e.g. 4, 4.5, 5):</label>
-        <input asp-for="LevelsInput" class="form-control" />
+        <label asp-for="Question.Level"></label>
+        <input asp-for="Question.Level" class="form-control" />
     </div>
     <div class="form-group">
         <label asp-for="Question.IsMultipleChoice"></label>
         <input asp-for="Question.IsMultipleChoice" type="checkbox" />
     </div>
-    <div class="form-group">
-        <label>Choices (one per line, only for multiple choice):</label>
-        <textarea asp-for="Question.Choices" class="form-control"></textarea>
+    <div class="form-group" id="choices-group" style="display:none;">
+        <label>Choices (one per line):</label>
+        <textarea asp-for="ChoicesInput" class="form-control"></textarea>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="correct-index-group" style="display:none;">
         <label asp-for="Question.CorrectAnswerIndex"></label>
         <input asp-for="Question.CorrectAnswerIndex" class="form-control" />
     </div>
-    <div class="form-group">
+    <div class="form-group" id="correct-input-group" style="display:none;">
         <label asp-for="Question.CorrectInputAnswer"></label>
         <input asp-for="Question.CorrectInputAnswer" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Question.CreatedById"></label>
+        <input asp-for="Question.CreatedById" class="form-control" />
     </div>
     <div class="form-group mt-3" style="text-align:center;">
         <input type="submit" value="Save" class="btn btn-primary" />
@@ -40,3 +44,15 @@
     </div>
 </form>
 <partial name="_ValidationScriptsPartial" />
+@section Scripts {
+<script>
+    function toggleFields() {
+        var isMC = document.getElementById("Question_IsMultipleChoice").checked;
+        document.getElementById("choices-group").style.display = isMC ? "" : "none";
+        document.getElementById("correct-index-group").style.display = isMC ? "" : "none";
+        document.getElementById("correct-input-group").style.display = isMC ? "none" : "";
+    }
+    document.getElementById("Question_IsMultipleChoice").addEventListener("change", toggleFields);
+    window.onload = toggleFields;
+</script>
+}

@@ -15,25 +15,30 @@ namespace api.Pages.Admin.Questions
         public Question Question { get; set; }
 
         [BindProperty]
-        public string LevelsInput { get; set; } // comma separated
+        public string ChoicesInput { get; set; } // one per line
 
         public void OnGet()
         {
-            Question = new Question { Choices = new List<string>() };
+            Question = new Question();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Parse Levels
-            if (!string.IsNullOrWhiteSpace(LevelsInput))
+            // Parse Choices
+            if (Question.IsMultipleChoice && !string.IsNullOrWhiteSpace(ChoicesInput))
             {
-                Question.Levels = new List<double>();
-                foreach (var s in LevelsInput.Split(','))
-                {
-                    if (double.TryParse(s.Trim(), out var lvl))
-                        Question.Levels.Add(lvl);
-                }
+                Question.Choices = new List<string>(ChoicesInput.Split('\n', '\r'));
+                Question.Choices.RemoveAll(s => string.IsNullOrWhiteSpace(s));
             }
+            else
+            {
+                Question.Choices = null;
+                Question.CorrectAnswerIndex = null;
+            }
+
+            // Gán CreatedById (ví dụ: Admin là "00")
+            if (string.IsNullOrEmpty(Question.CreatedById))
+                Question.CreatedById = "00";
 
             if (!ModelState.IsValid)
                 return Page();

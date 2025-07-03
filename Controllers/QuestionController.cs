@@ -22,6 +22,24 @@ namespace api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
+            // Kiểm tra dữ liệu hợp lệ
+            if (question.IsMultipleChoice)
+            {
+                if (question.Choices == null || question.Choices.Count < 2)
+                    return BadRequest("Multiple choice question must have at least 2 choices.");
+                if (question.CorrectAnswerIndex == null || question.CorrectAnswerIndex < 0 || question.CorrectAnswerIndex >= question.Choices.Count)
+                    return BadRequest("CorrectAnswerIndex is invalid.");
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(question.CorrectInputAnswer))
+                    return BadRequest("Input question must have a correct answer.");
+            }
+
+            // Gán CreatedById nếu chưa có
+            if (string.IsNullOrEmpty(question.CreatedById))
+                question.CreatedById = "00"; // Admin mặc định
+
             await firebaseClient
                 .Child("Questions")
                 .Child(question.QuestionId.ToString())
@@ -77,6 +95,24 @@ namespace api.Controllers
         public async Task<IActionResult> UpdateQuestionAsync(int questionId, [FromBody] Question question)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // Kiểm tra dữ liệu hợp lệ
+            if (question.IsMultipleChoice)
+            {
+                if (question.Choices == null || question.Choices.Count < 2)
+                    return BadRequest("Multiple choice question must have at least 2 choices.");
+                if (question.CorrectAnswerIndex == null || question.CorrectAnswerIndex < 0 || question.CorrectAnswerIndex >= question.Choices.Count)
+                    return BadRequest("CorrectAnswerIndex is invalid.");
+            }
+            else
+            {
+                if (string.IsNullOrWhiteSpace(question.CorrectInputAnswer))
+                    return BadRequest("Input question must have a correct answer.");
+            }
+
+            // Gán CreatedById nếu chưa có
+            if (string.IsNullOrEmpty(question.CreatedById))
+                question.CreatedById = "00"; // Admin mặc định
 
             await firebaseClient
                 .Child("Questions")

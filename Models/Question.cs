@@ -6,10 +6,11 @@ namespace api.Models
     {
         public int QuestionId { get; set; }
         public string Content { get; set; }
-        public List<string> Choices { get; set; }
-        public int CorrectAnswerIndex { get; set; }
-        public string CorrectInputAnswer { get; set; }
         public bool IsMultipleChoice { get; set; }
-        public List<double> Levels { get; set; } // VD: [4.0, 4.5, 5.0]
+        public List<string> Choices { get; set; }
+        public int? CorrectAnswerIndex { get; set; }
+        public string CorrectInputAnswer { get; set; }
+        public double Level { get; set; }
+        public string CreatedById { get; set; }
     }
 }

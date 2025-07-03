@@ -8,37 +8,36 @@
     <h2>Create Question</h2>
     <form method="post">
         <div class="form-group">
-            <label asp-for="Question.QuestionId" class="control-label"></label>
+            <label asp-for="Question.QuestionId"></label>
             <input asp-for="Question.QuestionId" class="form-control" />
-            <span asp-validation-for="Question.QuestionId" class="text-danger"></span>
         </div>
         <div class="form-group">
-            <label asp-for="Question.Content" class="control-label"></label>
+            <label asp-for="Question.Content"></label>
             <textarea asp-for="Question.Content" class="form-control"></textarea>
-            <span asp-validation-for="Question.Content" class="text-danger"></span>
         </div>
         <div class="form-group">
-            <label>IELTS Levels (comma separated, e.g. 4, 4.5, 5):</label>
-            <input asp-for="LevelsInput" class="form-control" />
+            <label asp-for="Question.Level"></label>
+            <input asp-for="Question.Level" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="Question.IsMultipleChoice" class="control-label"></label>
+            <label asp-for="Question.IsMultipleChoice"></label>
             <input asp-for="Question.IsMultipleChoice" type="checkbox" />
         </div>
-        <div class="form-group">
-            <label>Choices (one per line, only for multiple choice):</label>
-            <textarea asp-for="Question.Choices" class="form-control"></textarea>
-            <span asp-validation-for="Question.Choices" class="text-danger"></span>
+        <div class="form-group" id="choices-group" style="display:none;">
+            <label>Choices (one per line):</label>
+            <textarea asp-for="ChoicesInput" class="form-control"></textarea>
         </div>
-        <div class="form-group">
-            <label asp-for="Question.CorrectAnswerIndex" class="control-label"></label>
+        <div class="form-group" id="correct-index-group" style="display:none;">
+            <label asp-for="Question.CorrectAnswerIndex"></label>
             <input asp-for="Question.CorrectAnswerIndex" class="form-control" />
-            <span asp-validation-for="Question.CorrectAnswerIndex" class="text-danger"></span>
+        </div>
+        <div class="form-group" id="correct-input-group" style="display:none;">
+            <label asp-for="Question.CorrectInputAnswer"></label>
+            <input asp-for="Question.CorrectInputAnswer" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="Question.CorrectInputAnswer" class="control-label"></label>
-            <input asp-for="Question.CorrectInputAnswer" class="form-control" />
-            <span asp-validation-for="Question.CorrectInputAnswer" class="text-danger"></span>
+            <label asp-for="Question.CreatedById"></label>
+            <input asp-for="Question.CreatedById" class="form-control" value="00" />
         </div>
         <div class="form-group mt-3" style="text-align:center;">
             <input type="submit" value="Create" class="btn btn-primary" />
@@ -47,3 +46,15 @@
     </form>
 </div>
 <partial name="_ValidationScriptsPartial" />
+@section Scripts {
+<script>
+    function toggleFields() {
+        var isMC = document.getElementById("Question_IsMultipleChoice").checked;
+        document.getElementById("choices-group").style.display = isMC ? "" : "none";
+        document.getElementById("correct-index-group").style.display = isMC ? "" : "none";
+        document.getElementById("correct-input-group").style.display = isMC ? "none" : "";
+    }
+    document.getElementById("Question_IsMultipleChoice").addEventListener("change", toggleFields);
+    window.onload = toggleFields;
+</script>
+}

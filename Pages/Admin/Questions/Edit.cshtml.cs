@@ -22,7 +22,7 @@ namespace api.Pages.Admin.Questions
         public Question Question { get; set; }
 
         [BindProperty]
-        public string LevelsInput { get; set; }
+        public string ChoicesInput { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int id)
         {
@@ -34,24 +34,28 @@ namespace api.Pages.Admin.Questions
             var json = await response.Content.ReadAsStringAsync();
             Question = JsonConvert.DeserializeObject<Question>(json);
 
-            // Convert Levels to string for editing
-            LevelsInput = Question.Levels != null ? string.Join(", ", Question.Levels) : "";
+            // Convert Choices to string for editing
+            ChoicesInput = Question.Choices != null ? string.Join("\n", Question.Choices) : "";
 
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Parse Levels
-            if (!string.IsNullOrWhiteSpace(LevelsInput))
+            // Parse Choices
+            if (Question.IsMultipleChoice && !string.IsNullOrWhiteSpace(ChoicesInput))
             {
-                Question.Levels = new List<double>();
-                foreach (var s in LevelsInput.Split(','))
-                {
-                    if (double.TryParse(s.Trim(), out var lvl))
-                        Question.Levels.Add(lvl);
-                }
+                Question.Choices = new List<string>(ChoicesInput.Split('\n', '\r'));
+                Question.Choices.RemoveAll(s => string.IsNullOrWhiteSpace(s));
             }
+            else
+            {
+                Question.Choices = null;
+                Question.CorrectAnswerIndex = null;
+            }
+
+            if (string.IsNullOrEmpty(Question.CreatedById))
+                Question.CreatedById = "00";
 
             if (!ModelState.IsValid)
                 return Page();
