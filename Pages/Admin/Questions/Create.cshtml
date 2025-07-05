@@ -54,11 +54,42 @@
         background-color: #565e64;
         border-color: #43494e;
     }
+    .choice-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+    .choice-row input[type="text"] {
+        flex: 1;
+        margin-right: 8px;
+    }
+    .choice-row button {
+        min-width: 32px;
+        padding: 0 8px;
+    }
 </style>
+}
+@if (!string.IsNullOrEmpty(Model.DebugMessage))
+{
+    <div class="alert alert-warning" style="white-space:pre-wrap">@Model.DebugMessage</div>
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+        @foreach (var entry in ViewData.ModelState)
+        {
+            foreach (var error in entry.Value.Errors)
+            {
+                <li>@entry.Key: @error.ErrorMessage</li>
+            }
+        }
+        </ul>
+    </div>
 }
 <div class="create-course-container">
     <h2>Create Question</h2>
-    <form method="post">
+    <form method="post" id="questionForm">
         <div class="form-group">
             <label asp-for="Question.QuestionId"></label>
             <input asp-for="Question.QuestionId" class="form-control" />
@@ -73,11 +104,12 @@
         </div>
         <div class="form-group">
             <label asp-for="Question.IsMultipleChoice"></label>
-            <input asp-for="Question.IsMultipleChoice" type="checkbox" />
+            <input asp-for="Question.IsMultipleChoice" type="checkbox" id="isMC" />
         </div>
         <div class="form-group" id="choices-group" style="display:none;">
-            <label>Choices (one per line):</label>
-            <textarea asp-for="ChoicesInput" class="form-control"></textarea>
+            <label>Choices:</label>
+            <div id="choices-list"></div>
+            <button type="button" class="btn btn-secondary" onclick="addChoice()">Add Choice</button>
         </div>
         <div class="form-group" id="correct-index-group" style="display:none;">
             <label asp-for="Question.CorrectAnswerIndex"></label>
@@ -91,22 +123,59 @@
             <label asp-for="Question.CreatedById"></label>
             <input asp-for="Question.CreatedById" class="form-control" value="00" />
         </div>
+        <input type="hidden" name="ChoicesInput" id="ChoicesInput" />
         <div class="form-group mt-3" style="text-align:center;">
             <input type="submit" value="Create" class="btn btn-primary" />
             <a asp-page="Index" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>
+
 <partial name="_ValidationScriptsPartial" />
 @section Scripts {
 <script>
     function toggleFields() {
-        var isMC = document.getElementById("Question_IsMultipleChoice").checked;
+        var isMC = document.getElementById("isMC").checked;
         document.getElementById("choices-group").style.display = isMC ? "" : "none";
         document.getElementById("correct-index-group").style.display = isMC ? "" : "none";
         document.getElementById("correct-input-group").style.display = isMC ? "none" : "";
     }
-    document.getElementById("Question_IsMultipleChoice").addEventListener("change", toggleFields);
-    window.onload = toggleFields;
+    document.getElementById("isMC").addEventListener("change", toggleFields);
+    window.onload = function() {
+        toggleFields();
+        if (document.getElementById("isMC").checked) {
+            if (document.getElementById("choices-list").children.length === 0) {
+                addChoice();
+                addChoice();
+            }
+        }
+    };
+
+    function addChoice(value = "") {
+        var list = document.getElementById("choices-list");
+        var idx = list.children.length;
+        var div = document.createElement("div");
+        div.className = "choice-row";
+        div.innerHTML = `<input type="text" class="form-control" name="choice-item" value="${value.replace(/"/g, '&quot;')}" />
+                         <button type="button" class="btn btn-danger" onclick="removeChoice(this)">-</button>`;
+        list.appendChild(div);
+    }
+    function removeChoice(btn) {
+        var row = btn.parentNode;
+        row.parentNode.removeChild(row);
+    }
+
+    // Trước khi submit, gom các choices lại thành ChoicesInput
+    document.getElementById("questionForm").addEventListener("submit", function(e) {
+        var isMC = document.getElementById("isMC").checked;
+        if (isMC) {
+            var items = document.getElementsByName("choice-item");
+            var arr = [];
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].value.trim() !== "") arr.push(items[i].value.trim());
+            }
+            document.getElementById("ChoicesInput").value = arr.join("\n");
+        }
+    });
 </script>
 }
