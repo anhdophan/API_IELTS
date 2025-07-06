@@ -60,17 +60,14 @@
 <div class="create-exam-container">
     <h2>Create Exam</h2>
     <form method="post">
-        <div class="form-group">
-            <label asp-for="Exam.ExamId"></label>
-            <input asp-for="Exam.ExamId" class="form-control" />
-        </div>
+        <!-- Bỏ trường nhập ExamId -->
         <div class="form-group">
             <label asp-for="Exam.Title"></label>
             <input asp-for="Exam.Title" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="Exam.CourseId"></label>
-            <input asp-for="Exam.CourseId" class="form-control" />
+            <label asp-for="Exam.IdClass"></label>
+            <input asp-for="Exam.IdClass" class="form-control" />
         </div>
         <div class="form-group">
             <label asp-for="Exam.ExamDate"></label>

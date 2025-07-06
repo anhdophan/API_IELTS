@@ -31,6 +31,10 @@ namespace api.Controllers
             if (string.IsNullOrEmpty(exam.CreatedById))
                 exam.CreatedById = "00"; // Admin mặc định
 
+            // Sinh ExamId tự động nếu chưa có
+            if (exam.ExamId == 0)
+                exam.ExamId = int.Parse(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().Substring(5, 8));
+
             // Kiểm tra từng câu hỏi có tồn tại không (nếu muốn)
             foreach (var eq in exam.Questions)
             {
@@ -117,11 +121,11 @@ namespace api.Controllers
         }
 
         // Filter Exams by CourseId
-        [HttpGet("course/{courseId}")]
-        public async Task<ActionResult<List<Exam>>> GetExamsByCourse(int courseId)
+        [HttpGet("class/{idClass}")]
+        public async Task<ActionResult<List<Exam>>> GetExamsByClass(int idClass)
         {
             var exams = await GetAllExamsInternal();
-            var filtered = exams.Where(e => e.CourseId == courseId).ToList();
+            var filtered = exams.Where(e => e.IdClass == idClass).ToList();
             return Ok(filtered);
         }
 

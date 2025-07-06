@@ -7,15 +7,15 @@ namespace api.Models
     {
         public int ExamId { get; set; }
         public string Title { get; set; }
-        public int CourseId { get; set; }
+        public int IdClass { get; set; } // Đổi từ CourseId sang IdClass
         public DateTime ExamDate { get; set; }
         public List<ExamQuestion> Questions { get; set; }
-        public string CreatedById { get; set; } // Thêm dòng này
+        public string CreatedById { get; set; }
     }
 
     public class ExamQuestion
     {
         public int QuestionId { get; set; }
-        public double Score { get; set; } // VD: 0.25, 1.0, ...
+        public double Score { get; set; }
     }
 }
