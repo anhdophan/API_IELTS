@@ -1,0 +1,44 @@
+@page "{id:int}"
+@model api.Pages.Admin.Exams.DeleteModel
+@{
+    ViewData["Title"] = "Delete Exam";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+@section Styles {
+<style>
+    .delete-exam-container {
+        max-width: 600px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+        padding: 32px 28px 24px 28px;
+    }
+    .delete-exam-container h2 {
+        text-align: center;
+        font-weight: 700;
+        color: #c82333;
+        margin-bottom: 28px;
+    }
+    .delete-exam-container .btn-danger {
+        min-width: 120px;
+    }
+</style>
+}
+<div class="delete-exam-container">
+    <h2>Delete Exam</h2>
+    <div>
+        <h4>Bạn có chắc chắn muốn xóa bài thi này?</h4>
+        <dl class="row">
+            <dt class="col-sm-3">ID</dt>
+            <dd class="col-sm-9">@Model.Exam.ExamId</dd>
+            <dt class="col-sm-3">Title</dt>
+            <dd class="col-sm-9">@Model.Exam.Title</dd>
+        </dl>
+        <form method="post">
+            <input type="hidden" asp-for="Exam.ExamId" />
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

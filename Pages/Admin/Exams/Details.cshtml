@@ -1,0 +1,91 @@
+@page "{id:int}"
+@model api.Pages.Admin.Exams.DetailsModel
+@{
+    ViewData["Title"] = "Exam Details";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+@section Styles {
+<style>
+    .exam-details-container {
+        max-width: 700px;
+        margin: 40px auto;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+        padding: 32px 28px 24px 28px;
+    }
+    .exam-details-container h2 {
+        text-align: center;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 28px;
+    }
+    .exam-details-card {
+        border: none;
+        background: transparent;
+    }
+    .exam-details-card .card-body {
+        padding: 0;
+    }
+    .exam-details-card h4 {
+        font-weight: 600;
+        color: #007bff;
+        margin-bottom: 18px;
+    }
+    .exam-details-card p {
+        font-size: 1.08rem;
+        margin-bottom: 10px;
+        color: #34495e;
+    }
+    .exam-details-card strong {
+        color: #555;
+    }
+    .question-table th, .question-table td {
+        text-align: center;
+        vertical-align: middle !important;
+    }
+    .question-table th {
+        background: #f1f3f6;
+        font-weight: 600;
+        color: #34495e;
+    }
+</style>
+}
+<div class="exam-details-container">
+    <h2>Exam Details</h2>
+    <div class="card exam-details-card">
+        <div class="card-body">
+            <h4>@Model.Exam.Title</h4>
+            <p><strong>Exam ID:</strong> @Model.Exam.ExamId</p>
+            <p><strong>Course ID:</strong> @Model.Exam.CourseId</p>
+            <p><strong>Date:</strong> @Model.Exam.ExamDate.ToShortDateString()</p>
+            <p><strong>Created By:</strong> @Model.Exam.CreatedById</p>
+            <p><strong>Questions:</strong></p>
+            <table class="table table-bordered question-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>QuestionId</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @if (Model.Exam.Questions != null)
+                {
+                    int idx = 1;
+                    foreach (var q in Model.Exam.Questions)
+                    {
+                        <tr>
+                            <td>@idx</td>
+                            <td>@q.QuestionId</td>
+                            <td>@q.Score</td>
+                        </tr>
+                        idx++;
+                    }
+                }
+                </tbody>
+            </table>
+            <a asp-page="Index" class="btn btn-primary mt-3">Back to List</a>
+        </div>
+    </div>
+</div>

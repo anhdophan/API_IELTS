@@ -132,5 +132,31 @@ namespace api.Controllers
                 .DeleteAsync();
             return Ok();
         }
+
+        // Read by level
+        [HttpGet("level/{level}")]
+        public async Task<ActionResult<List<Question>>> GetQuestionsByLevel(double level)
+        {
+            var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Questions.json";
+            using (var httpClient = new System.Net.Http.HttpClient())
+            {
+                var json = await httpClient.GetStringAsync(url);
+
+                var questions = new List<Question>();
+                try
+                {
+                    var dict = JsonConvert.DeserializeObject<Dictionary<string, Question>>(json);
+                    if (dict != null)
+                        questions = dict.Values.ToList();
+                }
+                catch
+                {
+                    questions = JsonConvert.DeserializeObject<List<Question>>(json) ?? new List<Question>();
+                }
+
+                var filtered = questions.Where(q => Math.Abs(q.Level - level) < 0.001).ToList();
+                return Ok(filtered);
+            }
+        }
     }
 }

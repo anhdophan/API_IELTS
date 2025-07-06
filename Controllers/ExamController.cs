@@ -27,6 +27,10 @@ namespace api.Controllers
             if (exam.Questions == null || exam.Questions.Count == 0)
                 return BadRequest("Exam must contain at least one question.");
 
+            // Gán CreatedById nếu chưa có
+            if (string.IsNullOrEmpty(exam.CreatedById))
+                exam.CreatedById = "00"; // Admin mặc định
+
             // Kiểm tra từng câu hỏi có tồn tại không (nếu muốn)
             foreach (var eq in exam.Questions)
             {
@@ -60,6 +64,10 @@ namespace api.Controllers
         public async Task<IActionResult> UpdateExamAsync(string examId, [FromBody] Exam exam)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // Gán CreatedById nếu chưa có
+            if (string.IsNullOrEmpty(exam.CreatedById))
+                exam.CreatedById = "00"; // Admin mặc định
 
             await firebaseClient
                 .Child("Exams")

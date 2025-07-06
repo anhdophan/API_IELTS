@@ -9,7 +9,8 @@ namespace api.Models
         public string Title { get; set; }
         public int CourseId { get; set; }
         public DateTime ExamDate { get; set; }
-        public List<ExamQuestion> Questions { get; set; } // Sửa lại kiểu này
+        public List<ExamQuestion> Questions { get; set; }
+        public string CreatedById { get; set; } // Thêm dòng này
     }
 
     public class ExamQuestion
