@@ -67,7 +67,7 @@
             <tr>
                 <th>ID</th>
                 <th>Title</th>
-                <th>CourseId</th>
+                <th>ClassID</th>
                 <th>Date</th>
                 <th>Created By</th>
                 <th>Questions</th>
@@ -82,7 +82,7 @@
                     <tr>
                         <td>@e.ExamId</td>
                         <td>@e.Title</td>
-                        <td>@e.CourseId</td>
+                        <td>@e.IdClass</td>
                         <td>@e.ExamDate.ToShortDateString()</td>
                         <td>@e.CreatedById</td>
                         <td>@(e.Questions != null ? e.Questions.Count : 0)</td>
