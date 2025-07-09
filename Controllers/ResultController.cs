@@ -25,6 +25,10 @@ namespace api.Controllers
 
             try
             {
+                // Sinh ResultId tự động nếu chưa có
+                if (result.ResultId == 0)
+                    result.ResultId = int.Parse(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().Substring(5, 8));
+
                 var existing = await firebaseClient
                     .Child("Results")
                     .Child(result.ResultId.ToString())

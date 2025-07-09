@@ -209,8 +209,11 @@ namespace api.Controllers
                 StudentId = request.StudentId,
                 ExamId = examId,
                 Score = score,
+                TotalScore = totalScore, // nếu có
                 Remark = $"You got {score} out of {totalScore}",
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
+                Answers = request.Answers, // nếu muốn lưu đáp án
+                // DurationSeconds = ... // nếu muốn lưu thời gian làm bài thực tế
             };
 
             await firebaseClient

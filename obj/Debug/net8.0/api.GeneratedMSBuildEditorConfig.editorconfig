@@ -182,6 +182,14 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlci9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/User/Student/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlci9TdHVkZW50L0luZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/User/Student/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlci9TdHVkZW50L0xvZ2luLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/User/_StudentCarousel.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlci9fU3R1ZGVudENhcm91c2VsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
