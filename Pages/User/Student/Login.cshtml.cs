@@ -11,6 +11,7 @@ namespace api.Pages.User.Student
     {
         [BindProperty]
         public string Username { get; set; }
+
         [BindProperty]
         public string Password { get; set; }
 
@@ -18,9 +19,11 @@ namespace api.Pages.User.Student
 
         public async Task<IActionResult> OnPostAsync()
         {
+            // Lấy thông tin từ form
             Username = Request.Form["username"];
             Password = Request.Form["password"];
 
+            // Kiểm tra hợp lệ
             if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
             {
                 ModelState.AddModelError(string.Empty, "Vui lòng nhập đầy đủ tài khoản và mật khẩu.");
@@ -30,6 +33,7 @@ namespace api.Pages.User.Student
             using (var httpClient = new HttpClient())
             {
                 var response = await httpClient.GetAsync("https://api-ielts-cgn8.onrender.com/api/Student/all");
+
                 if (!response.IsSuccessStatusCode)
                 {
                     ModelState.AddModelError(string.Empty, "Không thể kết nối tới hệ thống.");
@@ -37,7 +41,7 @@ namespace api.Pages.User.Student
                 }
 
                 var json = await response.Content.ReadAsStringAsync();
-                // Dữ liệu trả về có thể là List hoặc Dictionary
+
                 List<JObject> students = new List<JObject>();
                 try
                 {
@@ -51,25 +55,29 @@ namespace api.Pages.User.Student
                         students.Add((JObject)item.Value);
                     }
                 }
-
+                Console.WriteLine($"Username nhập: {Username}, Password nhập: {Password}");
+                // Tìm học viên trùng thông tin
                 foreach (var student in students)
                 {
-                    if (student["Username"]?.ToString() == Username && student["Password"]?.ToString() == Password)
+                    var storedUsername = student["username"]?.ToString(); // sửa đúng key
+                    var storedPassword = student["password"]?.ToString();
+
+                Console.WriteLine($"API trả về: {student["Username"]} / {student["Password"]}");
+                    if (storedUsername == Username && storedPassword == Password)
                     {
-                        // Đăng nhập thành công, lưu thông tin vào TempData/Session nếu muốn
+                        // Đăng nhập thành công
                         StudentInfo = student;
-                        // Ví dụ lưu vào TempData
+
                         TempData["StudentId"] = student["StudentId"]?.ToString();
                         TempData["StudentName"] = student["Name"]?.ToString();
                         TempData["StudentAvatar"] = student["Avatar"]?.ToString();
                         TempData["StudentEmail"] = student["Email"]?.ToString();
-                        // ... các trường khác nếu cần
 
-                        // Chuyển hướng sang trang cá nhân hoặc dashboard
                         return RedirectToPage("/User/Student/Index");
                     }
                 }
 
+                // Nếu không tìm thấy
                 ModelState.AddModelError(string.Empty, "Tài khoản hoặc mật khẩu không đúng.");
                 return Page();
             }
