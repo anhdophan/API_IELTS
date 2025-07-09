@@ -27,7 +27,6 @@ namespace api.Controllers
             if (exam.Questions == null || exam.Questions.Count == 0)
                 return BadRequest("Exam must contain at least one question.");
 
-            // Gán CreatedById nếu chưa có
             if (string.IsNullOrEmpty(exam.CreatedById))
                 exam.CreatedById = "00"; // Admin mặc định
 
@@ -45,6 +44,12 @@ namespace api.Controllers
                 if (q == null)
                     return BadRequest($"Question {eq.QuestionId} does not exist.");
             }
+
+            // Kiểm tra các trường thời gian (nếu muốn)
+            if (exam.DurationMinutes <= 0)
+                return BadRequest("DurationMinutes must be greater than 0.");
+            if (exam.StartTime >= exam.EndTime)
+                return BadRequest("StartTime must be before EndTime.");
 
             var existing = await firebaseClient
                 .Child("Exams")
@@ -69,9 +74,14 @@ namespace api.Controllers
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // Gán CreatedById nếu chưa có
             if (string.IsNullOrEmpty(exam.CreatedById))
                 exam.CreatedById = "00"; // Admin mặc định
+
+            // Kiểm tra các trường thời gian (nếu muốn)
+            if (exam.DurationMinutes <= 0)
+                return BadRequest("DurationMinutes must be greater than 0.");
+            if (exam.StartTime >= exam.EndTime)
+                return BadRequest("StartTime must be before EndTime.");
 
             await firebaseClient
                 .Child("Exams")

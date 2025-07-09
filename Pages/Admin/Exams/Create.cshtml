@@ -66,8 +66,10 @@
             <input asp-for="Exam.Title" class="form-control" />
         </div>
         <div class="form-group">
-            <label asp-for="Exam.IdClass"></label>
-            <input asp-for="Exam.IdClass" class="form-control" />
+            <label asp-for="Exam.IdClass">Class</label>
+            <select asp-for="Exam.IdClass" class="form-control" asp-items="@(new SelectList(Model.AllClasses, "ClassId", "Name"))">
+                <option value="">-- Select Class --</option>
+            </select>
         </div>
         <div class="form-group">
             <label asp-for="Exam.ExamDate"></label>
@@ -76,6 +78,18 @@
         <div class="form-group">
             <label asp-for="Exam.CreatedById"></label>
             <input asp-for="Exam.CreatedById" class="form-control" value="00" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Exam.DurationMinutes"></label>
+            <input asp-for="Exam.DurationMinutes" class="form-control" type="number" min="1" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Exam.StartTime"></label>
+            <input asp-for="Exam.StartTime" class="form-control" type="datetime-local" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Exam.EndTime"></label>
+            <input asp-for="Exam.EndTime" class="form-control" type="datetime-local" />
         </div>
         <div class="form-group">
             <label>Lọc câu hỏi theo mức IELTS:</label>

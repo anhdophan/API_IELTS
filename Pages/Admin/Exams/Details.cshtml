@@ -60,6 +60,9 @@
             <p><strong>Class ID:</strong> @Model.Exam.IdClass</p>
             <p><strong>Date:</strong> @Model.Exam.ExamDate.ToShortDateString()</p>
             <p><strong>Created By:</strong> @Model.Exam.CreatedById</p>
+            <p><strong>Duration (minutes):</strong> @Model.Exam.DurationMinutes</p>
+            <p><strong>Start Time:</strong> @Model.Exam.StartTime.ToString("g")</p>
+            <p><strong>End Time:</strong> @Model.Exam.EndTime.ToString("g")</p>
             <p><strong>Questions:</strong></p>
             <table class="table table-bordered question-table">
                 <thead>

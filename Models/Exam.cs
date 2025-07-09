@@ -7,10 +7,14 @@ namespace api.Models
     {
         public int ExamId { get; set; }
         public string Title { get; set; }
-        public int IdClass { get; set; } // Đổi từ CourseId sang IdClass
+        public int IdClass { get; set; }
         public DateTime ExamDate { get; set; }
         public List<ExamQuestion> Questions { get; set; }
         public string CreatedById { get; set; }
+
+        public int DurationMinutes { get; set; }      // Thời gian làm bài (phút)
+        public DateTime StartTime { get; set; }       // Thời điểm bắt đầu mở bài thi
+        public DateTime EndTime { get; set; }         // Thời điểm kết thúc, khóa bài thi
     }
 
     public class ExamQuestion

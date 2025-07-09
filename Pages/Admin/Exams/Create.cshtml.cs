@@ -27,22 +27,27 @@ namespace api.Pages.Admin.Exams
         [BindProperty]
         public double FilterLevel { get; set; }
 
+        public List<Class> AllClasses { get; set; } = new(); // Thêm dòng này
+
         public string DebugMessage { get; set; }
 
         public async Task OnGetAsync()
         {
             await LoadQuestionsAsync();
+            await LoadClassesAsync(); // Thêm dòng này
         }
 
         public async Task<IActionResult> OnPostFilterAsync()
         {
             await LoadQuestionsAsync(FilterLevel);
+            await LoadClassesAsync(); // Thêm dòng này
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
             await LoadQuestionsAsync();
+            await LoadClassesAsync(); // Thêm dòng này
 
             // Build Exam.Questions from selected ids and scores
             Exam.Questions = new List<ExamQuestion>();
@@ -93,6 +98,17 @@ namespace api.Pages.Admin.Exams
             {
                 var json = await response.Content.ReadAsStringAsync();
                 AllQuestions = JsonConvert.DeserializeObject<List<Question>>(json) ?? new List<Question>();
+            }
+        }
+
+        private async Task LoadClassesAsync()
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync("https://api-ielts-cgn8.onrender.com/api/Class/all");
+            if (response.IsSuccessStatusCode)
+            {
+                var json = await response.Content.ReadAsStringAsync();
+                AllClasses = JsonConvert.DeserializeObject<List<Class>>(json) ?? new List<Class>();
             }
         }
     }
