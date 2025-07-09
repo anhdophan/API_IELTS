@@ -1,4 +1,5 @@
 @page
+@model api.Pages.User.Student.LoginModel
 @{
     Layout = "~/Pages/Shared/_LayoutCustomer.cshtml";
     ViewData["Title"] = "Đăng nhập";
@@ -86,14 +87,21 @@
     <div class="login-card">
         <img src="~/images/lt_logo.png" alt="L&T Education" />
         <h2>Đăng nhập</h2>
-        @if (!string.IsNullOrEmpty(ViewBag.Error))
+
+        @if (!ViewData.ModelState.IsValid)
         {
-            <div class="alert alert-danger">@ViewBag.Error</div>
+            <div class="alert alert-danger">
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <div>@error.ErrorMessage</div>
+                }
+            </div>
         }
+
         <form method="post">
             <div class="form-group">
                 <label for="username">Tài khoản</label>
-                <input type="text" id="username" name="username" class="form-control" required autofocus />
+                <input type="text" id="username" name="username" class="form-control" required autofocus value="@Model.Username" />
             </div>
             <div class="form-group">
                 <label for="password">Mật khẩu</label>
@@ -102,6 +110,7 @@
             <button type="submit" class="btn btn-login">Đăng nhập</button>
             <button type="submit" name="teacherLogin" value="true" class="btn btn-login" style="margin-top:10px;background:linear-gradient(to right,#2563eb,#38bdf8);">Đăng nhập cho Giảng viên</button>
         </form>
+
         <div class="login-links">
             <a href="#">Quên mật khẩu?</a> |
             <a href="/User/Register">Đăng ký tài khoản mới</a>

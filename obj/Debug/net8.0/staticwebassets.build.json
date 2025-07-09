@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "Ybb8Y3Htve+D0Peojx/mHTUnSf5eBjQvQIgg6R4w8cs=",
+  "Hash": "wmtOiwa65rqNC7J6ATTT3AsA2KlAAyiDG1HvjBfILMc=",
   "Source": "api",
   "BasePath": "_content/api",
   "Mode": "Default",
@@ -34,6 +34,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot/css/home.css"
+    },
+    {
+      "Identity": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/css/site-student.css",
+      "SourceId": "api",
+      "SourceType": "Discovered",
+      "ContentRoot": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/",
+      "BasePath": "_content/api",
+      "RelativePath": "css/site-student.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/css/site-student.css"
     },
     {
       "Identity": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/images/lt_logo_white.png",
