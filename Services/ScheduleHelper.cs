@@ -31,12 +31,10 @@ namespace api.Services
                         var isExam = examSet.Contains(date);
                         sessions.Add(new StudySession
                         {
-                            Date = date,
-                            DayOfWeek = sched.DayOfWeek,
-                            StartTime = sched.StartTime,
-                            EndTime = sched.EndTime,
+                            DateCreated = date,
+                            ClassID = cls.ClassId,
                             Material = isExam ? "Exam" : $"Material for {date:yyyy-MM-dd}",
-                            IsExam = isExam
+                            Detail = isExam ? "Prepare for the exam" : $"Review material for {date:yyyy-MM-dd}"
                         });
                     }
                 }
