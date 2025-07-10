@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 
 namespace api.Pages.User.Student
 {
@@ -17,70 +18,65 @@ namespace api.Pages.User.Student
 
         public dynamic StudentInfo { get; set; }
 
-        public async Task<IActionResult> OnPostAsync()
+       public async Task<IActionResult> OnPostAsync()
+{
+    Username = Request.Form["username"];
+    Password = Request.Form["password"];
+
+    if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
+    {
+        ModelState.AddModelError(string.Empty, "Vui lòng nhập đầy đủ tài khoản và mật khẩu.");
+        return Page();
+    }
+
+    using (var httpClient = new HttpClient())
+    {
+        var response = await httpClient.GetAsync("https://api-ielts-cgn8.onrender.com/api/Student/all");
+
+        if (!response.IsSuccessStatusCode)
         {
-            // Lấy thông tin từ form
-            Username = Request.Form["username"];
-            Password = Request.Form["password"];
+            ModelState.AddModelError(string.Empty, "Không thể kết nối tới hệ thống.");
+            return Page();
+        }
 
-            // Kiểm tra hợp lệ
-            if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
+        var json = await response.Content.ReadAsStringAsync();
+
+        List<JObject> students = new();
+        try
+        {
+            students = JArray.Parse(json).ToObject<List<JObject>>();
+        }
+        catch
+        {
+            var dict = JObject.Parse(json);
+            foreach (var item in dict.Properties())
             {
-                ModelState.AddModelError(string.Empty, "Vui lòng nhập đầy đủ tài khoản và mật khẩu.");
-                return Page();
+                students.Add((JObject)item.Value);
             }
+        }
 
-            using (var httpClient = new HttpClient())
+        foreach (var student in students)
+        {
+            var storedUsername = student["username"]?.ToString();
+            var storedPassword = student["password"]?.ToString();
+
+            if (storedUsername == Username && storedPassword == Password)
             {
-                var response = await httpClient.GetAsync("https://api-ielts-cgn8.onrender.com/api/Student/all");
+                // Gán session
+                HttpContext.Session.SetString("StudentId", student["studentId"]?.ToString() ?? "");
+                HttpContext.Session.SetString("StudentName", student["name"]?.ToString() ?? "");
+                HttpContext.Session.SetString("StudentAvatar", student["avatar"]?.ToString() ?? "");
+                HttpContext.Session.SetString("StudentEmail", student["email"]?.ToString() ?? "");
+                HttpContext.Session.SetString("StudentClass", student["class"]?.ToString() ?? "");
 
-                if (!response.IsSuccessStatusCode)
-                {
-                    ModelState.AddModelError(string.Empty, "Không thể kết nối tới hệ thống.");
-                    return Page();
-                }
-
-                var json = await response.Content.ReadAsStringAsync();
-
-                List<JObject> students = new List<JObject>();
-                try
-                {
-                    students = JArray.Parse(json).ToObject<List<JObject>>();
-                }
-                catch
-                {
-                    var dict = JObject.Parse(json);
-                    foreach (var item in dict.Properties())
-                    {
-                        students.Add((JObject)item.Value);
-                    }
-                }
-                Console.WriteLine($"Username nhập: {Username}, Password nhập: {Password}");
-                // Tìm học viên trùng thông tin
-                foreach (var student in students)
-                {
-                    var storedUsername = student["username"]?.ToString(); // sửa đúng key
-                    var storedPassword = student["password"]?.ToString();
-
-                Console.WriteLine($"API trả về: {student["Username"]} / {student["Password"]}");
-                    if (storedUsername == Username && storedPassword == Password)
-                    {
-                        // Đăng nhập thành công
-                        StudentInfo = student;
-
-                        TempData["StudentId"] = student["StudentId"]?.ToString();
-                        TempData["StudentName"] = student["Name"]?.ToString();
-                        TempData["StudentAvatar"] = student["Avatar"]?.ToString();
-                        TempData["StudentEmail"] = student["Email"]?.ToString();
-
-                        return RedirectToPage("/User/Student/Index");
-                    }
-                }
-
-                // Nếu không tìm thấy
-                ModelState.AddModelError(string.Empty, "Tài khoản hoặc mật khẩu không đúng.");
-                return Page();
+                return RedirectToPage("/User/Student/Index");
             }
+        }
+
+        ModelState.AddModelError(string.Empty, "Tài khoản hoặc mật khẩu không đúng.");
+        return Page();
+    }
+
         }
     }
 }

@@ -4,11 +4,11 @@ namespace api.Models
 {
     public class StudySession
     {
-        public DateTime Date { get; set; }
-        public string DayOfWeek { get; set; }
-        public string StartTime { get; set; }
-        public string EndTime { get; set; }
+        public int Id { get; set; }
+        public DateTime DateCreated { get; set; } // Start time of the study session
+        public int ClassID { get; set; } // Foreign key to Class
         public string Material { get; set; } // e.g., "Chapter 1", "Exam", etc.
-        public bool IsExam { get; set; }
+        public string Detail { get; set; } 
+    
     }
 }
