@@ -38,24 +38,26 @@
     <h2>Create New Study Session</h2>
 
     <form method="post">
+       
+
         <div class="form-group mb-3">
-            <label asp-for="Session.ClassID">Class</label>
-            <select asp-for="Session.ClassID" asp-items="Model.ClassList" class="form-select">
+            <label asp-for="StudySession.ClassID">Class</label>
+            <select asp-for="StudySession.ClassID" asp-items="Model.ClassList" class="form-select">
                 <option value="">Select Class</option>
             </select>
-            <span asp-validation-for="Session.ClassID" class="text-danger"></span>
+            <span asp-validation-for="StudySession.ClassID" class="text-danger"></span>
         </div>
 
         <div class="form-group mb-3">
-            <label asp-for="Session.Material"></label>
-            <input asp-for="Session.Material" class="form-control" />
-            <span asp-validation-for="Session.Material" class="text-danger"></span>
+            <label asp-for="StudySession.Material"></label>
+            <input asp-for="StudySession.Material" class="form-control" />
+            <span asp-validation-for="StudySession.Material" class="text-danger"></span>
         </div>
 
         <div class="form-group mb-3">
-            <label asp-for="Session.Detail"></label>
-            <textarea asp-for="Session.Detail" class="form-control"></textarea>
-            <span asp-validation-for="Session.Detail" class="text-danger"></span>
+            <label asp-for="StudySession.Detail"></label>
+            <textarea asp-for="StudySession.Detail" class="form-control"></textarea>
+            <span asp-validation-for="StudySession.Detail" class="text-danger"></span>
         </div>
 
         <div class="form-group d-flex gap-2">

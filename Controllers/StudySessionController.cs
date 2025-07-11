@@ -7,6 +7,7 @@ using Firebase.Database;
 using Firebase.Database.Query;
 using api.Models;
 using api.Services;
+using Microsoft.Extensions.Logging;
 
 namespace api.Controllers
 {
@@ -14,34 +15,63 @@ namespace api.Controllers
     [Route("api/[controller]")]
     public class StudySessionController : ControllerBase
     {
-        private readonly FirebaseClient firebaseClient = FirebaseService.Client;
+        private readonly FirebaseClient firebaseClient;
+        private readonly ILogger<StudySessionController> _logger;
 
-        // Create StudySession
+        public StudySessionController(ILogger<StudySessionController> logger)
+        {
+            firebaseClient = FirebaseService.Client;
+            _logger = logger;
+        }
+
+        private async Task LogAdminAction(string action, string performedBy, string description)
+        {
+            var log = new AdminLog
+            {
+                LogId = Guid.NewGuid().GetHashCode(),
+                Action = action,
+                PerformedBy = performedBy,
+                Timestamp = DateTime.UtcNow,
+                Description = description
+            };
+
+            await firebaseClient
+                .Child("AdminLogs")
+                .Child(log.LogId.ToString())
+                .PutAsync(log);
+        }
+
         [HttpPost]
-        public async Task<IActionResult> CreateAsync([FromBody] StudySession session)
+        public async Task<IActionResult> CreateStudySessionAsync([FromBody] StudySession session)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // Thêm ngày tạo nếu chưa có
             if (session.DateCreated == default)
                 session.DateCreated = DateTime.UtcNow;
 
-            var newRef = await firebaseClient
-                .Child("StudySessions")
-                .PostAsync(session);
+            // Sinh ID nếu chưa có
+            if (session.Id == 0)
+                session.Id = Guid.NewGuid().GetHashCode();
 
-            session.Id = newRef.Key.GetHashCode(); // Lưu Id dựa trên Firebase key hash để có thể truy xuất
+            var existing = await firebaseClient
+                .Child("StudySessions")
+                .Child(session.Id.ToString())
+                .OnceSingleAsync<StudySession>();
+
+            if (existing != null)
+                return Conflict($"StudySession with ID {session.Id} already exists.");
+
             await firebaseClient
                 .Child("StudySessions")
-                .Child(newRef.Key)
+                .Child(session.Id.ToString())
                 .PutAsync(session);
 
+            await LogAdminAction("CreateStudySession", "admin", $"Created StudySessionId={session.Id} for ClassId={session.ClassID} - {session.Material}");
             return Ok(session);
         }
 
-        // Update
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateAsync(string id, [FromBody] StudySession session)
+        public async Task<IActionResult> UpdateStudySessionAsync(string id, [FromBody] StudySession session)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -50,24 +80,32 @@ namespace api.Controllers
                 .Child(id)
                 .PutAsync(session);
 
+            await LogAdminAction("UpdateStudySession", "admin", $"Updated StudySessionId={id} for ClassId={session.ClassID} - {session.Material}");
             return Ok(session);
         }
 
-        // Delete
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAsync(string id)
+        public async Task<IActionResult> DeleteStudySessionAsync(string id)
         {
+            var session = await firebaseClient
+                .Child("StudySessions")
+                .Child(id)
+                .OnceSingleAsync<StudySession>();
+
+            if (session == null)
+                return NotFound("StudySession not found.");
+
             await firebaseClient
                 .Child("StudySessions")
                 .Child(id)
                 .DeleteAsync();
 
+            await LogAdminAction("DeleteStudySession", "admin", $"Deleted StudySessionId={id} for ClassId={session.ClassID}");
             return Ok();
         }
 
-        // Get one
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetByIdAsync(string id)
+        public async Task<ActionResult<StudySession>> GetStudySessionByIdAsync(string id)
         {
             var session = await firebaseClient
                 .Child("StudySessions")
@@ -78,9 +116,8 @@ namespace api.Controllers
             return Ok(session);
         }
 
-        // Get all
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllAsync()
+        public async Task<ActionResult<List<StudySession>>> GetAllStudySessionsAsync()
         {
             var sessions = await firebaseClient
                 .Child("StudySessions")
@@ -90,9 +127,8 @@ namespace api.Controllers
             return Ok(list);
         }
 
-        // Filter by ClassID
         [HttpGet("class")]
-        public async Task<IActionResult> GetByClassIdAsync([FromQuery] int classId)
+        public async Task<ActionResult<List<StudySession>>> GetStudySessionsByClassIdAsync([FromQuery] int classId)
         {
             var sessions = await firebaseClient
                 .Child("StudySessions")
@@ -105,9 +141,8 @@ namespace api.Controllers
             return Ok(filtered);
         }
 
-        // Filter by DateCreated (optional: from - to)
         [HttpGet("date")]
-        public async Task<IActionResult> FilterByDateAsync([FromQuery] DateTime? from, [FromQuery] DateTime? to)
+        public async Task<ActionResult<List<StudySession>>> FilterByDateAsync([FromQuery] DateTime? from, [FromQuery] DateTime? to)
         {
             var sessions = await firebaseClient
                 .Child("StudySessions")

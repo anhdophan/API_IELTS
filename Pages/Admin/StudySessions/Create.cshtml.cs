@@ -19,7 +19,7 @@ namespace api.Pages.Admin.StudySessions
         }
 
         [BindProperty]
-        public StudySession Session { get; set; }
+        public StudySession StudySession { get; set; }
 
         public SelectList ClassList { get; set; }
 
@@ -33,13 +33,15 @@ namespace api.Pages.Admin.StudySessions
         {
             await LoadClassesAsync();
 
+            // Không cần người dùng nhập Id, sinh ở backend
+            StudySession.DateCreated = DateTime.UtcNow;
+
+            ModelState.Remove("StudySession.Id"); // bỏ kiểm tra Id nếu không có input
             if (!ModelState.IsValid)
                 return Page();
 
-            Session.DateCreated = DateTime.UtcNow;
-
             var client = _clientFactory.CreateClient();
-            var json = JsonConvert.SerializeObject(Session);
+            var json = JsonConvert.SerializeObject(StudySession);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await client.PostAsync("https://api-ielts-cgn8.onrender.com/api/StudySession", content);
