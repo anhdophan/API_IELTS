@@ -1,0 +1,72 @@
+@page "{id}"
+@model api.Pages.Admin.StudySessions.DetailsModel
+@{
+    ViewData["Title"] = "Study Session Details";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .details-container {
+            max-width: 750px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .details-container h2 {
+            margin-bottom: 24px;
+        }
+
+        .details-row {
+            margin-bottom: 15px;
+            font-size: 1rem;
+        }
+
+        .details-label {
+            font-weight: 600;
+            width: 150px;
+            display: inline-block;
+        }
+
+        .details-actions {
+            margin-top: 30px;
+        }
+
+        pre {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+}
+
+<div class="details-container">
+    <h2>Study Session Details</h2>
+
+    <div class="details-row">
+        <span class="details-label">Session ID:</span> @Model.Session.Id
+    </div>
+    <div class="details-row">
+        <span class="details-label">Class:</span> @Model.ClassName
+    </div>
+    <div class="details-row">
+        <span class="details-label">Date Created:</span> @Model.Session.DateCreated.ToLocalTime().ToString("yyyy-MM-dd HH:mm")
+    </div>
+    <div class="details-row">
+        <span class="details-label">Material:</span> @Model.Session.Material
+    </div>
+    <div class="details-row">
+        <span class="details-label">Detail:</span>
+        <pre>@Model.Session.Detail</pre>
+    </div>
+
+    <div class="details-actions">
+        <a asp-page="Edit" asp-route-id="@Model.FirebaseKey" class="btn btn-primary me-2">Edit</a>
+        <a asp-page="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+</div>

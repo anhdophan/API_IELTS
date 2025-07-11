@@ -146,6 +146,26 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vU3R1ZGVudHMvSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/Admin/StudySessions/Create.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vU3R1ZHlTZXNzaW9ucy9DcmVhdGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/Admin/StudySessions/Delete.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vU3R1ZHlTZXNzaW9ucy9EZWxldGUuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/Admin/StudySessions/Details.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vU3R1ZHlTZXNzaW9ucy9EZXRhaWxzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/Admin/StudySessions/Edit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vU3R1ZHlTZXNzaW9ucy9FZGl0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/Admin/StudySessions/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vU3R1ZHlTZXNzaW9ucy9JbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/Admin/Teacher/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vVGVhY2hlci9DcmVhdGUuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

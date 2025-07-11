@@ -1,0 +1,68 @@
+@page "{id}"
+@model api.Pages.Admin.StudySessions.EditModel
+@{
+    ViewData["Title"] = "Edit Study Session";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .form-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 32px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-container h2 {
+            margin-bottom: 24px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .form-group label {
+            font-weight: 600;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+        }
+    </style>
+}
+
+<partial name="_ValidationScriptsPartial" />
+
+<div class="form-container">
+    <h2>Edit Study Session</h2>
+
+    <form method="post">
+        <input type="hidden" asp-for="FirebaseKey" />
+
+        <div class="form-group mb-3">
+            <label asp-for="Session.ClassID">Class</label>
+            <select asp-for="Session.ClassID" asp-items="Model.ClassList" class="form-select">
+                <option value="">Select Class</option>
+            </select>
+            <span asp-validation-for="Session.ClassID" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Session.Material"></label>
+            <input asp-for="Session.Material" class="form-control" />
+            <span asp-validation-for="Session.Material" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-3">
+            <label asp-for="Session.Detail"></label>
+            <textarea asp-for="Session.Detail" class="form-control"></textarea>
+            <span asp-validation-for="Session.Detail" class="text-danger"></span>
+        </div>
+
+        <div class="form-group d-flex gap-2">
+            <button type="submit" class="btn btn-success">Save</button>
+            <a asp-page="Index" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>

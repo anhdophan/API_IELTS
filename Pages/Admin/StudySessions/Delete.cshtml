@@ -1,0 +1,64 @@
+@page "{id}"
+@model api.Pages.Admin.StudySessions.DeleteModel
+@{
+    ViewData["Title"] = "Delete Study Session";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .delete-container {
+            max-width: 750px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .delete-container h2 {
+            margin-bottom: 24px;
+        }
+
+        .delete-container .details-row {
+            margin-bottom: 12px;
+        }
+
+        .delete-container .details-label {
+            font-weight: 600;
+            width: 150px;
+            display: inline-block;
+        }
+
+        .delete-container pre {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+
+        .form-actions {
+            margin-top: 24px;
+        }
+    </style>
+}
+
+<div class="delete-container">
+    <h2>Delete Study Session</h2>
+
+    <div class="alert alert-warning">Are you sure you want to delete this study session?</div>
+
+    <div class="details-row"><span class="details-label">ID:</span> @Model.Session.Id</div>
+    <div class="details-row"><span class="details-label">Class:</span> @Model.ClassName</div>
+    <div class="details-row"><span class="details-label">Date Created:</span> @Model.Session.DateCreated.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</div>
+    <div class="details-row"><span class="details-label">Material:</span> @Model.Session.Material</div>
+    <div class="details-row"><span class="details-label">Detail:</span> <pre>@Model.Session.Detail</pre></div>
+
+    <form method="post">
+        <input type="hidden" asp-for="FirebaseKey" />
+        <div class="form-actions">
+            <input type="submit" value="Delete" class="btn btn-danger" />
+            <a asp-page="Index" class="btn btn-secondary ms-2">Cancel</a>
+        </div>
+    </form>
+</div>
