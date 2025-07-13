@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System.Collections.Generic;
 using System.Linq;
 using System;
@@ -72,19 +73,21 @@ namespace api.Pages.Admin.Exams
                 return Page();
             }
 
-            // ✅ Đảm bảo StartTime và EndTime là Local time
+            // ✅ Giữ nguyên local time (không chuyển sang UTC)
             if (Exam.StartTime.Kind == DateTimeKind.Unspecified)
                 Exam.StartTime = DateTime.SpecifyKind(Exam.StartTime, DateTimeKind.Local);
             if (Exam.EndTime.Kind == DateTimeKind.Unspecified)
                 Exam.EndTime = DateTime.SpecifyKind(Exam.EndTime, DateTimeKind.Local);
 
-            // ❌ Không chuyển sang UTC nữa — giữ nguyên Local time
+            var settings = new JsonSerializerSettings
+            {
+                DateTimeZoneHandling = DateTimeZoneHandling.Local // ⛳ KHÔNG chuyển sang UTC
+            };
 
-            using var httpClient = new HttpClient();
-            var json = JsonConvert.SerializeObject(Exam);
+            var json = JsonConvert.SerializeObject(Exam, settings);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await httpClient.PostAsync("https://api-ielts-cgn8.onrender.com/api/Exam", content);
+            var response = await new HttpClient().PostAsync("https://api-ielts-cgn8.onrender.com/api/Exam", content);
 
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");
