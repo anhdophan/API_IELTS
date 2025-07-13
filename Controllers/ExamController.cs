@@ -1,3 +1,5 @@
+// Full updated ExamController.cs with fixed timezone handling
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,7 +32,6 @@ namespace api.Controllers
             }
         }
 
-        // Create Exam
         [HttpPost]
         public async Task<IActionResult> CreateExamAsync([FromBody] Exam exam)
         {
@@ -61,20 +62,10 @@ namespace api.Controllers
             if (exam.StartTime >= exam.EndTime)
                 return BadRequest("StartTime must be before EndTime.");
 
-            // 🔧 Fix chuyển giờ từ VN sang UTC đúng chuẩn
             if (exam.StartTime.Kind == DateTimeKind.Unspecified)
                 exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Local);
             if (exam.EndTime.Kind == DateTimeKind.Unspecified)
                 exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Local);
-
-            exam.StartTime = exam.StartTime.ToUniversalTime();
-            exam.EndTime = exam.EndTime.ToUniversalTime();
-
-            // Debug log
-            Console.WriteLine("==== [DEBUG - Time Check] ====");
-            Console.WriteLine($"StartTime (Local): {exam.StartTime.ToLocalTime()} | UTC: {exam.StartTime}");
-            Console.WriteLine($"EndTime (Local):   {exam.EndTime.ToLocalTime()} | UTC: {exam.EndTime}");
-            Console.WriteLine("================================");
 
             var existing = await firebaseClient
                 .Child("Exams")
@@ -92,7 +83,6 @@ namespace api.Controllers
             return Ok(exam);
         }
 
-        // Update Exam
         [HttpPut("{examId}")]
         public async Task<IActionResult> UpdateExamAsync(string examId, [FromBody] Exam exam)
         {
@@ -106,14 +96,10 @@ namespace api.Controllers
             if (exam.StartTime >= exam.EndTime)
                 return BadRequest("StartTime must be before EndTime.");
 
-            // 🔧 Fix xử lý giờ cập nhật đúng
             if (exam.StartTime.Kind == DateTimeKind.Unspecified)
                 exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Local);
             if (exam.EndTime.Kind == DateTimeKind.Unspecified)
                 exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Local);
-
-            exam.StartTime = exam.StartTime.ToUniversalTime();
-            exam.EndTime = exam.EndTime.ToUniversalTime();
 
             await firebaseClient
                 .Child("Exams")
@@ -123,7 +109,6 @@ namespace api.Controllers
             return Ok(exam);
         }
 
-        // Delete Exam
         [HttpDelete("{examId}")]
         public async Task<IActionResult> DeleteExamAsync(string examId)
         {
@@ -134,7 +119,6 @@ namespace api.Controllers
             return Ok();
         }
 
-        // Get Exam by Id
         [HttpGet("{examId}")]
         public async Task<ActionResult<Exam>> GetExamAsync(string examId)
         {
@@ -147,7 +131,6 @@ namespace api.Controllers
             return Ok(exam);
         }
 
-        // Get all Exams
         [HttpGet("all")]
         public async Task<ActionResult<List<Exam>>> GetAllExamsAsync()
         {
@@ -162,7 +145,6 @@ namespace api.Controllers
             }
         }
 
-        // Get exams by class
         [HttpGet("class/{idClass}")]
         public async Task<ActionResult<List<Exam>>> GetExamsByClass(int idClass)
         {
@@ -216,49 +198,42 @@ namespace api.Controllers
             public int DurationSeconds { get; set; }
         }
 
-      [HttpPost("{examId}/submit")]
-public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitExamRequest request)
-{
-    if (examId != request.ExamId)
-        return BadRequest("ExamId in route and body must match.");
+        [HttpPost("{examId}/submit")]
+        public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitExamRequest request)
+        {
+            if (examId != request.ExamId)
+                return BadRequest("ExamId in route and body must match.");
 
-    var exam = await firebaseClient
-        .Child("Exams")
-        .Child(examId.ToString())
-        .OnceSingleAsync<Exam>();
+            var exam = await firebaseClient
+                .Child("Exams")
+                .Child(examId.ToString())
+                .OnceSingleAsync<Exam>();
 
-    if (exam == null)
-        return NotFound("Exam not found");
+            if (exam == null)
+                return NotFound("Exam not found");
 
-    if (exam.Questions == null || exam.Questions.Count == 0)
-        return BadRequest("Exam has no questions.");
+            if (exam.Questions == null || exam.Questions.Count == 0)
+                return BadRequest("Exam has no questions.");
 
-    var vnTz = GetVietnamTimeZone();
+            var vnTz = GetVietnamTimeZone();
 
-    // ✅ Bảo đảm thời gian là UTC để convert đúng
-    var utcNow = DateTime.UtcNow;
-    exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Utc);
-    exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Utc);
+            exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Local);
+            exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Local);
 
-    // ✅ Convert sang VN time và gán Kind = Local để so sánh đúng
-    var now = DateTime.SpecifyKind(TimeZoneInfo.ConvertTimeFromUtc(utcNow, vnTz), DateTimeKind.Local);
-    var startTimeVN = DateTime.SpecifyKind(TimeZoneInfo.ConvertTimeFromUtc(exam.StartTime, vnTz), DateTimeKind.Local);
-    var endTimeVN = DateTime.SpecifyKind(TimeZoneInfo.ConvertTimeFromUtc(exam.EndTime, vnTz), DateTimeKind.Local);
+            var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vnTz);
 
-    Console.WriteLine("==== [DEBUG - Time Check] ====");
-    Console.WriteLine($"UTC Now:         {utcNow} | Kind: {utcNow.Kind}");
-    Console.WriteLine($"Now (VN Time):   {now} | Kind: {now.Kind}");
-    Console.WriteLine($"StartTime (VN):  {startTimeVN} | UTC: {exam.StartTime}");
-    Console.WriteLine($"EndTime (VN):    {endTimeVN} | UTC: {exam.EndTime}");
-    Console.WriteLine("================================");
+            Console.WriteLine("==== [DEBUG - Time Check] ====");
+            Console.WriteLine($"UTC Now:         {DateTime.UtcNow} | Kind: {DateTime.UtcNow.Kind}");
+            Console.WriteLine($"Now (VN Time):   {now} | Kind: {now.Kind}");
+            Console.WriteLine($"StartTime (VN):  {exam.StartTime}");
+            Console.WriteLine($"EndTime (VN):    {exam.EndTime}");
+            Console.WriteLine("================================");
 
-    if (now > endTimeVN)
-        return BadRequest("The exam time is over. You cannot submit anymore.");
+            if (now > exam.EndTime)
+                return BadRequest("The exam time is over. You cannot submit anymore.");
 
-    if (now < startTimeVN)
-        return BadRequest("The exam has not started yet.");
-
-   
+            if (now < exam.StartTime)
+                return BadRequest("The exam has not started yet.");
 
             var classData = await firebaseClient
                 .Child("Classes")
