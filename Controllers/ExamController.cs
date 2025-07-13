@@ -198,33 +198,40 @@ namespace api.Controllers
         }
 
         [HttpPost("{examId}/submit")]
-        public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitExamRequest request)
-        {
-            if (examId != request.ExamId)
-                return BadRequest("ExamId in route and body must match.");
+public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitExamRequest request)
+{
+    if (examId != request.ExamId)
+        return BadRequest("ExamId in route and body must match.");
 
-            // 🔍 Lấy thông tin Exam
-            var exam = await firebaseClient
-                .Child("Exams")
-                .Child(examId.ToString())
-                .OnceSingleAsync<Exam>();
+    var exam = await firebaseClient
+        .Child("Exams")
+        .Child(examId.ToString())
+        .OnceSingleAsync<Exam>();
 
-            if (exam == null)
-                return NotFound("Exam not found");
+    if (exam == null)
+        return NotFound("Exam not found");
 
-            if (exam.Questions == null || exam.Questions.Count == 0)
-                return BadRequest("Exam has no questions.");
+    if (exam.Questions == null || exam.Questions.Count == 0)
+        return BadRequest("Exam has no questions.");
 
-            // ✅ Sử dụng thời gian Local để so sánh với thời gian Local lưu trong Firebase
-            var now = DateTime.Now;
+    // 🔍 Lấy thời gian hiện tại
+    var now = DateTime.Now;
 
-            // 🔒 Không cho nộp sau khi bài thi kết thúc
-            if (now > exam.EndTime)
-                return BadRequest("The exam time is over. You cannot submit anymore.");
+    // 🧾 In log để debug
+    Console.WriteLine("==== [DEBUG - Time Check] ====");
+    Console.WriteLine($"Now (Local): {now} | Kind: {now.Kind}");
+    Console.WriteLine($"StartTime: {exam.StartTime} | Kind: {exam.StartTime.Kind}");
+    Console.WriteLine($"EndTime:   {exam.EndTime}   | Kind: {exam.EndTime.Kind}");
+    Console.WriteLine("================================");
 
-            // 🔒 Không cho nộp trước khi bắt đầu
-            if (now < exam.StartTime)
-                return BadRequest("The exam has not started yet.");
+    if (now > exam.EndTime)
+        return BadRequest("The exam time is over. You cannot submit anymore.");
+
+    if (now < exam.StartTime)
+        return BadRequest("The exam has not started yet.");
+
+    // (phần còn lại giữ nguyên...)
+
 
             // 🔒 Kiểm tra StudentId có thuộc Class của Exam không
             var classData = await firebaseClient
