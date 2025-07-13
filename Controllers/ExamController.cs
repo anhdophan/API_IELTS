@@ -235,15 +235,19 @@ namespace api.Controllers
 
             var vnTz = GetVietnamTimeZone();
 
-            var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vnTz);
+           var utcNow = DateTime.UtcNow;
+            var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, vnTz);
+
             var startTimeVN = TimeZoneInfo.ConvertTimeFromUtc(exam.StartTime, vnTz);
             var endTimeVN = TimeZoneInfo.ConvertTimeFromUtc(exam.EndTime, vnTz);
 
             Console.WriteLine("==== [DEBUG - Time Check] ====");
-            Console.WriteLine($"Now (VN):       {now} | Kind: {now.Kind}");
-            Console.WriteLine($"StartTime (VN): {startTimeVN} | Kind: {startTimeVN.Kind}");
-            Console.WriteLine($"EndTime (VN):   {endTimeVN} | Kind: {endTimeVN.Kind}");
+            Console.WriteLine($"UTC Now:         {utcNow} | Kind: {utcNow.Kind}");
+            Console.WriteLine($"Now (VN Time):   {now} | Kind: {now.Kind}");
+            Console.WriteLine($"StartTime (VN):  {startTimeVN} | UTC: {exam.StartTime}");
+            Console.WriteLine($"EndTime (VN):    {endTimeVN} | UTC: {exam.EndTime}");
             Console.WriteLine("================================");
+
 
             if (now > endTimeVN)
                 return BadRequest("The exam time is over. You cannot submit anymore.");
