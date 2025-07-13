@@ -34,7 +34,8 @@ namespace api.Controllers
        [HttpPost]
 public async Task<IActionResult> CreateExamAsync([FromBody] Exam exam)
 {
-    if (!ModelState.IsValid) return BadRequest(ModelState);
+    if (!ModelState.IsValid)
+        return BadRequest(ModelState);
 
     if (exam.Questions == null || exam.Questions.Count == 0)
         return BadRequest("Exam must contain at least one question.");
@@ -45,6 +46,7 @@ public async Task<IActionResult> CreateExamAsync([FromBody] Exam exam)
     if (exam.ExamId == 0)
         exam.ExamId = int.Parse(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().Substring(5, 8));
 
+    // Kiểm tra câu hỏi tồn tại
     foreach (var eq in exam.Questions)
     {
         var q = await firebaseClient
@@ -60,12 +62,22 @@ public async Task<IActionResult> CreateExamAsync([FromBody] Exam exam)
     if (exam.StartTime >= exam.EndTime)
         return BadRequest("StartTime must be before EndTime.");
 
-    // 👉 Chuyển về UTC trước khi lưu
-    var vnTz = GetVietnamTimeZone();
-    exam.StartTime = TimeZoneInfo.ConvertTimeToUtc(exam.StartTime, vnTz);
-    exam.EndTime = TimeZoneInfo.ConvertTimeToUtc(exam.EndTime, vnTz);
+    // 👉 Chuyển từ giờ Vietnam sang UTC trước khi lưu
+    var vietnamTimeZone = GetVietnamTimeZone();
 
-    var existing = await firebaseClient
+    var vnStart = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Unspecified);
+    var vnEnd = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Unspecified);
+
+    exam.StartTime = TimeZoneInfo.ConvertTimeToUtc(vnStart, vietnamTimeZone);
+    exam.EndTime = TimeZoneInfo.ConvertTimeToUtc(vnEnd, vietnamTimeZone);
+    // Debug log để kiểm tra thời gian
+    Console.WriteLine("==== [DEBUG - Time Check] ====");
+    Console.WriteLine($"StartTime (UTC): {exam.StartTime} | Kind: {exam.StartTime.Kind}");
+    Console.WriteLine($"EndTime (UTC):   {exam.EndTime} | Kind: {exam.EndTime.Kind}");
+    Console.WriteLine("================================");
+
+    // Kiểm tra trùng ExamId
+            var existing = await firebaseClient
         .Child("Exams")
         .Child(exam.ExamId.ToString())
         .OnceSingleAsync<Exam>();
@@ -73,6 +85,7 @@ public async Task<IActionResult> CreateExamAsync([FromBody] Exam exam)
     if (existing != null)
         return Conflict($"Exam with ID {exam.ExamId} already exists.");
 
+    // Lưu vào Firebase
     await firebaseClient
         .Child("Exams")
         .Child(exam.ExamId.ToString())
