@@ -198,115 +198,133 @@ namespace api.Controllers
             public int DurationSeconds { get; set; }
         }
 
-        [HttpPost("{examId}/submit")]
-        public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitExamRequest request)
+      [HttpPost("{examId}/submit")]
+public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitExamRequest request)
+{
+    if (examId != request.ExamId)
+        return BadRequest("ExamId in route and body must match.");
+
+    var exam = await firebaseClient
+        .Child("Exams")
+        .Child(examId.ToString())
+        .OnceSingleAsync<Exam>();
+
+    if (exam == null)
+        return NotFound("Exam not found");
+
+    if (exam.Questions == null || exam.Questions.Count == 0)
+        return BadRequest("Exam has no questions.");
+
+    // === 🕒 Chuẩn hóa múi giờ ===
+    var vnTz = GetVietnamTimeZone();
+    var utcNow = DateTime.UtcNow; // ✅ Giờ UTC
+
+    // 👉 Đảm bảo StartTime và EndTime có Kind = Utc
+    exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Utc);
+    exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Utc);
+
+    // 👉 Convert UTC -> Vietnam time + gán Kind = Local
+    var nowVN = TimeZoneInfo.ConvertTimeFromUtc(utcNow, vnTz);
+    var now = DateTime.SpecifyKind(nowVN, DateTimeKind.Local);
+
+    var startTimeVN = TimeZoneInfo.ConvertTimeFromUtc(exam.StartTime, vnTz);
+    startTimeVN = DateTime.SpecifyKind(startTimeVN, DateTimeKind.Local);
+
+    var endTimeVN = TimeZoneInfo.ConvertTimeFromUtc(exam.EndTime, vnTz);
+    endTimeVN = DateTime.SpecifyKind(endTimeVN, DateTimeKind.Local);
+
+    // === 📋 Log thời gian rõ ràng ===
+    Console.WriteLine("==== [DEBUG - Time Check] ====");
+    Console.WriteLine($"UTC Now:         {utcNow} | Kind: {utcNow.Kind}");
+    Console.WriteLine($"Now (VN Time):   {now} | Kind: {now.Kind}");
+    Console.WriteLine($"StartTime (VN):  {startTimeVN} | UTC: {exam.StartTime}");
+    Console.WriteLine($"EndTime (VN):    {endTimeVN} | UTC: {exam.EndTime}");
+    Console.WriteLine("================================");
+
+    // === 🛑 Kiểm tra hợp lệ thời gian ===
+    if (now > endTimeVN)
+        return BadRequest("The exam time is over. You cannot submit anymore.");
+
+    if (now < startTimeVN)
+        return BadRequest("The exam has not started yet.");
+
+    // === ✅ Kiểm tra sinh viên thuộc lớp ===
+    var classData = await firebaseClient
+        .Child("Classes")
+        .Child(exam.IdClass.ToString())
+        .OnceSingleAsync<Class>();
+
+    if (classData == null)
+        return NotFound("Class for exam not found.");
+
+    if (classData.StudentIds == null || !classData.StudentIds.Contains(request.StudentId))
+        return BadRequest("Student is not enrolled in the class for this exam.");
+
+    // === ✅ Kiểm tra đã nộp chưa ===
+    var existingResults = await firebaseClient
+        .Child("Results")
+        .OnceAsync<Result>();
+
+    bool alreadySubmitted = existingResults
+        .Any(r => r.Object.ExamId == examId && r.Object.StudentId == request.StudentId);
+
+    if (alreadySubmitted)
+        return Conflict("Student has already submitted this exam.");
+
+    // === 🧠 Tính điểm ===
+    double score = 0;
+    double totalScore = exam.Questions.Sum(q => q.Score);
+
+    for (int i = 0; i < exam.Questions.Count; i++)
+    {
+        if (i >= request.Answers.Count) break;
+
+        var eq = exam.Questions[i];
+        var q = await firebaseClient
+            .Child("Questions")
+            .Child(eq.QuestionId.ToString())
+            .OnceSingleAsync<Question>();
+
+        var userAnswer = request.Answers[i];
+        bool correct = false;
+
+        if (q.IsMultipleChoice)
         {
-            if (examId != request.ExamId)
-                return BadRequest("ExamId in route and body must match.");
-
-            var exam = await firebaseClient
-                .Child("Exams")
-                .Child(examId.ToString())
-                .OnceSingleAsync<Exam>();
-
-            if (exam == null)
-                return NotFound("Exam not found");
-
-            if (exam.Questions == null || exam.Questions.Count == 0)
-                return BadRequest("Exam has no questions.");
-
-            var vnTz = GetVietnamTimeZone();
-
-            exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Local);
-            exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Local);
-
-            var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, vnTz);
-
-            Console.WriteLine("==== [DEBUG - Time Check] ====");
-            Console.WriteLine($"UTC Now:         {DateTime.UtcNow} | Kind: {DateTime.UtcNow.Kind}");
-            Console.WriteLine($"Now (VN Time):   {now} | Kind: {now.Kind}");
-            Console.WriteLine($"StartTime (VN):  {exam.StartTime}");
-            Console.WriteLine($"EndTime (VN):    {exam.EndTime}");
-            Console.WriteLine("================================");
-
-            if (now > exam.EndTime)
-                return BadRequest("The exam time is over. You cannot submit anymore.");
-
-            if (now < exam.StartTime)
-                return BadRequest("The exam has not started yet.");
-
-            var classData = await firebaseClient
-                .Child("Classes")
-                .Child(exam.IdClass.ToString())
-                .OnceSingleAsync<Class>();
-
-            if (classData == null)
-                return NotFound("Class for exam not found.");
-
-            if (classData.StudentIds == null || !classData.StudentIds.Contains(request.StudentId))
-                return BadRequest("Student is not enrolled in the class for this exam.");
-
-            var existingResults = await firebaseClient
-                .Child("Results")
-                .OnceAsync<Result>();
-
-            bool alreadySubmitted = existingResults
-                .Any(r => r.Object.ExamId == examId && r.Object.StudentId == request.StudentId);
-
-            if (alreadySubmitted)
-                return Conflict("Student has already submitted this exam.");
-
-            double score = 0;
-            double totalScore = exam.Questions.Sum(q => q.Score);
-
-            for (int i = 0; i < exam.Questions.Count; i++)
-            {
-                if (i >= request.Answers.Count) break;
-
-                var eq = exam.Questions[i];
-                var q = await firebaseClient
-                    .Child("Questions")
-                    .Child(eq.QuestionId.ToString())
-                    .OnceSingleAsync<Question>();
-
-                var userAnswer = request.Answers[i];
-                bool correct = false;
-
-                if (q.IsMultipleChoice)
-                {
-                    if (int.TryParse(userAnswer, out int idx) && q.CorrectAnswerIndex == idx)
-                        correct = true;
-                }
-                else
-                {
-                    if (string.Equals(q.CorrectInputAnswer?.Trim(), userAnswer?.Trim(), StringComparison.OrdinalIgnoreCase))
-                        correct = true;
-                }
-
-                if (correct)
-                    score += eq.Score;
-            }
-
-            var result = new Result
-            {
-                ResultId = int.Parse(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().Substring(5, 8)),
-                StudentId = request.StudentId,
-                ExamId = examId,
-                Score = score,
-                TotalScore = totalScore,
-                Remark = $"You got {score} out of {totalScore}",
-                Timestamp = DateTime.UtcNow,
-                Answers = request.Answers,
-                DurationSeconds = request.DurationSeconds
-            };
-
-            await firebaseClient
-                .Child("Results")
-                .Child(result.ResultId.ToString())
-                .PutAsync(result);
-
-            return Ok(result);
+            if (int.TryParse(userAnswer, out int idx) && q.CorrectAnswerIndex == idx)
+                correct = true;
         }
+        else
+        {
+            if (string.Equals(q.CorrectInputAnswer?.Trim(), userAnswer?.Trim(), StringComparison.OrdinalIgnoreCase))
+                correct = true;
+        }
+
+        if (correct)
+            score += eq.Score;
+    }
+
+    // === 💾 Ghi kết quả ===
+    var result = new Result
+    {
+        ResultId = int.Parse(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().Substring(5, 8)),
+        StudentId = request.StudentId,
+        ExamId = examId,
+        Score = score,
+        TotalScore = totalScore,
+        Remark = $"You got {score} out of {totalScore}",
+        Timestamp = DateTime.UtcNow,
+        Answers = request.Answers,
+        DurationSeconds = request.DurationSeconds
+    };
+
+    await firebaseClient
+        .Child("Results")
+        .Child(result.ResultId.ToString())
+        .PutAsync(result);
+
+    return Ok(result);
+}
+
 
         private async Task<List<Exam>> GetAllExamsInternal()
         {
