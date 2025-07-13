@@ -30,6 +30,7 @@ namespace api.Controllers
             }
         }
 
+        // Create Exam
         [HttpPost]
         public async Task<IActionResult> CreateExamAsync([FromBody] Exam exam)
         {
@@ -60,22 +61,19 @@ namespace api.Controllers
             if (exam.StartTime >= exam.EndTime)
                 return BadRequest("StartTime must be before EndTime.");
 
-            var vietnamTimeZone = GetVietnamTimeZone();
-
+            // 🔧 Fix chuyển giờ từ VN sang UTC đúng chuẩn
             if (exam.StartTime.Kind == DateTimeKind.Unspecified)
                 exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Local);
             if (exam.EndTime.Kind == DateTimeKind.Unspecified)
                 exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Local);
 
-            var localStart = TimeZoneInfo.ConvertTime(exam.StartTime, vietnamTimeZone);
-            var localEnd = TimeZoneInfo.ConvertTime(exam.EndTime, vietnamTimeZone);
+            exam.StartTime = exam.StartTime.ToUniversalTime();
+            exam.EndTime = exam.EndTime.ToUniversalTime();
 
-            exam.StartTime = localStart.ToUniversalTime();
-            exam.EndTime = localEnd.ToUniversalTime();
-
+            // Debug log
             Console.WriteLine("==== [DEBUG - Time Check] ====");
-            Console.WriteLine($"StartTime (Local): {localStart} | UTC: {exam.StartTime}");
-            Console.WriteLine($"EndTime (Local):   {localEnd} | UTC: {exam.EndTime}");
+            Console.WriteLine($"StartTime (Local): {exam.StartTime.ToLocalTime()} | UTC: {exam.StartTime}");
+            Console.WriteLine($"EndTime (Local):   {exam.EndTime.ToLocalTime()} | UTC: {exam.EndTime}");
             Console.WriteLine("================================");
 
             var existing = await firebaseClient
@@ -94,11 +92,11 @@ namespace api.Controllers
             return Ok(exam);
         }
 
+        // Update Exam
         [HttpPut("{examId}")]
         public async Task<IActionResult> UpdateExamAsync(string examId, [FromBody] Exam exam)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             if (string.IsNullOrEmpty(exam.CreatedById))
                 exam.CreatedById = "00";
@@ -108,18 +106,14 @@ namespace api.Controllers
             if (exam.StartTime >= exam.EndTime)
                 return BadRequest("StartTime must be before EndTime.");
 
-            var vnTz = GetVietnamTimeZone();
-
+            // 🔧 Fix xử lý giờ cập nhật đúng
             if (exam.StartTime.Kind == DateTimeKind.Unspecified)
                 exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Local);
             if (exam.EndTime.Kind == DateTimeKind.Unspecified)
                 exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Local);
 
-            var localStart = TimeZoneInfo.ConvertTime(exam.StartTime, vnTz);
-            var localEnd = TimeZoneInfo.ConvertTime(exam.EndTime, vnTz);
-
-            exam.StartTime = localStart.ToUniversalTime();
-            exam.EndTime = localEnd.ToUniversalTime();
+            exam.StartTime = exam.StartTime.ToUniversalTime();
+            exam.EndTime = exam.EndTime.ToUniversalTime();
 
             await firebaseClient
                 .Child("Exams")
@@ -129,6 +123,7 @@ namespace api.Controllers
             return Ok(exam);
         }
 
+        // Delete Exam
         [HttpDelete("{examId}")]
         public async Task<IActionResult> DeleteExamAsync(string examId)
         {
@@ -139,6 +134,7 @@ namespace api.Controllers
             return Ok();
         }
 
+        // Get Exam by Id
         [HttpGet("{examId}")]
         public async Task<ActionResult<Exam>> GetExamAsync(string examId)
         {
@@ -151,6 +147,7 @@ namespace api.Controllers
             return Ok(exam);
         }
 
+        // Get all Exams
         [HttpGet("all")]
         public async Task<ActionResult<List<Exam>>> GetAllExamsAsync()
         {
@@ -165,20 +162,19 @@ namespace api.Controllers
             }
         }
 
+        // Get exams by class
         [HttpGet("class/{idClass}")]
         public async Task<ActionResult<List<Exam>>> GetExamsByClass(int idClass)
         {
             var exams = await GetAllExamsInternal();
-            var filtered = exams.Where(e => e.IdClass == idClass).ToList();
-            return Ok(filtered);
+            return Ok(exams.Where(e => e.IdClass == idClass).ToList());
         }
 
         [HttpGet("date")]
         public async Task<ActionResult<List<Exam>>> GetExamsByDate([FromQuery] DateTime date)
         {
             var exams = await GetAllExamsInternal();
-            var filtered = exams.Where(e => e.ExamDate.Date == date.Date).ToList();
-            return Ok(filtered);
+            return Ok(exams.Where(e => e.ExamDate.Date == date.Date).ToList());
         }
 
         [HttpGet("{examId}/questions")]
@@ -209,11 +205,7 @@ namespace api.Controllers
             }
 
             var questionIdsInExam = exam.Questions.Select(q => q.QuestionId).ToHashSet();
-            var filteredQuestions = allQuestions
-                .Where(q => questionIdsInExam.Contains(q.QuestionId))
-                .ToList();
-
-            return Ok(filteredQuestions);
+            return Ok(allQuestions.Where(q => questionIdsInExam.Contains(q.QuestionId)).ToList());
         }
 
         public class SubmitExamRequest
@@ -335,7 +327,7 @@ namespace api.Controllers
         private async Task<List<Exam>> GetAllExamsInternal()
         {
             var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Exams.json";
-            using (var httpClient = new System.Net.Http.HttpClient())
+            using (var httpClient = new HttpClient())
             {
                 var json = await httpClient.GetStringAsync(url);
 
