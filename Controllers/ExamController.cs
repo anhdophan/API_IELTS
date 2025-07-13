@@ -216,44 +216,49 @@ namespace api.Controllers
             public int DurationSeconds { get; set; }
         }
 
-        [HttpPost("{examId}/submit")]
-        public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitExamRequest request)
-        {
-            if (examId != request.ExamId)
-                return BadRequest("ExamId in route and body must match.");
+      [HttpPost("{examId}/submit")]
+public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitExamRequest request)
+{
+    if (examId != request.ExamId)
+        return BadRequest("ExamId in route and body must match.");
 
-            var exam = await firebaseClient
-                .Child("Exams")
-                .Child(examId.ToString())
-                .OnceSingleAsync<Exam>();
+    var exam = await firebaseClient
+        .Child("Exams")
+        .Child(examId.ToString())
+        .OnceSingleAsync<Exam>();
 
-            if (exam == null)
-                return NotFound("Exam not found");
+    if (exam == null)
+        return NotFound("Exam not found");
 
-            if (exam.Questions == null || exam.Questions.Count == 0)
-                return BadRequest("Exam has no questions.");
+    if (exam.Questions == null || exam.Questions.Count == 0)
+        return BadRequest("Exam has no questions.");
 
-            var vnTz = GetVietnamTimeZone();
+    var vnTz = GetVietnamTimeZone();
 
-           var utcNow = DateTime.UtcNow;
-            var now = TimeZoneInfo.ConvertTimeFromUtc(utcNow, vnTz);
+    // ✅ Bảo đảm thời gian là UTC để convert đúng
+    var utcNow = DateTime.UtcNow;
+    exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Utc);
+    exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Utc);
 
-            var startTimeVN = TimeZoneInfo.ConvertTimeFromUtc(exam.StartTime, vnTz);
-            var endTimeVN = TimeZoneInfo.ConvertTimeFromUtc(exam.EndTime, vnTz);
+    // ✅ Convert sang VN time và gán Kind = Local để so sánh đúng
+    var now = DateTime.SpecifyKind(TimeZoneInfo.ConvertTimeFromUtc(utcNow, vnTz), DateTimeKind.Local);
+    var startTimeVN = DateTime.SpecifyKind(TimeZoneInfo.ConvertTimeFromUtc(exam.StartTime, vnTz), DateTimeKind.Local);
+    var endTimeVN = DateTime.SpecifyKind(TimeZoneInfo.ConvertTimeFromUtc(exam.EndTime, vnTz), DateTimeKind.Local);
 
-            Console.WriteLine("==== [DEBUG - Time Check] ====");
-            Console.WriteLine($"UTC Now:         {utcNow} | Kind: {utcNow.Kind}");
-            Console.WriteLine($"Now (VN Time):   {now} | Kind: {now.Kind}");
-            Console.WriteLine($"StartTime (VN):  {startTimeVN} | UTC: {exam.StartTime}");
-            Console.WriteLine($"EndTime (VN):    {endTimeVN} | UTC: {exam.EndTime}");
-            Console.WriteLine("================================");
+    Console.WriteLine("==== [DEBUG - Time Check] ====");
+    Console.WriteLine($"UTC Now:         {utcNow} | Kind: {utcNow.Kind}");
+    Console.WriteLine($"Now (VN Time):   {now} | Kind: {now.Kind}");
+    Console.WriteLine($"StartTime (VN):  {startTimeVN} | UTC: {exam.StartTime}");
+    Console.WriteLine($"EndTime (VN):    {endTimeVN} | UTC: {exam.EndTime}");
+    Console.WriteLine("================================");
 
+    if (now > endTimeVN)
+        return BadRequest("The exam time is over. You cannot submit anymore.");
 
-            if (now > endTimeVN)
-                return BadRequest("The exam time is over. You cannot submit anymore.");
+    if (now < startTimeVN)
+        return BadRequest("The exam has not started yet.");
 
-            if (now < startTimeVN)
-                return BadRequest("The exam has not started yet.");
+   
 
             var classData = await firebaseClient
                 .Child("Classes")
