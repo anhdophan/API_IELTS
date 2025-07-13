@@ -56,9 +56,12 @@ D:/Web_Mobi_Project/API/api/bin/Debug/net8.0/System.Reactive.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/CloudinaryDotNet.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Firebase.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/LiteDB.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Microsoft.AspNetCore.JsonPatch.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Microsoft.AspNetCore.Mvc.NewtonsoftJson.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Microsoft.AspNetCore.OpenApi.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Microsoft.OpenApi.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Newtonsoft.Json.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Newtonsoft.Json.Bson.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Swashbuckle.AspNetCore.Swagger.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Swashbuckle.AspNetCore.SwaggerGen.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Swashbuckle.AspNetCore.SwaggerUI.dll

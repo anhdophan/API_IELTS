@@ -1,14 +1,27 @@
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options =>
+    {
+        options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
+        options.SerializerSettings.DateFormatString = "yyyy-MM-ddTHH:mm:ss";
+    });
+
 builder.Services.AddSwaggerGen();
 builder.Services.AddSession();
 builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, "keys")))
     .SetApplicationName("IeltsApp");
+
 builder.Services.AddRazorPages();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient("apiClient", client =>
@@ -23,9 +36,7 @@ builder.Services.AddLogging(logging =>
     logging.AddDebug();
 });
 
-
 var app = builder.Build();
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -41,13 +52,12 @@ app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
 
-
 app.UseEndpoints(endpoints =>
 {
     endpoints.MapRazorPages();
     endpoints.MapGet("/", context => {
-    context.Response.Redirect("/User");
-    return Task.CompletedTask;
+        context.Response.Redirect("/User");
+        return Task.CompletedTask;
     });
 });
 
