@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace api.Pages.Admin.Exams
 {
@@ -27,20 +28,20 @@ namespace api.Pages.Admin.Exams
         [BindProperty]
         public double FilterLevel { get; set; }
 
-        public List<Class> AllClasses { get; set; } = new(); // Thêm dòng này
+        public List<Class> AllClasses { get; set; } = new();
 
         public string DebugMessage { get; set; }
 
         public async Task OnGetAsync()
         {
             await LoadQuestionsAsync();
-            await LoadClassesAsync(); // Thêm dòng này
+            await LoadClassesAsync();
         }
 
         public async Task<IActionResult> OnPostFilterAsync()
         {
             await LoadQuestionsAsync(FilterLevel);
-            await LoadClassesAsync(); // Thêm dòng này
+            await LoadClassesAsync();
             return Page();
         }
 
@@ -49,16 +50,6 @@ namespace api.Pages.Admin.Exams
             await LoadQuestionsAsync();
             await LoadClassesAsync();
 
-            // Convert thời gian sang UTC
-            if (Exam.StartTime.Kind == DateTimeKind.Unspecified)
-                Exam.StartTime = DateTime.SpecifyKind(Exam.StartTime, DateTimeKind.Local);
-            if (Exam.EndTime.Kind == DateTimeKind.Unspecified)
-                Exam.EndTime = DateTime.SpecifyKind(Exam.EndTime, DateTimeKind.Local);
-
-            Exam.StartTime = Exam.StartTime.ToUniversalTime();
-            Exam.EndTime = Exam.EndTime.ToUniversalTime();
-
-            // Build Exam.Questions from selected ids and scores
             Exam.Questions = new List<ExamQuestion>();
             for (int i = 0; i < SelectedQuestionIds.Count; i++)
             {
@@ -81,6 +72,15 @@ namespace api.Pages.Admin.Exams
                 return Page();
             }
 
+            // ✅ Chuyển StartTime và EndTime sang UTC
+            if (Exam.StartTime.Kind == DateTimeKind.Unspecified)
+                Exam.StartTime = DateTime.SpecifyKind(Exam.StartTime, DateTimeKind.Local);
+            if (Exam.EndTime.Kind == DateTimeKind.Unspecified)
+                Exam.EndTime = DateTime.SpecifyKind(Exam.EndTime, DateTimeKind.Local);
+
+            Exam.StartTime = Exam.StartTime.ToUniversalTime();
+            Exam.EndTime = Exam.EndTime.ToUniversalTime();
+
             using var httpClient = new HttpClient();
             var json = JsonConvert.SerializeObject(Exam);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -94,7 +94,6 @@ namespace api.Pages.Admin.Exams
             DebugMessage = $"API Error: {response.StatusCode} - {errorContent}";
             return Page();
         }
-
 
         private async Task LoadQuestionsAsync(double? level = null)
         {
