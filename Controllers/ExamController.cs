@@ -50,6 +50,8 @@ namespace api.Controllers
                 return BadRequest("DurationMinutes must be greater than 0.");
             if (exam.StartTime >= exam.EndTime)
                 return BadRequest("StartTime must be before EndTime.");
+            exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Local);
+            exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Local);
 
             var existing = await firebaseClient
                 .Child("Exams")

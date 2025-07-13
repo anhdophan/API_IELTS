@@ -72,14 +72,13 @@ namespace api.Pages.Admin.Exams
                 return Page();
             }
 
-            // ✅ Chuyển StartTime và EndTime sang UTC
+            // ✅ Đảm bảo StartTime và EndTime là Local time
             if (Exam.StartTime.Kind == DateTimeKind.Unspecified)
                 Exam.StartTime = DateTime.SpecifyKind(Exam.StartTime, DateTimeKind.Local);
             if (Exam.EndTime.Kind == DateTimeKind.Unspecified)
                 Exam.EndTime = DateTime.SpecifyKind(Exam.EndTime, DateTimeKind.Local);
 
-            Exam.StartTime = Exam.StartTime.ToLocalTime();
-            Exam.EndTime = Exam.EndTime.ToLocalTime();
+            // ❌ Không chuyển sang UTC nữa — giữ nguyên Local time
 
             using var httpClient = new HttpClient();
             var json = JsonConvert.SerializeObject(Exam);
