@@ -15,7 +15,7 @@ namespace api.Pages.Admin.Questions
         public Question Question { get; set; }
 
         [BindProperty]
-        public string ChoicesInput { get; set; } // nhận từ hidden input
+        public string ChoicesInput { get; set; } = string.Empty; // nhận từ hidden input
 
         public string DebugMessage { get; set; }
 
