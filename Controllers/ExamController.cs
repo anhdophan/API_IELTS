@@ -215,7 +215,8 @@ namespace api.Controllers
             if (exam.Questions == null || exam.Questions.Count == 0)
                 return BadRequest("Exam has no questions.");
 
-            var now = DateTime.UtcNow;
+            // ✅ Sử dụng thời gian Local để so sánh với thời gian Local lưu trong Firebase
+            var now = DateTime.Now;
 
             // 🔒 Không cho nộp sau khi bài thi kết thúc
             if (now > exam.EndTime)
@@ -248,7 +249,7 @@ namespace api.Controllers
             if (alreadySubmitted)
                 return Conflict("Student has already submitted this exam.");
 
-            // 👉 Chấm điểm như cũ
+            // 👉 Chấm điểm
             double score = 0;
             double totalScore = exam.Questions.Sum(q => q.Score);
 
@@ -291,7 +292,7 @@ namespace api.Controllers
                 Remark = $"You got {score} out of {totalScore}",
                 Timestamp = now,
                 Answers = request.Answers,
-                DurationSeconds = request.DurationSeconds  // ✅ Lưu thời gian làm bài
+                DurationSeconds = request.DurationSeconds
             };
 
             await firebaseClient
@@ -301,6 +302,7 @@ namespace api.Controllers
 
             return Ok(result);
         }
+
 
 
 
