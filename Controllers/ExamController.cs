@@ -147,6 +147,44 @@ namespace api.Controllers
             var filtered = exams.Where(e => e.ExamDate.Date == date.Date).ToList();
             return Ok(filtered);
         }
+        [HttpGet("{examId}/questions")]
+        public async Task<ActionResult<List<Question>>> GetQuestionsForExam(int examId)
+        {
+            // Lấy exam từ Firebase
+            var exam = await firebaseClient
+                .Child("Exams")
+                .Child(examId.ToString())
+                .OnceSingleAsync<Exam>();
+
+            if (exam == null)
+                return NotFound("Exam not found");
+
+            if (exam.Questions == null || exam.Questions.Count == 0)
+                return Ok(new List<Question>()); // không có câu hỏi nào
+
+            // Gọi API Question/all để lấy toàn bộ câu hỏi
+            var httpClient = new HttpClient();
+            var json = await httpClient.GetStringAsync("https://api-ielts-cgn8.onrender.com/api/Question/all");
+
+            List<Question> allQuestions;
+            try
+            {
+                allQuestions = JsonConvert.DeserializeObject<List<Question>>(json);
+            }
+            catch
+            {
+                return BadRequest("Failed to parse Question list.");
+            }
+
+            // Lọc theo danh sách questionId trong Exam
+            var questionIdsInExam = exam.Questions.Select(q => q.QuestionId).ToHashSet();
+            var filteredQuestions = allQuestions
+                .Where(q => questionIdsInExam.Contains(q.QuestionId))
+                .ToList();
+
+            return Ok(filteredQuestions);
+        }
+
 
         // Submit Exam Request DTO
         public class SubmitExamRequest
