@@ -24,23 +24,31 @@ namespace api.Pages.Admin.Questions
             Question = new Question();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+       public async Task<IActionResult> OnPostAsync()
         {
-            // Parse Choices từ ChoicesInput
-            if (Question.IsMultipleChoice && !string.IsNullOrWhiteSpace(ChoicesInput))
+            // Di chuyển phần xử lý ChoicesInput lên đầu
+            if (Question.IsMultipleChoice)
             {
-                Question.Choices = new List<string>(ChoicesInput.Split('\n'));
-                Question.Choices.RemoveAll(s => string.IsNullOrWhiteSpace(s));
+                if (!string.IsNullOrWhiteSpace(ChoicesInput))
+                {
+                    Question.Choices = new List<string>(ChoicesInput.Split('\n'));
+                    Question.Choices.RemoveAll(s => string.IsNullOrWhiteSpace(s));
+                }
+                else
+                {
+                    Question.Choices = new List<string>();
+                }
             }
             else
             {
-                Question.Choices = new List<string>(); // luôn là list rỗng, không null
+                Question.Choices = new List<string>();
                 Question.CorrectAnswerIndex = null;
             }
 
             if (string.IsNullOrEmpty(Question.CreatedById))
                 Question.CreatedById = "00";
 
+            // Kiểm tra ModelState sau khi đã xử lý dữ liệu
             if (!ModelState.IsValid)
             {
                 DebugMessage = "ModelState is invalid.";
@@ -70,5 +78,6 @@ namespace api.Pages.Admin.Questions
 
             return Page();
         }
+
     }
 }
