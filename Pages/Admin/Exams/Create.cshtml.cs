@@ -47,7 +47,16 @@ namespace api.Pages.Admin.Exams
         public async Task<IActionResult> OnPostAsync()
         {
             await LoadQuestionsAsync();
-            await LoadClassesAsync(); // Thêm dòng này
+            await LoadClassesAsync();
+
+            // Convert thời gian sang UTC
+            if (Exam.StartTime.Kind == DateTimeKind.Unspecified)
+                Exam.StartTime = DateTime.SpecifyKind(Exam.StartTime, DateTimeKind.Local);
+            if (Exam.EndTime.Kind == DateTimeKind.Unspecified)
+                Exam.EndTime = DateTime.SpecifyKind(Exam.EndTime, DateTimeKind.Local);
+
+            Exam.StartTime = Exam.StartTime.ToUniversalTime();
+            Exam.EndTime = Exam.EndTime.ToUniversalTime();
 
             // Build Exam.Questions from selected ids and scores
             Exam.Questions = new List<ExamQuestion>();
@@ -85,6 +94,7 @@ namespace api.Pages.Admin.Exams
             DebugMessage = $"API Error: {response.StatusCode} - {errorContent}";
             return Page();
         }
+
 
         private async Task LoadQuestionsAsync(double? level = null)
         {
