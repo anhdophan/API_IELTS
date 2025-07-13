@@ -192,6 +192,7 @@ namespace api.Controllers
             public int StudentId { get; set; }
             public int ExamId { get; set; }
             public List<string> Answers { get; set; } // Index or input text answers
+             public int DurationSeconds { get; set; }
         }
 
         [HttpPost("{examId}/submit")]
@@ -199,6 +200,8 @@ namespace api.Controllers
         {
             if (examId != request.ExamId)
                 return BadRequest("ExamId in route and body must match.");
+
+            // 🔍 Lấy thông tin Exam
             var exam = await firebaseClient
                 .Child("Exams")
                 .Child(examId.ToString())
@@ -210,6 +213,40 @@ namespace api.Controllers
             if (exam.Questions == null || exam.Questions.Count == 0)
                 return BadRequest("Exam has no questions.");
 
+            var now = DateTime.UtcNow;
+
+            // 🔒 Không cho nộp sau khi bài thi kết thúc
+            if (now > exam.EndTime)
+                return BadRequest("The exam time is over. You cannot submit anymore.");
+
+            // 🔒 Không cho nộp trước khi bắt đầu
+            if (now < exam.StartTime)
+                return BadRequest("The exam has not started yet.");
+
+            // 🔒 Kiểm tra StudentId có thuộc Class của Exam không
+            var classData = await firebaseClient
+                .Child("Classes")
+                .Child(exam.IdClass.ToString())
+                .OnceSingleAsync<Class>();
+
+            if (classData == null)
+                return NotFound("Class for exam not found.");
+
+            if (classData.StudentIds == null || !classData.StudentIds.Contains(request.StudentId))
+                return BadRequest("Student is not enrolled in the class for this exam.");
+
+            // 🔁 Không cho nộp lại nếu đã có Result
+            var existingResults = await firebaseClient
+                .Child("Results")
+                .OnceAsync<Result>();
+
+            bool alreadySubmitted = existingResults
+                .Any(r => r.Object.ExamId == examId && r.Object.StudentId == request.StudentId);
+
+            if (alreadySubmitted)
+                return Conflict("Student has already submitted this exam.");
+
+            // 👉 Chấm điểm như cũ
             double score = 0;
             double totalScore = exam.Questions.Sum(q => q.Score);
 
@@ -241,17 +278,18 @@ namespace api.Controllers
                     score += eq.Score;
             }
 
+            // 🎯 Tạo kết quả
             var result = new Result
             {
                 ResultId = int.Parse(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().Substring(5, 8)),
                 StudentId = request.StudentId,
                 ExamId = examId,
                 Score = score,
-                TotalScore = totalScore, // nếu có
+                TotalScore = totalScore,
                 Remark = $"You got {score} out of {totalScore}",
-                Timestamp = DateTime.UtcNow,
-                Answers = request.Answers, // nếu muốn lưu đáp án
-                // DurationSeconds = ... // nếu muốn lưu thời gian làm bài thực tế
+                Timestamp = now,
+                Answers = request.Answers,
+                DurationSeconds = request.DurationSeconds  // ✅ Lưu thời gian làm bài
             };
 
             await firebaseClient
@@ -261,6 +299,8 @@ namespace api.Controllers
 
             return Ok(result);
         }
+
+
 
         // Private helper: get all exams from Firebase, support Dictionary or List JSON
         private async Task<List<Exam>> GetAllExamsInternal()
