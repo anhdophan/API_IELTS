@@ -78,8 +78,8 @@ namespace api.Pages.Admin.Exams
             if (Exam.EndTime.Kind == DateTimeKind.Unspecified)
                 Exam.EndTime = DateTime.SpecifyKind(Exam.EndTime, DateTimeKind.Local);
 
-            Exam.StartTime = Exam.StartTime.ToUniversalTime();
-            Exam.EndTime = Exam.EndTime.ToUniversalTime();
+            Exam.StartTime = Exam.StartTime.ToLocalTime();
+            Exam.EndTime = Exam.EndTime.ToLocalTime();
 
             using var httpClient = new HttpClient();
             var json = JsonConvert.SerializeObject(Exam);
