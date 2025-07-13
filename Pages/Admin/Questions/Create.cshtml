@@ -151,6 +151,22 @@
         }
     };
 
+    document.getElementById("questionForm").addEventListener("submit", function(e) {
+    var isMC = document.getElementById("isMC").checked;
+    if (isMC) {
+        var items = document.getElementsByName("choice-item");
+        var arr = [];
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].value.trim() !== "") arr.push(items[i].value.trim());
+        }
+        document.getElementById("ChoicesInput").value = arr.join("\n");
+    } else {
+        // Nếu không phải multiple choice, gán ChoicesInput là chuỗi rỗng rõ ràng
+        document.getElementById("ChoicesInput").value = "";
+    }
+});
+
+
     function addChoice(value = "") {
         var list = document.getElementById("choices-list");
         var idx = list.children.length;
