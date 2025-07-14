@@ -239,7 +239,41 @@ namespace api.Controllers
             public List<string> Answers { get; set; }
             public int DurationSeconds { get; set; }
         }
+        private async Task<List<Result>> GetResultsByStudentIdInternalAsync(int studentId)
+        {
+            var allResults = await GetAllResultsAsync();
+            return allResults.Where(r => r.StudentId == studentId).ToList();
+        }
 
+        [HttpGet("{examId}/student/{studentId}/check")]
+        public async Task<IActionResult> CheckIfStudentHasTakenExamAsync(int examId, int studentId)
+        {
+            try
+            {
+                var results = await GetResultsByStudentIdInternalAsync(studentId);
+
+                if (results != null && results.Any(r => r.ExamId == examId))
+                {
+                    return Ok(new
+                    {
+                        hasTaken = true,
+                        message = "Bạn đã làm bài này."
+                    });
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        hasTaken = false,
+                        message = "Bạn chưa làm bài này. Bạn có thể bắt đầu làm bài."
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Lỗi kiểm tra kết quả: {ex.Message}");
+            }
+        }
         [HttpPost("{examId}/submit")]
         public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitExamRequest request)
         {

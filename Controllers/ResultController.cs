@@ -175,6 +175,8 @@ namespace api.Controllers
             }
         }
 
+        
+
         // List results by StudentId
         [HttpGet("student/{studentId}")]
         public async Task<ActionResult<List<Result>>> GetResultsByStudentIdAsync(int studentId)
@@ -197,6 +199,52 @@ namespace api.Controllers
                 return StatusCode(500, $"Error fetching results by studentId: {ex.Message}");
             }
         }
+
+        [HttpGet("student/{studentId}/detailed")]
+        public async Task<ActionResult<List<object>>> GetDetailedResultsByStudentIdAsync(int studentId)
+        {
+            try
+            {
+                // Lấy tất cả kết quả của học sinh
+                var results = await firebaseClient
+                    .Child("Results")
+                    .OnceAsync<Result>();
+
+                var studentResults = results
+                    .Where(r => r.Object.StudentId == studentId)
+                    .Select(r => r.Object)
+                    .ToList();
+
+                if (!studentResults.Any())
+                    return NotFound("No results found for this student.");
+
+                // Lấy tất cả Exams để đối chiếu
+                var exams = await firebaseClient
+                    .Child("Exams")
+                    .OnceAsync<Exam>();
+
+                var examDict = exams.ToDictionary(e => e.Object.ExamId, e => e.Object);
+
+                var detailedResults = studentResults.Select(r => new
+                {
+                    r.ResultId,
+                    r.ExamId,
+                    ExamTitle = examDict.ContainsKey(r.ExamId) ? examDict[r.ExamId].Title : "Unknown",
+                    r.Score,
+                    r.TotalScore,
+                    r.Remark,
+                    r.Timestamp,
+                    r.DurationSeconds
+                }).ToList();
+
+                return Ok(detailedResults);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error fetching detailed results: {ex.Message}");
+            }
+        }
+
 
         // Average score by StudentId
         [HttpGet("student/{studentId}/average")]
