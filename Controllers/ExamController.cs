@@ -260,16 +260,20 @@ public async Task<IActionResult> SubmitExamAsync(int examId, [FromBody] SubmitEx
 
    
 
-            var classData = await firebaseClient
-                .Child("Classes")
-                .Child(exam.IdClass.ToString())
-                .OnceSingleAsync<Class>();
+            // Gọi API kiểm tra student thuộc class
+            using (var httpClient = new HttpClient())
+            {
+                var studentApiUrl = $"https://api-ielts-cgn8.onrender.com/api/Class/{exam.IdClass}/students";
+                var json = await httpClient.GetStringAsync(studentApiUrl);
 
-            if (classData == null)
-                return NotFound("Class for exam not found.");
+                var studentsInClass = JsonConvert.DeserializeObject<List<Student>>(json);
 
-            if (classData.StudentIds == null || !classData.StudentIds.Contains(request.StudentId))
-                return BadRequest("Student is not enrolled in the class for this exam.");
+                if (!studentsInClass.Any(s => s.StudentId == request.StudentId))
+                {
+                    return BadRequest("Student is not enrolled in the class for this exam.");
+                }
+            }
+
 
             var existingResults = await firebaseClient
                 .Child("Results")

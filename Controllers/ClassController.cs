@@ -243,6 +243,27 @@ namespace api.Controllers
 
             return Ok(cls);
         }
+        [HttpGet("{classId}/students")]
+        public async Task<IActionResult> GetStudentsInClass(string classId)
+        {
+            var httpClient = new HttpClient();
+            try
+            {
+                var response = await httpClient.GetStringAsync("https://api-ielts-cgn8.onrender.com/api/Student/all");
+                var students = JsonConvert.DeserializeObject<List<Student>>(response);
+
+                var filtered = students
+                    .Where(s => s.Class == classId)
+                    .ToList();
+
+                return Ok(filtered);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Failed to fetch students: {ex.Message}");
+            }
+        }
+
 
         // Get Study Sessions for Class
         [HttpGet("{classId}/studysessions")]
