@@ -253,7 +253,7 @@ namespace api.Controllers
                 var students = JsonConvert.DeserializeObject<List<Student>>(response);
 
                 var filtered = students
-                    .Where(s => s.Class == classId)
+                    .Where(s => s.ClassId == classId)
                     .ToList();
 
                 return Ok(filtered);

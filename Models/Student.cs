@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace api.Models
 {
@@ -13,7 +14,9 @@ namespace api.Models
         public string Password { get; set; }
         public string StudyingCourse { get; set; }
         public double Score { get; set; }
-        public string Class { get; set; }
-        public string Avatar { get; set; } 
+        [JsonProperty("class")]
+        public string ClassId { get; set; }
+
+        public string Avatar { get; set; }
     }
 }

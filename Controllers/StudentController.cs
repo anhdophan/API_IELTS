@@ -101,7 +101,7 @@ namespace api.Controllers
         {
             var all = await GetAllStudentsInternal();
             var filtered = all
-                .Where(s => s.Class != null && s.Class.Equals(className, StringComparison.OrdinalIgnoreCase))
+                .Where(s => s.ClassId != null && s.ClassId.Equals(className, StringComparison.OrdinalIgnoreCase))
                 .ToList();
 
             return Ok(filtered);

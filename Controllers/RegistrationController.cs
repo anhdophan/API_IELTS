@@ -44,7 +44,7 @@ namespace api.Controllers
             student.Username = student.Email;
             student.Password = student.Email + "123";
             if (student.Score == 0) student.Score = 0;
-            if (string.IsNullOrEmpty(student.Class)) student.Class = "";
+            if (string.IsNullOrEmpty(student.ClassId)) student.ClassId = "";
 
             await firebaseClient
                 .Child("Students")
@@ -266,7 +266,7 @@ namespace api.Controllers
                 Username = registration.Email,
                 Password = registration.Email + "123",
                 PhoneNumber = registration.PhoneNumber,
-                Class = registration.ClassId.ToString(),
+                ClassId = registration.ClassId.ToString(),
                 StudyingCourse = registration.CourseId.ToString(),
                 Score = 0,
                 Avatar = "https://ui-avatars.com/api/?name=Student"
