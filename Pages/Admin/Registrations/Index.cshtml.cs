@@ -48,7 +48,7 @@ namespace api.Pages.Admin.Registrations
                 Username = reg.Email,
                 Password = reg.Email + "123",
                 PhoneNumber = "", // Nếu có thì lấy ra
-                Class = "", // Nếu có thì lấy ra
+                ClassId = "", // Nếu có thì lấy ra
                 StudyingCourse = reg.CourseId.ToString(),
                 Score = 0,
                 Avatar = "https://ui-avatars.com/api/?name=Student" // hoặc link ảnh mặc định khác

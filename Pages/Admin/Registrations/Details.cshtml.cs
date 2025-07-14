@@ -51,7 +51,7 @@ namespace api.Pages.Admin.Registrations
                 Username = reg.Email,
                 Password = reg.Email + "123",
                 PhoneNumber = "",
-                Class = "",
+                ClassId = "",
                 StudyingCourse = reg.CourseId.ToString(),
                 Score = 0
             };
