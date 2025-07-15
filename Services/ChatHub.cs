@@ -25,7 +25,7 @@ namespace api.Hubs
                 {
                     var classes = classIdsRaw.Split(',')
                                              .Select(c => int.TryParse(c, out var id) ? id : -1)
-                                             .Where(id => id > 0)
+                                             .Where(id => id >= 0)
                                              .ToList();
                     studentClasses[userId] = classes;
                 }
