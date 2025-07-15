@@ -3,7 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Mvc.NewtonsoftJson;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
+using System.IO;
+using System;
+using api.Hubs;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,7 +20,13 @@ builder.Services.AddControllers()
         options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Local;
         options.SerializerSettings.DateFormatString = "yyyy-MM-ddTHH:mm:ss";
     });
+builder.Services.AddControllers();
 
+// ✅ Thêm dòng này để bật SignalR
+builder.Services.AddSignalR();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSession();
 builder.Services.AddDataProtection()
@@ -51,6 +62,7 @@ app.UseRouting();
 app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
+app.MapHub<ChatHub>("/chatHub");
 
 app.UseEndpoints(endpoints =>
 {
