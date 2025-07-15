@@ -1,0 +1,74 @@
+
+@page
+@model api.Pages.Admin.ChatModel
+@{
+    ViewData["Title"] = "Create Class";
+    Layout = "~/Pages/Shared/_Layout.cshtml";
+
+}
+<h2>Chat với Học viên</h2>
+
+<div class="mb-3">
+    <label>Chọn học viên:</label>
+    <select id="studentSelect" class="form-select"></select>
+</div>
+
+<div id="chatBox" class="border p-3 mb-3" style="height: 300px; overflow-y: auto; background: #f9f9f9;"></div>
+
+<div class="input-group">
+    <input type="text" id="messageInput" class="form-control" placeholder="Nhập tin nhắn..." />
+    <button class="btn btn-primary" onclick="sendMessage()">Gửi</button>
+</div>
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+<script>
+    const chatBox = document.getElementById("chatBox");
+    const studentSelect = document.getElementById("studentSelect");
+    let selectedStudentId = null;
+
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/chatHub?userId=admin") // userId cần thiết để mapping connection
+        .build();
+
+    connection.on("ReceivePrivateMessage", function (senderId, message) {
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${senderId}</strong>: ${message}`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    });
+
+    async function sendMessage() {
+        const msg = document.getElementById("messageInput").value.trim();
+        if (!msg || !selectedStudentId) return;
+
+        await connection.invoke("SendPrivateMessage", "admin", selectedStudentId.toString(), msg);
+        document.getElementById("messageInput").value = "";
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>Bạn</strong>: ${msg}`;
+        chatBox.appendChild(div);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function loadStudents() {
+        const res = await fetch("/api/Student/all");
+        const data = await res.json();
+        studentSelect.innerHTML = `<option value="">-- Chọn học viên --</option>`;
+        data.forEach(s => {
+            const opt = document.createElement("option");
+            opt.value = s.studentId;
+            opt.text = `${s.name} (${s.email})`;
+            studentSelect.appendChild(opt);
+        });
+    }
+
+    studentSelect.addEventListener("change", function () {
+        selectedStudentId = this.value;
+        chatBox.innerHTML = ''; // Clear chat when switching
+    });
+
+    connection.start().then(() => {
+        loadStudents();
+    }).catch(err => console.error(err.toString()));
+</script>
+}

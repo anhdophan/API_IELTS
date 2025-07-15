@@ -18,6 +18,10 @@ build_property.GenerateRazorMetadataSourceChecksumAttributes =
 build_property.MSBuildProjectDirectory = /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api
 build_property._RazorSourceGeneratorDebug = 
 
+[/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/Admin/Chat.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vQ2hhdC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/Admin/Class/Create.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvQWRtaW4vQ2xhc3MvQ3JlYXRlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

@@ -7,13 +7,9 @@ namespace api.Hubs
 {
     public class ChatHub : Hub
     {
-        // Lưu thông tin kết nối: userId -> ConnectionId
         private static ConcurrentDictionary<string, string> userConnections = new();
-
-        // Lưu thông tin class mà student thuộc về: userId -> List<classId>
         private static ConcurrentDictionary<string, List<int>> studentClasses = new();
 
-        // Khi client kết nối, gửi query ?userId=...&classIds=1,2,3
         public override async Task OnConnectedAsync()
         {
             var httpContext = Context.GetHttpContext();
@@ -24,7 +20,8 @@ namespace api.Hubs
             {
                 userConnections[userId] = Context.ConnectionId;
 
-                if (!string.IsNullOrEmpty(classIdsRaw))
+                // Chỉ thêm class nếu không phải admin
+                if (userId != "admin" && !string.IsNullOrEmpty(classIdsRaw))
                 {
                     var classes = classIdsRaw.Split(',')
                                              .Select(c => int.TryParse(c, out var id) ? id : -1)
@@ -49,26 +46,29 @@ namespace api.Hubs
             await base.OnDisconnectedAsync(exception);
         }
 
-        /// <summary>
-        /// Gửi tin nhắn giữa 2 student nếu họ thuộc cùng 1 class
-        /// </summary>
         public async Task SendPrivateMessage(string senderId, string receiverId, string message)
         {
-            if (!userConnections.ContainsKey(receiverId) || !studentClasses.ContainsKey(senderId) || !studentClasses.ContainsKey(receiverId))
+            // Cho phép admin chat với bất kỳ ai và ngược lại
+            if (senderId == "admin" || receiverId == "admin")
             {
+                if (userConnections.TryGetValue(receiverId, out var connectionId))
+                {
+                    await Clients.Client(connectionId).SendAsync("ReceiveMessage", senderId, message);
+                }
                 return;
             }
 
-            // Kiểm tra có lớp chung không
+            // Kiểm tra 2 học sinh có chung lớp
+            if (!studentClasses.ContainsKey(senderId) || !studentClasses.ContainsKey(receiverId))
+                return;
+
             var senderClasses = studentClasses[senderId];
             var receiverClasses = studentClasses[receiverId];
-
             var hasSharedClass = senderClasses.Intersect(receiverClasses).Any();
 
-            if (hasSharedClass)
+            if (hasSharedClass && userConnections.TryGetValue(receiverId, out var connId))
             {
-                var connectionId = userConnections[receiverId];
-                await Clients.Client(connectionId).SendAsync("ReceiveMessage", senderId, message);
+                await Clients.Client(connId).SendAsync("ReceiveMessage", senderId, message);
             }
         }
     }
