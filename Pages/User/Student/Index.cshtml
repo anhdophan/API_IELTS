@@ -2,23 +2,29 @@
 @model api.Pages.User.Student.IndexModel
 @{
     ViewData["Title"] = "L&T Education - HỆ Thống Học Trực Tuyến";
-    Layout = "~/Pages/Shared/_LayoutCustomer.cshtml";
 }
 
- <link rel="stylesheet" href="~/css/site-student.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/site-student.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-
-<!-- Header Section -->
 <header>
     <div class="top-bar">
         <div class="container">
             <span class="welcome-text"><i class="fa-regular fa-user"></i> Hi, @Model.StudentName!</span>
 
             <div class="user-info">
-                <a href="#">\u0110ĂNG NHẬP BẺNG TÀI KHOẢN CỦA BẠN</a>
+                @if (!string.IsNullOrEmpty(Model.StudentAvatar))
+                {
+                    <img src="@Model.StudentAvatar" alt="Avatar" class="avatar-img" />
+                }
+                else
+                {
+                    <div class="user-avatar">@(Model.StudentName?.Length > 1 ? Model.StudentName.Substring(0, 2).ToUpper() : "SD")</div>
+                }
+                <a href="#">ĐĂNG NHẬP BẰNG TÀI KHOẢN CỦA BẠN</a>
                 <a href="#">Student</a>
                 <a href="#">Professor</a>
-                <div class="user-avatar">PD</div>
+                <a href="#">PD</a>
             </div>
         </div>
     </div>
@@ -28,368 +34,380 @@
             <div class="logo">
                 <a href="/">
                     <img src="https://via.placeholder.com/150x40/dc3545/FFFFFF?text=L%26T+EDU" alt="L&T Education Logo">
-                    <span>HỆ THỐNG HỌC TRỰC TUYỂN</span>
+                    <span>HỆ THỐNG HỌC TRỰC TUYẾN</span>
                 </a>
             </div>
             <div class="header-controls">
                 <a href="#" class="lang-select"><i class="fas fa-globe"></i>Vietnamese (VI)</a>
-                <a href="#"><i class="fas fa-bell"></i></a>
-                <a href="#"><i class="fas fa-cog"></i></a>
-            </div>
+                <a href="#"><i class="fas fa-bell"></i></a> <a href="#"><i class="fas fa-cog"></i></a> </div>
         </div>
     </nav>
 
-    <!-- Banner Section -->
     <section class="banner">
         <div class="container">
             <div class="banner-main-content">
-                    <h1>HUFLIT 2025<br>TUYỂN SINH THẠC SĨ</h1>
-                    <p>Chào mừng bạn đến với hệ thống học tập trực tuyến của L&T Education!</p>
-                    <div class="banner-info-boxes">
-                        <div class="banner-info-box">
-                            <strong>1.000+</strong>
-                            <span>Học viên đã tốt nghiệp</span>
-                        </div>
-                        <div class="banner-info-box">
-                            <strong>50+</strong>
-                            <span>Khóa học đa dạng</span>
-                        </div>
-                        <div class="banner-info-box">
-                            <strong>10+</strong>
-                            <span>Năm kinh nghiệm</span>
-                        </div>
+                <h1>HUFLIT 2025<br>TUYỂN SINH THẠC SĨ</h1>
+                <p>Chào mừng bạn đến với hệ thống học tập trực tuyến của L&T Education!</p>
+                <div class="banner-info-boxes">
+                    <div class="banner-info-box">
+                        <strong>1.000+</strong>
+                        <span>Học viên đã tốt nghiệp</span>
+                    </div>
+                    <div class="banner-info-box">
+                        <strong>50+</strong>
+                        <span>Khóa học đa dạng</span>
+                    </div>
+                    <div class="banner-info-box">
+                        <strong>10+</strong>
+                        <span>Năm kinh nghiệm</span>
                     </div>
                 </div>
-                <div class="banner-right-panel">
-                    <h3>CÔNG NGHỆ THÔNG TIN</h3>
-                    <p>Sẵn sàng cho một tương lai đầy hứa hẹn?</p>
-                    <div class="input-group">
-                        <input type="text" placeholder="Nhập mã kích hoạt khóa học...">
-                        <button type="submit">Kích hoạt</button>
-                    </div>
-                    <div class="links">
-                        <a href="#">Đăng nhập</a>
-                        <a href="#">Xem thời khóa biểu</a>
-                        <a href="#">Tìm kiếm lớp học</a>
-                    </div>
+            </div>
+            <div class="banner-right-panel">
+                <h3>CÔNG NGHỆ THÔNG TIN</h3>
+                <p>Sẵn sàng cho một tương lai đầy hứa hẹn?</p>
+                <div class="input-group">
+                    <input type="text" placeholder="Nhập mã kích hoạt khóa học...">
+                    <button type="submit">Kích hoạt</button>
                 </div>
+                <div class="links">
+                    <a href="#">Đăng nhập</a>
+                    <a href="#">Xem thời khóa biểu</a>
+                    <a href="#">Tìm kiếm lớp học</a>
+                </div>
+            </div>
         </div>
     </section>
 </header>
 
-<!-- Main Content -->
 <main class="main-content">
     <div class="container">
+        <section class="icon-boxes-small">
+            <a href="#" class="icon-box-small">
+                <i class="fas fa-home"></i>
+                <p>Trang chủ</p>
+            </a>
+            <a href="#" class="icon-box-small">
+                <i class="fas fa-bell"></i>
+                <p>Thông báo</p>
+            </a>
+            <a href="#" class="icon-box-small">
+                <i class="fas fa-calendar-alt"></i>
+                <p>Thời khóa biểu</p>
+            </a>
+            <a href="#" class="icon-box-small">
+                <i class="fas fa-book-open"></i>
+                <p>Đăng ký học phần</p>
+            </a>
+            <a href="#" class="icon-box-small">
+                <i class="fas fa-chart-line"></i>
+                <p>Tra cứu điểm</p>
+            </a>
+            <a href="#" class="icon-box-small">
+                <i class="fas fa-dollar-sign"></i>
+                <p>Thanh toán học phí</p>
+            </a>
+            <a href="#" class="icon-box-small">
+                <i class="fas fa-lightbulb"></i>
+                <p>Đăng ký đề tài</p>
+            </a>
+            <a href="#" class="icon-box-small">
+                <i class="fas fa-envelope"></i>
+                <p>Liên hệ</p>
+            </a>
+        </section>
+
         <section class="card-section">
-                <div class="section-header">
-                    <h2>Thời gian biểu cá nhân</h2>
-                    <a href="#" class="view-all">Xem chi tiết</a>
-                </div>
-                <div class="notification-list">
-                    <ul>
-                        @if (Model.Exams != null && Model.Exams.Any())
+            <div class="section-header">
+                <h2>Thời gian biểu cá nhân</h2>
+                <a href="#" class="view-all">Xem chi tiết</a>
+            </div>
+            <div class="notification-list">
+                <ul>
+                    @if (Model.Exams != null && Model.Exams.Any())
+                    {
+                        foreach (var exam in Model.Exams.OrderBy(e => e.ExamDate).Take(3))
                         {
-                            foreach (var exam in Model.Exams.OrderBy(e => e.ExamDate).Take(3))
+                            <li>
+                                <div class="date">
+                                    <span>@exam.ExamDate.Day</span>Tháng @exam.ExamDate.Month
+                                </div>
+                                <div class="content">
+                                    <strong>[Lịch thi] @exam.Title</strong>
+                                    <p>Bắt đầu: @exam.StartTime.ToString("HH:mm dd/MM/yyyy")</p>
+                                    <p>Kết thúc: @exam.EndTime.ToString("HH:mm dd/MM/yyyy")</p>
+                                </div>
+                                <div class="actions">
+                                    <a href="#">Chi tiết</a>
+                                </div>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li>
+                            <div class="content">Không có lịch thi nào sắp tới.</div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </section>
+
+        <section class="feature-cards">
+            <a href="#" class="feature-card">
+                <div class="icon"><i class="fas fa-history"></i></div>
+                <div class="content">
+                    <h4>Lịch sử học tập</h4>
+                    <p>Xem lại quá trình học tập, các môn đã học, điểm số và kết quả.</p>
+                    <span class="view-more">Xem chi tiết</span>
+                </div>
+            </a>
+            <a href="#" class="feature-card">
+                <div class="icon"><i class="fas fa-bullhorn"></i></div>
+                <div class="content">
+                    <h4>Thông báo chung</h4>
+                    <p>Cập nhật những thông tin, tin tức mới nhất từ L&T Education.</p>
+                    <span class="view-more">Xem chi tiết</span>
+                </div>
+            </a>
+            <a href="#" class="feature-card">
+                <div class="icon"><i class="fas fa-calendar-check"></i></div>
+                <div class="content">
+                    <h4>Thời khóa biểu cá nhân</h4>
+                    <p>Xem thời gian biểu các lớp học, phòng học, giáo viên chi tiết.</p>
+                    <span class="view-more">Xem chi tiết</span>
+                </div>
+            </a>
+            <a href="#" class="feature-card">
+                <div class="icon"><i class="fas fa-file-invoice"></i></div>
+                <div class="content">
+                    <h4>Đăng ký học phần</h4>
+                    <p>Thực hiện đăng ký các học phần cho kỳ học tiếp theo.</p>
+                    <span class="view-more">Xem chi tiết</span>
+                </div>
+            </a>
+             <a href="#" class="feature-card">
+                <div class="icon"><i class="fas fa-poll"></i></div>
+                <div class="content">
+                    <h4>Tra cứu điểm</h4>
+                    <p>Xem kết quả điểm thi các môn học và điểm trung bình tích lũy.</p>
+                    <span class="view-more">Xem chi tiết</span>
+                </div>
+            </a>
+             <a href="#" class="feature-card">
+                <div class="icon"><i class="fas fa-receipt"></i></div>
+                <div class="content">
+                    <h4>Thanh toán học phí</h4>
+                    <p>Quản lý các khoản học phí, lịch sử thanh toán và tình trạng công nợ.</p>
+                    <span class="view-more">Xem chi tiết</span>
+                </div>
+            </a>
+        </section>
+
+        <section class="card-section">
+            <div class="section-header">
+                <h2>Đào tạo</h2>
+                <a href="#" class="view-all">Xem tất cả</a>
+            </div>
+            <div class="colorful-grid">
+                <a href="#" class="grid-item-colored blue span-2-col tall top-left-content">
+                    <h4>Chương trình đào tạo</h4>
+                    <p>Thông tin chi tiết về các ngành đào tạo và chương trình học.</p>
+                </a>
+                <a href="#" class="grid-item-colored pink">
+                    <i class="fas fa-user-graduate"></i>
+                    <h4>Tuyển sinh</h4>
+                </a>
+                <a href="#" class="grid-item-colored purple">
+                    <i class="fas fa-users"></i>
+                    <h4>Sinh viên</h4>
+                </a>
+                <a href="#" class="grid-item-colored orange">
+                    <i class="fas fa-briefcase"></i>
+                    <h4>Việc làm</h4>
+                </a>
+                <a href="#" class="grid-item-colored green">
+                    <i class="fas fa-globe"></i>
+                    <h4>Quốc tế</h4>
+                </a>
+                <a href="#" class="grid-item-colored teal">
+                    <i class="fas fa-laptop-code"></i>
+                    <h4>Công nghệ</h4>
+                </a>
+                <a href="#" class="grid-item-colored cyan">
+                    <i class="fas fa-book"></i>
+                    <h4>Thư viện</h4>
+                </a>
+                <a href="#" class="grid-item-colored red">
+                    <i class="fas fa-university"></i>
+                    <h4>Khoa học</h4>
+                </a>
+            </div>
+        </section>
+
+        <section class="card-section">
+            <div class="section-header">
+                <h2>Hoạt động học tập</h2>
+                <a href="#" class="view-all">Xem tất cả</a>
+            </div>
+            <div class="colorful-grid">
+                <a href="#" class="grid-item-colored blue">
+                    <i class="fas fa-graduation-cap"></i>
+                    <h4>Đề án tốt nghiệp</h4>
+                </a>
+                <a href="#" class="grid-item-colored pink">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                    <h4>Giảng viên</h4>
+                </a>
+                <a href="#" class="grid-item-colored purple">
+                    <i class="fas fa-puzzle-piece"></i>
+                    <h4>Câu lạc bộ</h4>
+                </a>
+                <a href="#" class="grid-item-colored orange">
+                    <i class="fas fa-medal"></i>
+                    <h4>Thành tích</h4>
+                </a>
+            </div>
+        </section>
+
+        <section class="calendar-section">
+            <div class="calendar-view">
+                <div class="calendar-header">
+                    <button>&lt;</button>
+                    <h3>Tháng @DateTime.Now.Month, @DateTime.Now.Year</h3>
+                    <button>&gt;</button>
+                </div>
+                <div class="days-of-week">
+                    <span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
+                </div>
+                <div class="calendar-grid">
+                    @* Logic để hiển thị các ngày trong tháng *@
+                    @{
+                        var today = DateTime.Today;
+                        var firstDayOfMonth = new DateTime(today.Year, today.Month, 1);
+                        var daysInMonth = DateTime.DaysInMonth(today.Year, today.Month);
+                        var startDayOfWeek = (int)firstDayOfMonth.DayOfWeek; // 0 for Sunday, 1 for Monday...
+
+                        // Fill empty cells for days before the 1st
+                        for (int i = 0; i < startDayOfWeek; i++)
+                        {
+                            <span class="calendar-day empty"></span>
+                        }
+
+                        // Fill days of the month
+                        for (int day = 1; day <= daysInMonth; day++)
+                        {
+                            var currentDay = new DateTime(today.Year, today.Month, day);
+                            var isCurrentDay = currentDay.Date == today.Date ? "current-day" : "";
+                            var isEventDay = Model.Exams.Any(e => e.ExamDate.Date == currentDay.Date) ? "event-day" : "";
+
+                            <span class="calendar-day @isCurrentDay @isEventDay">@day</span>
+                        }
+                    }
+                </div>
+            </div>
+            <div class="event-list">
+                <h3>Sự kiện sắp tới</h3>
+                <ul>
+                    @if (Model.Exams != null && Model.Exams.Any())
+                    {
+                        foreach (var exam in Model.Exams.OrderBy(e => e.StartTime).Take(3))
+                        {
+                            <li>
+                                <div class="event-time">@exam.StartTime.ToString("dd/MM/yyyy - HH:mm")</div>
+                                <div class="event-title">Lịch thi: @exam.Title</div>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li>
+                            <div class="event-title">Không có sự kiện nào sắp tới.</div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </section>
+
+        <section class="card-section">
+            <div class="section-header">
+                <h2>Lịch học của tôi</h2>
+                <a href="#" class="view-all">Xem toàn bộ</a>
+            </div>
+            <div class="table-section">
+                <table>
+                    <thead>
+                        <tr>
+                            
+                            <th>Thứ</th>
+                            <th>Ngày học</th>
+                            <th>Giờ bắt đầu</th>
+                            <th>Giờ kết thúc</th>
+                           
+                            <th>Giảng viên</th>
+                            <th>Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.ClassSchedule != null && Model.ClassSchedule.Any())
+                        {
+                            @foreach (var session in Model.ClassSchedule.OrderBy(s => s.Date).ThenBy(s => s.StartTime))
                             {
-                                <li>
-                                    <div class="date">
-                                        <span>@exam.ExamDate.Day</span>Tháng @exam.ExamDate.Month
-                                    </div>
-                                    <div class="content">
-                                        <strong>[Lịch thi] @exam.Title</strong>
-                                        <p>Bắt đầu: @exam.StartTime.ToString("HH:mm dd/MM/yyyy")</p>
-                                        <p>Kết thúc: @exam.EndTime.ToString("HH:mm dd/MM/yyyy")</p>
-                                    </div>
-                                    <div class="actions">
+                                <tr>
+                                    
+                                    <td>@session.DayOfWeek</td>
+                                    <td>@session.Date.ToString("dd/MM/yyyy")</td>
+                                    <td>@session.StartTime</td>
+                                    <td>@session.EndTime</td>
+                                   
+                                    <td>@session.TeacherName</td>
+                                    <td class="action-links">
                                         <a href="#">Chi tiết</a>
-                                    </div>
-                                </li>
+                                    </td>
+                                </tr>
                             }
                         }
                         else
                         {
-                            <li>
-                                <div class="content">Không có lịch thi nào sắp tới.</div>
-                            </li>
+                            <tr>
+                                <td colspan="8">Không có lịch học nào.</td>
+                            </tr>
                         }
-                    </ul>
-                </div>
-            </section>
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-            <section class="icon-boxes-small">
-                <a href="#" class="icon-box-small">
-                    <i class="fas fa-home"></i>
-                    <p>Trang chủ</p>
+        <section class="card-section">
+            <div class="section-header">
+                <h2>Tiện ích khác</h2>
+                <a href="#" class="view-all">Xem thêm</a>
+            </div>
+            <div class="colorful-grid">
+                <a href="#" class="grid-item-colored blue">
+                    <i class="fas fa-map"></i>
+                    <h4>Sơ đồ trường</h4>
                 </a>
-                <a href="#" class="icon-box-small">
-                    <i class="fas fa-bell"></i>
-                    <p>Thông báo</p>
-                </a>
-                <a href="#" class="icon-box-small">
-                    <i class="fas fa-calendar-alt"></i>
-                    <p>Thời khóa biểu</p>
-                </a>
-                <a href="#" class="icon-box-small">
-                    <i class="fas fa-book-open"></i>
-                    <p>Đăng ký học phần</p>
-                </a>
-                <a href="#" class="icon-box-small">
-                    <i class="fas fa-chart-line"></i>
-                    <p>Tra cứu điểm</p>
-                </a>
-                <a href="#" class="icon-box-small">
+                <a href="#" class="grid-item-colored pink">
                     <i class="fas fa-dollar-sign"></i>
-                    <p>Thanh toán học phí</p>
+                    <h4>Học phí</h4>
                 </a>
-                <a href="#" class="icon-box-small">
-                    <i class="fas fa-lightbulb"></i>
-                    <p>Đăng ký đề tài</p>
+                <a href="#" class="grid-item-colored purple">
+                    <i class="fas fa-question-circle"></i>
+                    <h4>Hỗ trợ</h4>
                 </a>
-                <a href="#" class="icon-box-small">
-                    <i class="fas fa-envelope"></i>
-                    <p>Liên hệ</p>
+                <a href="#" class="grid-item-colored orange">
+                    <i class="fas fa-file-alt"></i>
+                    <h4>Văn bản</h4>
                 </a>
-            </section>
-
-            <section class="feature-cards">
-                <a href="#" class="feature-card">
-                    <div class="icon"><i class="fas fa-history"></i></div>
-                    <div class="content">
-                        <h4>Lịch sử học tập</h4>
-                        <p>Xem lại quá trình học tập, các môn đã học, điểm số và kết quả.</p>
-                        <span class="view-more">Xem chi tiết</span>
-                    </div>
-                </a>
-                <a href="#" class="feature-card">
-                    <div class="icon"><i class="fas fa-bullhorn"></i></div>
-                    <div class="content">
-                        <h4>Thông báo chung</h4>
-                        <p>Cập nhật những thông tin, tin tức mới nhất từ L&T Education.</p>
-                        <span class="view-more">Xem chi tiết</span>
-                    </div>
-                </a>
-                <a href="#" class="feature-card">
-                    <div class="icon"><i class="fas fa-calendar-check"></i></div>
-                    <div class="content">
-                        <h4>Thời khóa biểu cá nhân</h4>
-                        <p>Xem thời gian biểu các lớp học, phòng học, giáo viên chi tiết.</p>
-                        <span class="view-more">Xem chi tiết</span>
-                    </div>
-                </a>
-                <a href="#" class="feature-card">
-                    <div class="icon"><i class="fas fa-file-invoice"></i></div>
-                    <div class="content">
-                        <h4>Đăng ký học phần</h4>
-                        <p>Thực hiện đăng ký các học phần cho kỳ học tiếp theo.</p>
-                        <span class="view-more">Xem chi tiết</span>
-                    </div>
-                </a>
-                 <a href="#" class="feature-card">
-                    <div class="icon"><i class="fas fa-poll"></i></div>
-                    <div class="content">
-                        <h4>Tra cứu điểm</h4>
-                        <p>Xem kết quả điểm thi các môn học và điểm trung bình tích lũy.</p>
-                        <span class="view-more">Xem chi tiết</span>
-                    </div>
-                </a>
-                 <a href="#" class="feature-card">
-                    <div class="icon"><i class="fas fa-receipt"></i></div>
-                    <div class="content">
-                        <h4>Thanh toán học phí</h4>
-                        <p>Quản lý các khoản học phí, lịch sử thanh toán và tình trạng công nợ.</p>
-                        <span class="view-more">Xem chi tiết</span>
-                    </div>
-                </a>
-            </section>
-
-            <section class="card-section">
-                <div class="section-header">
-                    <h2>Đào tạo</h2>
-                    <a href="#" class="view-all">Xem tất cả</a>
-                </div>
-                <div class="colorful-grid">
-                    <a href="#" class="grid-item-colored blue tall top-left-content">
-                        <h4>Chương trình đào tạo</h4>
-                        <p>Thông tin chi tiết về các ngành đào tạo và chương trình học.</p>
-                    </a>
-                    <a href="#" class="grid-item-colored pink">
-                        <i class="fas fa-user-graduate"></i>
-                        <h4>Tuyển sinh</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored purple">
-                        <i class="fas fa-users"></i>
-                        <h4>Sinh viên</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored orange">
-                        <i class="fas fa-briefcase"></i>
-                        <h4>Việc làm</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored green">
-                        <i class="fas fa-globe"></i>
-                        <h4>Quốc tế</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored teal">
-                        <i class="fas fa-laptop-code"></i>
-                        <h4>Công nghệ</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored cyan">
-                        <i class="fas fa-book"></i>
-                        <h4>Thư viện</h4>
-                    </a>
-                     <a href="#" class="grid-item-colored red">
-                        <i class="fas fa-university"></i>
-                        <h4>Khoa học</h4>
-                    </a>
-                </div>
-            </section>
-
-            <section class="card-section">
-                <div class="section-header">
-                    <h2>Hoạt động học tập</h2>
-                    <a href="#" class="view-all">Xem tất cả</a>
-                </div>
-                <div class="colorful-grid">
-                    <a href="#" class="grid-item-colored blue">
-                        <i class="fas fa-graduation-cap"></i>
-                        <h4>Đề án tốt nghiệp</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored pink">
-                        <i class="fas fa-chalkboard-teacher"></i>
-                        <h4>Giảng viên</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored purple">
-                        <i class="fas fa-puzzle-piece"></i>
-                        <h4>Câu lạc bộ</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored orange">
-                        <i class="fas fa-medal"></i>
-                        <h4>Thành tích</h4>
-                    </a>
-                </div>
-            </section>
-
-
-            <section class="calendar-section">
-                <div class="calendar-view">
-                    <div class="calendar-header">
-                        <button>&lt;</button>
-                        <h3>Tháng @DateTime.Now.Month, @DateTime.Now.Year</h3>
-                        <button>&gt;</button>
-                    </div>
-                    <div class="days-of-week">
-                        <span>CN</span><span>T2</span><span>T3</span><span>T4</span><span>T5</span><span>T6</span><span>T7</span>
-                    </div>
-                    <div class="calendar-grid">
-                        <span class="calendar-day empty"></span><span class="calendar-day empty"></span><span class="calendar-day empty"></span>
-                        <span class="calendar-day empty"></span><span class="calendar-day">1</span><span class="calendar-day">2</span><span class="calendar-day">3</span>
-                        <span class="calendar-day">4</span><span class="calendar-day">5</span><span class="calendar-day">6</span><span class="calendar-day">7</span>
-                        <span class="calendar-day">8</span><span class="calendar-day current-day">9</span><span class="calendar-day event-day">10</span><span class="calendar-day">11</span>
-                        <span class="calendar-day">12</span><span class="calendar-day">13</span><span class="calendar-day event-day">14</span><span class="calendar-day">15</span>
-                        <span class="calendar-day">16</span><span class="calendar-day">17</span><span class="calendar-day">18</span><span class="calendar-day">19</span>
-                        <span class="calendar-day">20</span><span class="calendar-day">21</span><span class="calendar-day">22</span><span class="calendar-day">23</span>
-                        <span class="calendar-day">24</span><span class="calendar-day">25</span><span class="calendar-day">26</span><span class="calendar-day">27</span>
-                        <span class="calendar-day">28</span><span class="calendar-day">29</span><span class="calendar-day">30</span><span class="calendar-day">31</span>
-                    </div>
-                </div>
-                <div class="event-list">
-                    <h3>Sự kiện sắp tới</h3>
-                    <ul>
-                        @if (Model.Exams != null && Model.Exams.Any())
-                        {
-                            foreach (var exam in Model.Exams.OrderBy(e => e.StartTime).Take(3))
-                            {
-                                <li>
-                                    <div class="event-time">@exam.StartTime.ToString("dd/MM/yyyy - HH:mm")</div>
-                                    <div class="event-title">Lịch thi: @exam.Title</div>
-                                </li>
-                            }
-                        }
-                        else
-                        {
-                            <li>
-                                <div class="event-title">Không có sự kiện nào sắp tới.</div>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </section>
-
-            <section class="card-section">
-                <div class="section-header">
-                    <h2>Lịch học của tôi</h2>
-                    <a href="#" class="view-all">Xem toàn bộ</a>
-                </div>
-                <div class="table-section">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Môn học</th>
-                                <th>Mã môn</th>
-                                <th>Phòng học</th>
-                                <th>Thời gian</th>
-                                <th>Giảng viên</th>
-                                <th>Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Cấu trúc dữ liệu</td>
-                                <td>CS201</td>
-                                <td>P203</td>
-                                <td>Thứ 2 (8:00 - 10:00)</td>
-                                <td>Nguyễn Văn A</td>
-                                <td class="action-links">
-                                    <a href="#">Chi tiết</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Lập trình Web</td>
-                                <td>WE305</td>
-                                <td>L301</td>
-                                <td>Thứ 4 (13:00 - 15:00)</td>
-                                <td>Trần Thị B</td>
-                                <td class="action-links">
-                                    <a href="#">Chi tiết</a>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Cơ sở dữ liệu</td>
-                                <td>DB101</td>
-                                <td>P105</td>
-                                <td>Thứ 6 (8:00 - 10:00)</td>
-                                <td>Lê Văn C</td>
-                                <td class="action-links">
-                                    <a href="#">Chi tiết</a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="card-section">
-                <div class="section-header">
-                    <h2>Tiện ích khác</h2>
-                    <a href="#" class="view-all">Xem thêm</a>
-                </div>
-                <div class="colorful-grid">
-                    <a href="#" class="grid-item-colored blue">
-                        <i class="fas fa-map"></i>
-                        <h4>Sơ đồ trường</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored pink">
-                        <i class="fas fa-dollar-sign"></i>
-                        <h4>Học phí</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored purple">
-                        <i class="fas fa-question-circle"></i>
-                        <h4>Hỗ trợ</h4>
-                    </a>
-                    <a href="#" class="grid-item-colored orange">
-                        <i class="fas fa-file-alt"></i>
-                        <h4>Văn bản</h4>
-                    </a>
-                </div>
-            </section>
+            </div>
+        </section>
     </div>
 </main>
+
+<footer class="footer">
+    <div class="container">
+        <p>© 2025 L&T Education. All rights reserved. | <a href="#" style="color: white;">Chính sách bảo mật</a></p>
+    </div>
+</footer>
+

@@ -355,20 +355,42 @@ namespace api.Controllers
             }
             return Ok(studyDays);
         }
+        [HttpGet("teacher/{teacherId}")]
+        public async Task<IActionResult> GetTeacherById(int teacherId)
+        {
+            var httpClient = new HttpClient();
+            try
+            {
+                var response = await httpClient.GetStringAsync("https://api-ielts-cgn8.onrender.com/api/Teacher/all");
+                var teachers = JsonConvert.DeserializeObject<List<Teacher>>(response);
+
+                var teacher = teachers.FirstOrDefault(t => t.TeacherId == teacherId);
+
+                if (teacher == null)
+                    return NotFound($"Teacher with ID {teacherId} not found.");
+
+                return Ok(teacher);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Failed to fetch teacher: {ex.Message}");
+            }
+        }
+
 
         // Internal method to get all classes as Dictionary
         private async Task<List<Class>> GetAllClassesInternal()
         {
             var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Classes.json";
             using var httpClient = new HttpClient();
-            
+
             try
             {
                 var response = await httpClient.GetAsync(url);
                 response.EnsureSuccessStatusCode();
-                
+
                 var json = await response.Content.ReadAsStringAsync();
-                
+
                 if (string.IsNullOrWhiteSpace(json) || json == "null")
                 {
                     _logger.LogInformation("No classes data found in Firebase");
