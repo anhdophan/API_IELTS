@@ -1,5 +1,4 @@
-
-    using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.RazorPages;
     using Microsoft.AspNetCore.Mvc;
     using Newtonsoft.Json;
     using System.Net.Http;
@@ -12,9 +11,10 @@
         public class IndexModel : PageModel
         {
             public List<ExamInfo> Exams { get; set; } = new();
-            public List<ClassScheduleInfo> ClassSchedule { get; set; } = new(); // New property for class schedule
+            // public List<ClassScheduleInfo> ClassSchedule { get; set; } = new(); // Remove this, JavaScript will handle
             public string StudentName { get; set; }
             public string StudentAvatar { get; set; }
+            public string StudentClassId { get; set; } // New property to pass classId to JS
 
             public async Task<IActionResult> OnGetAsync()
             {
@@ -25,90 +25,18 @@
 
                 if (string.IsNullOrEmpty(classIdStr))
                 {
-                    // Redirect to login if classId is not in session
                     return RedirectToPage("/User/Student/Login");
                 }
 
                 StudentName = studentName ?? "Student";
                 StudentAvatar = studentAvatar ?? "";
+                StudentClassId = classIdStr; // Assign to the new property
 
                 int classId = int.Parse(classIdStr);
-                string className = ""; // Will fetch this along with other class details
-                int courseId = 0; // Will fetch this to get course name
-                int teacherId = 0; // Will fetch this to get teacher name
 
                 using var httpClient = new HttpClient();
 
-                // 1. Fetch Class details to get CourseId, TeacherId, and Room
-                try
-                {
-                    var classResponse = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/{classId}");
-                    if (classResponse.IsSuccessStatusCode)
-                    {
-                        var classJson = await classResponse.Content.ReadAsStringAsync();
-                        var classObj = JsonConvert.DeserializeObject<ClassDetail>(classJson);
-                        if (classObj != null)
-                        {
-                            className = classObj.ClassName; // Assuming Class has a ClassName property
-                            courseId = classObj.CourseId;
-                            teacherId = classObj.TeacherId;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Log error but don't prevent page load if class details fail
-                    Console.WriteLine($"Error fetching class details: {ex.Message}");
-                }
-
-
-                // 2. Fetch Course details to get CourseName
-                string courseName = "N/A";
-                if (courseId > 0)
-                {
-                    try
-                    {
-                        var courseResponse = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Course/{courseId}");
-                        if (courseResponse.IsSuccessStatusCode)
-                        {
-                            var courseJson = await courseResponse.Content.ReadAsStringAsync();
-                            var courseObj = JsonConvert.DeserializeObject<CourseInfo>(courseJson);
-                            if (courseObj != null)
-                            {
-                                courseName = courseObj.CourseName;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error fetching course details: {ex.Message}");
-                    }
-                }
-
-                // 3. Fetch Teacher details to get TeacherName
-                string teacherName = "N/A";
-                if (teacherId > 0)
-                {
-                    try
-                    {
-                        var teacherResponse = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Teacher/{teacherId}");
-                        if (teacherResponse.IsSuccessStatusCode)
-                        {
-                            var teacherJson = await teacherResponse.Content.ReadAsStringAsync();
-                            var teacherObj = JsonConvert.DeserializeObject<TeacherInfo>(teacherJson);
-                            if (teacherObj != null)
-                            {
-                                teacherName = teacherObj.TeacherName; // Assuming Teacher has a TeacherName property
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error fetching teacher details: {ex.Message}");
-                    }
-                }
-
-                // 4. Fetch Exam data (existing logic)
+                // Fetch Exam data (keep this as it's not related to the weekly schedule)
                 try
                 {
                     var examResponse = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Exam/class/{classId}");
@@ -123,34 +51,8 @@
                     Console.WriteLine($"Error fetching exam data: {ex.Message}");
                 }
 
-
-                // 5. Fetch Class Schedule data
-                try
-                {
-                    var scheduleResponse = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Class/{classId}/studydays");
-                    if (scheduleResponse.IsSuccessStatusCode)
-                    {
-                        var json = await scheduleResponse.Content.ReadAsStringAsync();
-                        var rawSchedule = JsonConvert.DeserializeObject<List<RawScheduleEntry>>(json) ?? new List<RawScheduleEntry>();
-
-                        ClassSchedule = rawSchedule.Select(rs => new ClassScheduleInfo
-                        {
-                            CourseName = courseName, // Use the fetched course name
-                            DayOfWeek = rs.DayOfWeek,
-                            Date = rs.Date,
-                            StartTime = rs.StartTime,
-                            EndTime = rs.EndTime,
-                            Room = className, // Assuming ClassName is actually Room in this context or you have a separate Room property
-                            TeacherName = teacherName // Use the fetched teacher name
-                        }).ToList();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error fetching class schedule: {ex.Message}");
-                    // Optionally set an error message for the user
-                    // ModelState.AddModelError(string.Empty, "Không thể tải lịch học. Vui lòng thử lại sau.");
-                }
+                // Removed the ClassSchedule fetching logic from OnGetAsync
+                // This will now be handled by JavaScript using Fetch API on the client side.
 
                 return Page();
             }
@@ -164,16 +66,16 @@
                 public DateTime EndTime { get; set; }
             }
 
-            // DTO to match the structure of the /api/Class/{classId}/studydays response
+            // DTOs needed by JavaScript for fetching (though not directly used by C# OnGet anymore for schedule)
+            // Keep them here for reference or if you decide to pre-fetch some data
             public class RawScheduleEntry
             {
                 public DateTime Date { get; set; }
                 public string DayOfWeek { get; set; }
-                public string StartTime { get; set; } // Time as string (e.g., "08:00")
-                public string EndTime { get; set; }   // Time as string (e.g., "10:00")
+                public string StartTime { get; set; }
+                public string EndTime { get; set; }
             }
 
-            // Combined DTO for displaying in the table
             public class ClassScheduleInfo
             {
                 public string CourseName { get; set; }
@@ -181,34 +83,32 @@
                 public DateTime Date { get; set; }
                 public string StartTime { get; set; }
                 public string EndTime { get; set; }
-                public string Room { get; set; } // This needs to come from ClassDetails if it's not className
+                public string Room { get; set; }
                 public string TeacherName { get; set; }
             }
 
-            // DTO for Class details from /api/Class/{classId}
             public class ClassDetail
             {
                 public string ClassId { get; set; }
-                public string ClassName { get; set; } // Assuming ClassName can be used as Room, or add a Room property
+                [JsonProperty("room")] // Assume 'room' is the field name for room in Firebase Class object
+                public string Room { get; set; }
+                public string ClassName { get; set; } // Keep this if 'room' might be 'className' sometimes
                 public int CourseId { get; set; }
                 public int TeacherId { get; set; }
-                // Add other properties you might need from the Class object
             }
 
-            // DTO for Course details from /api/Course/{courseId}
             public class CourseInfo
             {
                 public int CourseId { get; set; }
+                [JsonProperty("name")] // Use JsonProperty to map 'name' from API to CourseName
                 public string CourseName { get; set; }
-                // Add other properties if needed
             }
 
-            // DTO for Teacher details from /api/Teacher/{teacherId}
             public class TeacherInfo
             {
                 public int TeacherId { get; set; }
+                [JsonProperty("name")] // Use JsonProperty to map 'name' from API to TeacherName
                 public string TeacherName { get; set; }
-                // Add other properties if needed
             }
         }
     }

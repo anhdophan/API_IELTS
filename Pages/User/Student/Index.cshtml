@@ -328,55 +328,37 @@
                 </ul>
             </div>
         </section>
+<section class="card-section">
+    <p>DEBUG: StudentClassId = @Model.StudentClassId</p>
+    <div class="section-header">
+        <h2>Lịch học của tôi</h2>
+        <a href="#" class="view-all">Xem toàn bộ</a>
+    </div>
+    <div class="table-section">
+        <div class="week-selector-container">
+            <label for="weekSelector">Chọn tuần:</label>
+            <select id="weekSelector" class="form-control">
+                </select>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Môn học</th>
+                    <th>Thứ</th>
+                    <th>Ngày học</th>
+                    <th>Giờ bắt đầu</th>
+                    <th>Giờ kết thúc</th>
+                    <th>Phòng học</th>
+                    <th>Giảng viên</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleTableBody">
+                </tbody>
+        </table>
+    </div>
+</section>
 
-        <section class="card-section">
-            <div class="section-header">
-                <h2>Lịch học của tôi</h2>
-                <a href="#" class="view-all">Xem toàn bộ</a>
-            </div>
-            <div class="table-section">
-                <table>
-                    <thead>
-                        <tr>
-                            
-                            <th>Thứ</th>
-                            <th>Ngày học</th>
-                            <th>Giờ bắt đầu</th>
-                            <th>Giờ kết thúc</th>
-                           
-                            <th>Giảng viên</th>
-                            <th>Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (Model.ClassSchedule != null && Model.ClassSchedule.Any())
-                        {
-                            @foreach (var session in Model.ClassSchedule.OrderBy(s => s.Date).ThenBy(s => s.StartTime))
-                            {
-                                <tr>
-                                    
-                                    <td>@session.DayOfWeek</td>
-                                    <td>@session.Date.ToString("dd/MM/yyyy")</td>
-                                    <td>@session.StartTime</td>
-                                    <td>@session.EndTime</td>
-                                   
-                                    <td>@session.TeacherName</td>
-                                    <td class="action-links">
-                                        <a href="#">Chi tiết</a>
-                                    </td>
-                                </tr>
-                            }
-                        }
-                        else
-                        {
-                            <tr>
-                                <td colspan="8">Không có lịch học nào.</td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        </section>
 
         <section class="card-section">
             <div class="section-header">
@@ -411,3 +393,183 @@
     </div>
 </footer>
 
+@section Scripts {
+<script>
+    let allClassScheduleData = [];
+    const classIdForSchedule = parseInt("@Model.StudentClassId");
+
+    function formatDate(date) {
+        const d = new Date(date);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    function mapDayOfWeekToVietnamese(day) {
+        const map = {
+            "Monday": "Thứ 2",
+            "Tuesday": "Thứ 3",
+            "Wednesday": "Thứ 4",
+            "Thursday": "Thứ 5",
+            "Friday": "Thứ 6",
+            "Saturday": "Thứ 7",
+            "Sunday": "Chủ Nhật"
+        };
+        return map[day] || day;
+    }
+
+    function renderSchedule(scheduleData) {
+        const tableBody = document.getElementById("scheduleTableBody");
+        tableBody.innerHTML = "";
+
+        if (!scheduleData || scheduleData.length === 0) {
+            const row = tableBody.insertRow();
+            const cell = row.insertCell();
+            cell.colSpan = 8;
+            cell.textContent = "Không có lịch học nào trong tuần này.";
+            cell.style.textAlign = "center";
+            return;
+        }
+
+        for (const item of scheduleData) {
+            const row = tableBody.insertRow();
+            row.insertCell().textContent = item.courseName || "N/A";
+            row.insertCell().textContent = mapDayOfWeekToVietnamese(item.dayOfWeek);
+            row.insertCell().textContent = formatDate(item.date);
+            row.insertCell().textContent = item.startTime;
+            row.insertCell().textContent = item.endTime;
+            row.insertCell().textContent = item.room || "N/A";
+            row.insertCell().textContent = item.teacherName || "N/A";
+
+            const actionCell = row.insertCell();
+            const detailLink = document.createElement("a");
+            detailLink.href = "#";
+            detailLink.textContent = "Chi tiết";
+            actionCell.appendChild(detailLink);
+            actionCell.classList.add("action-links");
+        }
+    }
+
+    function getCurrentWeekStart() {
+        const today = new Date();
+        const day = today.getDay();
+        const diff = today.getDate() - (day === 0 ? 6 : day - 1);
+        const monday = new Date(today.setDate(diff));
+        monday.setHours(0, 0, 0, 0);
+        return monday;
+    }
+
+    function populateWeekSelector() {
+        const weekSelector = document.getElementById("weekSelector");
+        weekSelector.innerHTML = "";
+
+        const base = getCurrentWeekStart();
+        const weeks = [];
+
+        for (let i = -4; i <= 4; i++) {
+            const start = new Date(base);
+            start.setDate(start.getDate() + i * 7);
+            const end = new Date(start);
+            end.setDate(start.getDate() + 6);
+
+            const label = `Tuần ${formatDate(start)} - ${formatDate(end)}`;
+            const option = document.createElement("option");
+            option.value = start.toISOString().split("T")[0];
+            option.textContent = label;
+
+            if (i === 0) option.selected = true;
+
+            weekSelector.appendChild(option);
+        }
+
+        return weekSelector.value;
+    }
+
+    function displayScheduleForWeek(weekStartDateStr) {
+        const weekStart = new Date(weekStartDateStr);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+
+        const filtered = allClassScheduleData.filter(item => {
+            const d = new Date(item.date);
+            return d >= weekStart && d <= weekEnd;
+        });
+
+        renderSchedule(filtered);
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+        if (!classIdForSchedule || isNaN(classIdForSchedule)) {
+            console.error("Lỗi: classIdForSchedule không hợp lệ.");
+            return;
+        }
+
+        try {
+            // Get class
+            const classRes = await fetch(`https://api-ielts-cgn8.onrender.com/api/Class/${classIdForSchedule}`);
+            const classData = await classRes.json();
+
+            const courseId = classData.courseId || 0;
+            const teacherId = classData.teacherId || 0;
+            const roomName = classData.room || classData.name || "Phòng học";
+
+            // Get course
+            let courseName = "Môn học";
+            if (courseId) {
+                const courseRes = await fetch(`https://api-ielts-cgn8.onrender.com/api/Course/${courseId}`);
+                if (courseRes.ok) {
+                    const course = await courseRes.json();
+                    courseName = course.name;
+                }
+            }
+
+            // Get teacher
+            let teacherName = "Giảng viên";
+            if (teacherId) {
+                const teacherRes = await fetch(`https://api-ielts-cgn8.onrender.com/api/Teacher/${teacherId}`);
+                if (teacherRes.ok) {
+                    const teacher = await teacherRes.json();
+                    teacherName = teacher.name;
+                }
+            }
+
+            // Get schedule
+            const scheduleRes = await fetch(`https://api-ielts-cgn8.onrender.com/api/Class/${classIdForSchedule}/studydays`);
+            const rawSchedule = await scheduleRes.json();
+
+            // Fake date for recurring schedule: Convert dayOfWeek to next date
+            const today = new Date();
+            allClassScheduleData = rawSchedule.map(s => {
+                const dow = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                const targetDow = dow.indexOf(s.dayOfWeek);
+                const currentDow = today.getDay();
+                const offset = (targetDow + 7 - currentDow) % 7;
+                const targetDate = new Date(today);
+                targetDate.setDate(today.getDate() + offset);
+
+                return {
+                    courseName,
+                    dayOfWeek: s.dayOfWeek,
+                    date: targetDate,
+                    startTime: s.startTime,
+                    endTime: s.endTime,
+                    room: roomName,
+                    teacherName
+                };
+            });
+
+            const defaultWeek = populateWeekSelector();
+            displayScheduleForWeek(defaultWeek);
+
+            document.getElementById("weekSelector").addEventListener("change", e => {
+                displayScheduleForWeek(e.target.value);
+            });
+
+        } catch (err) {
+            console.error("Lỗi khi tải dữ liệu lịch học:", err);
+        }
+    });
+</script>
+
+}
