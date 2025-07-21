@@ -1,0 +1,141 @@
+@page
+@model api.Pages.User.Students.DoExamModel
+@{
+    ViewData["Title"] = "Làm bài thi";
+    Layout = "~/Pages/Shared/_LayoutStudent.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/site-student.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    .exam-do-main {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+        max-width: 820px;
+        margin: 40px auto 32px auto;
+        padding: 32px 32px 24px 32px;
+    }
+    .exam-do-header {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #d32f2f;
+        margin-bottom: 18px;
+        text-align: center;
+    }
+    .question-block {
+        margin-bottom: 28px;
+        padding: 18px 18px 12px 18px;
+        border-radius: 8px;
+        background: #fafbfc;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.03);
+    }
+    .question-title {
+        font-weight: 600;
+        color: #222;
+        margin-bottom: 10px;
+    }
+    .choices-list label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+    .input-answer {
+        width: 100%;
+        padding: 8px 12px;
+        border-radius: 4px;
+        border: 1px solid #d1d5db;
+        font-size: 1rem;
+        margin-top: 6px;
+    }
+    .exam-actions {
+        text-align: center;
+        margin-top: 24px;
+    }
+    .btn-submit-exam {
+        background: #d32f2f;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 12px 36px;
+        font-weight: 600;
+        font-size: 1.1em;
+        transition: background 0.2s;
+    }
+    .btn-submit-exam:hover {
+        background: #b91c1c;
+    }
+    .timer {
+        font-size: 1.2em;
+        color: #007bff;
+        font-weight: 600;
+        margin-bottom: 18px;
+        text-align: right;
+    }
+</style>
+
+<div class="exam-do-main">
+    <div class="exam-do-header">
+        <i class="fas fa-pen-alt"></i> @Model.Exam.Title
+    </div>
+    <div>
+        <strong>Thời gian làm bài:</strong> @Model.Exam.DurationMinutes phút
+        <br />
+        <strong>Số câu hỏi:</strong> @(Model.Questions?.Count ?? 0)
+    </div>
+    <div class="timer" id="timer"></div>
+    <form method="post" id="examForm">
+        @for (int i = 0; i < Model.Questions.Count; i++)
+        {
+            var q = Model.Questions[i];
+            <div class="question-block">
+                <div class="question-title">
+                    Câu @(i + 1): @q.Content
+                </div>
+                @if (q.IsMultipleChoice)
+                {
+                    <div class="choices-list">
+                        @for (int j = 0; j < q.Choices.Count; j++)
+                        {
+                            <label>
+                                <input type="radio" name="Answers[@i]" value="@j" required />
+                                @q.Choices[j]
+                            </label>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <input type="text" name="Answers[@i]" class="input-answer" placeholder="Nhập đáp án..." required />
+                }
+            </div>
+        }
+        <div class="exam-actions">
+            <button type="submit" class="btn-submit-exam">
+                <i class="fas fa-paper-plane"></i> Nộp bài
+            </button>
+        </div>
+        <input type="hidden" name="ExamId" value="@Model.Exam.ExamId" />
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    // Đếm ngược thời gian làm bài
+    let duration = @Model.Exam.DurationMinutes * 60;
+    let timerEl = document.getElementById('timer');
+    let form = document.getElementById('examForm');
+    let interval = setInterval(function() {
+        let m = Math.floor(duration / 60);
+        let s = duration % 60;
+        timerEl.textContent = "Thời gian còn lại: " + m + " phút " + s + " giây";
+        if (--duration < 0) {
+            clearInterval(interval);
+            timerEl.textContent = "Hết giờ! Bài sẽ được nộp tự động.";
+            form.submit();
+        }
+    }, 1000);
+</script>
+}

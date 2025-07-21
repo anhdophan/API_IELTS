@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
     using System.Collections.Generic;
     using System.Linq;
 
-    namespace api.Pages.User.Student
+    namespace api.Pages.User.Students
     {
         public class IndexModel : PageModel
         {
@@ -25,7 +25,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
                 if (string.IsNullOrEmpty(classIdStr))
                 {
-                    return RedirectToPage("/User/Student/Login");
+                    return RedirectToPage("/User/Students/Login");
                 }
 
                 StudentName = studentName ?? "Student";

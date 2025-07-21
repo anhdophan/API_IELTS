@@ -1,6 +1,10 @@
 {
   "Files": [
     {
+      "Id": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/css/calendar-style.css",
+      "PackagePath": "staticwebassets/css/calendar-style.css"
+    },
+    {
       "Id": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/css/home.css",
       "PackagePath": "staticwebassets/css/home.css"
     },

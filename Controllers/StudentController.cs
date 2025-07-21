@@ -158,6 +158,56 @@ namespace api.Controllers
             return Ok(filtered);
         }
 
+        // Update student score
+        [HttpPost("{studentId}/update-score")]
+        public async Task<IActionResult> UpdateStudentScoreAsync(string studentId)
+        {
+            // Lấy student
+            var student = await firebaseClient
+                .Child("Students")
+                .Child(studentId)
+                .OnceSingleAsync<Student>();
+            if (student == null)
+                return NotFound("Student not found.");
+
+            // Lấy tất cả kết quả Result của student này
+            var results = await firebaseClient.Child("Results").OnceAsync<Result>();
+            var studentResults = results
+                .Select(r => r.Object)
+                .Where(r => r.StudentId.ToString() == studentId)
+                .ToList();
+
+            if (!studentResults.Any())
+                return BadRequest("Student has no exam results.");
+
+            // Tính điểm từng bài thi, điểm trung bình (số và %)
+            double totalScore = studentResults.Sum(r => r.Score);
+            double totalMax = studentResults.Sum(r => r.TotalScore);
+            double avgScore = studentResults.Average(r => r.Score);
+            double avgPercent = totalMax > 0 ? (totalScore / totalMax) * 100 : 0;
+
+            // Lưu điểm trung bình vào trường Score của Student
+            student.Score = avgScore;
+
+            // (Có thể lưu thêm điểm % vào một trường khác nếu muốn, ví dụ: student.AvgPercent = avgPercent;)
+
+            // Cập nhật lại Student
+            await firebaseClient
+                .Child("Students")
+                .Child(studentId)
+                .PutAsync(student);
+
+            // Trả về thông tin điểm
+            return Ok(new
+            {
+                StudentId = student.StudentId,
+                Name = student.Name,
+                AvgScore = avgScore,
+                AvgPercent = avgPercent,
+                ExamScores = studentResults.Select(r => new { r.ExamId, r.Score, r.TotalScore })
+            });
+        }
+
         // Private helper to get all students
         private async Task<List<Student>> GetAllStudentsInternal()
         {

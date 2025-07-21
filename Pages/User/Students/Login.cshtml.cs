@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
-namespace api.Pages.User.Student
+namespace api.Pages.User.Students
 {
     public class LoginModel : PageModel
     {
@@ -69,7 +69,7 @@ namespace api.Pages.User.Student
                 HttpContext.Session.SetString("StudentEmail", student["email"]?.ToString() ?? "");
                 HttpContext.Session.SetString("StudentClass", student["class"]?.ToString() ?? "");
 
-                return RedirectToPage("/User/Student/Index");
+                return RedirectToPage("/User/Students/Index");
             }
         }
 

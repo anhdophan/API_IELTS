@@ -1,0 +1,76 @@
+@{
+    var studentName = ViewData["StudentName"]?.ToString() ?? "Student";
+    var studentAvatar = ViewData["StudentAvatar"]?.ToString() ?? "";
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <title>@ViewData["Title"] - L&T Education</title>
+    <link rel="stylesheet" href="~/css/site-student.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <div class="top-bar">
+            <div class="container">
+                <span class="welcome-text">
+                    <i class="fa-regular fa-user"></i> Hi, @studentName!
+                </span>
+
+                <div class="user-info">
+                    @if (!string.IsNullOrEmpty(studentAvatar))
+                    {
+                        <img src="@studentAvatar" alt="Avatar" class="avatar-img" />
+                    }
+                    else
+                    {
+                        <div class="user-avatar">
+                            @(studentName.Length > 1 ? studentName.Substring(0, 2).ToUpper() : "SD")
+                        </div>
+                    }
+
+                    <a href="/User/Students/Profile" title="Thông tin cá nhân" style="margin-left:8px;">
+                        <i class="fas fa-user-circle"></i> Hồ sơ
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <nav class="header-nav">
+            <div class="container">
+                <div class="logo">
+                    <a href="/">
+                        <img src="~/images/lt_logo.png" alt="L&T Education Logo">
+                        <span>HỆ THỐNG HỌC TRỰC TUYẾN</span>
+                    </a>
+                </div>
+                <div class="header-controls">
+                    <a href="#" class="lang-select"><i class="fas fa-globe"></i>Vietnamese (VI)</a>
+                    <a href="#"><i class="fas fa-bell"></i></a>
+                    <a href="#"><i class="fas fa-cog"></i></a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- BODY CONTENT -->
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <p>© 2025 L&T Education. All rights reserved. | 
+                <a href="#" style="color: white;">Chính sách bảo mật</a>
+            </p>
+        </div>
+    </footer>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

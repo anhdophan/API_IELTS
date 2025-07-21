@@ -1,0 +1,269 @@
+@page
+@model api.Pages.User.Students.ExamPageModel
+@{
+    ViewData["Title"] = "Thông tin bài thi";
+    Layout = "~/Pages/Shared/_LayoutStudent.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/site-student.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+        min-height: 100vh;
+    }
+    .exam-main-card {
+        background: #fff;
+        border-radius: 18px;
+        box-shadow: 0 8px 32px rgba(60,72,88,0.13), 0 1.5px 6px rgba(220,38,38,0.09);
+        max-width: 860px;
+        margin: 48px auto 36px auto;
+        padding: 0 0 36px 0;
+        border: 1.5px solid #e0e7ff;
+        transition: box-shadow 0.2s;
+    }
+    .exam-main-card:hover {
+        box-shadow: 0 12px 40px rgba(60,72,88,0.18), 0 2px 8px rgba(220,38,38,0.13);
+    }
+    .exam-header {
+        border-radius: 18px 18px 0 0;
+        background: linear-gradient(90deg, #f43f5e 0%, #fbbf24 100%);
+        padding: 32px 40px 18px 40px;
+        border-bottom: 2px solid #f1f5f9;
+        color: #fff;
+        position: relative;
+    }
+    .exam-header h1 {
+        font-size: 2.2rem;
+        font-weight: 800;
+        margin: 0 0 10px 0;
+        color: #fff;
+        letter-spacing: 1px;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    }
+    .exam-status {
+        margin-top: 10px;
+        margin-bottom: 0;
+    }
+    .exam-status .badge {
+        font-size: 1.08em;
+        padding: 7px 22px;
+        border-radius: 8px;
+        font-weight: 600;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        border: 1.5px solid #fff;
+        background: #fff;
+        color: #f43f5e;
+        margin-right: 10px;
+    }
+    .badge-success { background: #e0fce6; color: #16a34a; border-color: #bbf7d0; }
+    .badge-warning { background: #fef9c3; color: #b45309; border-color: #fde68a; }
+    .badge-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+    .badge-info { background: #dbeafe; color: #2563eb; border-color: #bfdbfe; }
+    .exam-info-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        font-size: 1.12em;
+        background: #f9fafb;
+        border-radius: 0 0 12px 12px;
+        overflow: hidden;
+    }
+    .exam-info-table td {
+        padding: 13px 32px 13px 44px;
+        border-bottom: 1px solid #f1f1f1;
+        color: #444;
+    }
+    .exam-info-table td.label {
+        font-weight: 700;
+        width: 200px;
+        color: #d32f2f;
+        letter-spacing: 0.5px;
+    }
+    .submission-section {
+        margin: 0 40px;
+        margin-top: 36px;
+    }
+    .submission-header {
+        font-size: 1.25em;
+        font-weight: 700;
+        margin-bottom: 16px;
+        color: #f43f5e;
+        letter-spacing: 0.5px;
+    }
+    .submission-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #f8fafc;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 22px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.03);
+    }
+    .submission-table td, .submission-table th {
+        padding: 12px 20px;
+        border-bottom: 1px solid #e9ecef;
+        font-size: 1.05em;
+    }
+    .submission-table th {
+        background: #f1f3f6;
+        font-weight: 700;
+        color: #f43f5e;
+        width: 210px;
+        letter-spacing: 0.5px;
+    }
+    .submission-actions {
+        text-align: right;
+        margin-top: 22px;
+    }
+    .btn-yellow {
+        background: linear-gradient(90deg, #fbbf24 60%, #f59e42 100%);
+        color: #222;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 36px;
+        font-weight: 700;
+        font-size: 1.12em;
+        margin-left: 8px;
+        transition: background 0.2s, color 0.2s;
+        box-shadow: 0 2px 8px rgba(251,191,36,0.08);
+    }
+    .btn-yellow:hover {
+        background: linear-gradient(90deg, #f59e42 0%, #fbbf24 100%);
+        color: #fff;
+    }
+    .text-muted {
+        color: #9ca3af !important;
+    }
+</style>
+
+<div class="exam-main-card">
+    <div class="exam-header">
+        <h1><i class="fas fa-file-alt"></i> @Model.Exam.Title</h1>
+        <div class="exam-status">
+            @if (Model.Result != null)
+            {
+                <span class="badge badge-success"><i class="fas fa-check"></i> Đã hoàn thành</span>
+            }
+            else
+            {
+                <span class="badge badge-warning"><i class="fas fa-clock"></i> Chưa làm bài</span>
+            }
+        </div>
+    </div>
+    <table class="exam-info-table">
+        <tr>
+            <td class="label">Ngày thi:</td>
+            <td>@Model.Exam.ExamDate.ToString("dddd, dd/MM/yyyy")</td>
+        </tr>
+        <tr>
+            <td class="label">Thời gian mở:</td>
+            <td>@Model.Exam.StartTime.ToString("HH:mm dd/MM/yyyy")</td>
+        </tr>
+        <tr>
+            <td class="label">Thời gian đóng:</td>
+            <td>@Model.Exam.EndTime.ToString("HH:mm dd/MM/yyyy")</td>
+        </tr>
+        <tr>
+            <td class="label">Thời lượng làm bài:</td>
+            <td>@Model.Exam.DurationMinutes phút</td>
+        </tr>
+        <tr>
+            <td class="label">Tổng điểm:</td>
+            <td>@(Model.Exam.Questions?.Sum(q => q.Score) ?? 0)</td>
+        </tr>
+    </table>
+
+    <div class="submission-section">
+        <div class="submission-header"><i class="fas fa-clipboard-check"></i> Trạng thái nộp bài</div>
+        <table class="submission-table">
+            <tr>
+                <th>Trạng thái</th>
+                <td>
+                    @if (Model.Result != null)
+                    {
+                        <span class="badge badge-success">Đã nộp bài</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-danger">Chưa nộp bài</span>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <th>Điểm số</th>
+                <td>
+                    @if (Model.Result != null)
+                    {
+                        <span style="color:#f59e42;font-weight:700;">
+                            @Model.Result.Score / @Model.Result.TotalScore
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">--</span>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <th>Thời gian nộp</th>
+                <td>
+                    @if (Model.Result != null)
+                    {
+                        <span style="color:#2563eb;">
+                            @Model.Result.Timestamp.ToLocalTime().ToString("HH:mm dd/MM/yyyy")
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">--</span>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <th>Thời gian làm bài</th>
+                <td>
+                    @if (Model.Result != null)
+                    {
+                        <span style="color:#16a34a;">
+                            @(TimeSpan.FromSeconds(Model.Result.DurationSeconds).ToString(@"hh\:mm\:ss"))
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">--</span>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <th>Nhận xét</th>
+                <td>
+                    @if (Model.Result != null)
+                    {
+                        <span style="color:#f43f5e;">@Model.Result.Remark</span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">--</span>
+                    }
+                </td>
+            </tr>
+        </table>
+
+        <div class="submission-actions">
+            @if (Model.Result == null)
+            {
+                <a href="/User/Students/DoExam?examId=@Model.Exam.ExamId" class="btn btn-yellow">
+                    <i class="fas fa-edit"></i> Bắt đầu làm bài
+                </a>
+            }
+            else
+            {
+                <a href="/User/Students/Index" class="btn btn-yellow">
+                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                </a>
+            }
+        </div>
+    </div>
+</div>

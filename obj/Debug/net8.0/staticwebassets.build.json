@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "wmtOiwa65rqNC7J6ATTT3AsA2KlAAyiDG1HvjBfILMc=",
+  "Hash": "3xw+wdEpdUDFdki1DCPmBjDD1wSjQd+ztnT8ES/NB84=",
   "Source": "api",
   "BasePath": "_content/api",
   "Mode": "Default",
@@ -16,6 +16,25 @@
     }
   ],
   "Assets": [
+    {
+      "Identity": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/css/calendar-style.css",
+      "SourceId": "api",
+      "SourceType": "Discovered",
+      "ContentRoot": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/",
+      "BasePath": "_content/api",
+      "RelativePath": "css/calendar-style.css",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot/css/calendar-style.css"
+    },
     {
       "Identity": "/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/wwwroot/css/home.css",
       "SourceId": "api",
