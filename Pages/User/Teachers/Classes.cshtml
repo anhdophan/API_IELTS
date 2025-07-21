@@ -1,0 +1,31 @@
+@page
+@model api.Pages.User.Teachers.ClassesModel
+@{
+    ViewData["Title"] = "Lớp học của tôi";
+    Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
+}
+
+<h2>Lớp học của tôi</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Tên lớp</th>
+            <th>Khóa học</th>
+            <th>Số sinh viên</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cls in Model.Classes)
+        {
+            <tr>
+                <td>@cls.Name</td>
+                <td>@(Model.CourseNames.ContainsKey(cls.CourseId) ? Model.CourseNames[cls.CourseId] : cls.CourseId.ToString())</td>
+                <td>@cls.StudentIds.Count</td>
+                <td>
+                    <a href="/User/Teachers/ClassDetail?classId=@cls.ClassId" class="btn btn-primary btn-sm">Chi tiết</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

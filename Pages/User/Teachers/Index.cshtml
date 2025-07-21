@@ -1,0 +1,39 @@
+@page
+@model api.Pages.User.Teachers.IndexModel
+@{
+    ViewData["Title"] = "Giảng viên - Dashboard";
+    Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
+}
+
+<div class="teacher-dashboard">
+    <h2>Chào mừng, @Model.Teacher.Name!</h2>
+    <div class="dashboard-cards">
+        <a href="/User/Teachers/Classes" class="dashboard-card">
+            <i class="fas fa-users"></i>
+            <div>
+                <strong>@Model.Classes.Count</strong>
+                <span>Lớp đang dạy</span>
+            </div>
+        </a>
+        <a href="/User/Teachers/Exams" class="dashboard-card">
+            <i class="fas fa-file-alt"></i>
+            <div>
+                <strong>@Model.Exams.Count</strong>
+                <span>Bài thi đã tạo</span>
+            </div>
+        </a>
+        <a href="/User/Teachers/Questions" class="dashboard-card">
+            <i class="fas fa-question"></i>
+            <div>
+                <strong>@Model.Questions.Count</strong>
+                <span>Câu hỏi</span>
+            </div>
+        </a>
+        <a href="/User/Teachers/Profile" class="dashboard-card">
+            <i class="fas fa-user"></i>
+            <div>
+                <span>Thông tin cá nhân</span>
+            </div>
+        </a>
+    </div>
+</div>

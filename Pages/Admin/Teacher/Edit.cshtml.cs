@@ -34,10 +34,17 @@ namespace api.Pages.Admin.Teachers
             return Page();
         }
 
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync(IFormFile AvatarUpload)
         {
             if (!ModelState.IsValid)
                 return Page();
+
+            // Xử lý upload avatar
+            if (AvatarUpload != null && AvatarUpload.Length > 0)
+            {
+                // TODO: Upload lên cloud hoặc lưu server, ở đây chỉ demo lấy tên file
+                Teacher.Avatar = "/uploads/" + System.IO.Path.GetFileName(AvatarUpload.FileName);
+            }
 
             var client = _clientFactory.CreateClient();
             var json = JsonConvert.SerializeObject(Teacher);

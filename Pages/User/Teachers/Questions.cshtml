@@ -1,0 +1,41 @@
+@page
+@model api.Pages.User.Teachers.QuestionsModel
+@{
+    ViewData["Title"] = "Quản lý câu hỏi";
+    Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
+}
+
+<h2>Ngân hàng câu hỏi</h2>
+<a href="/User/Teachers/CreateQuestion" class="btn btn-success mb-3"><i class="fas fa-plus"></i> Thêm câu hỏi</a>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nội dung</th>
+            <th>Loại</th>
+            <th>Đáp án đúng</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var q in Model.Questions)
+        {
+            <tr>
+                <td>@q.Content</td>
+                <td>@(q.IsMultipleChoice ? "Trắc nghiệm" : "Tự luận")</td>
+                <td>
+                    @if (q.IsMultipleChoice)
+                    {
+                        @q.Choices[q.CorrectAnswerIndex ?? 0]
+                    }
+                    else
+                    {
+                        @q.CorrectInputAnswer
+                    }
+                </td>
+                <td>
+                    <a href="/User/Teachers/EditQuestion?questionId=@q.QuestionId" class="btn btn-primary btn-sm">Sửa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

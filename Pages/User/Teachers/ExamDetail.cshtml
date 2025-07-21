@@ -1,0 +1,34 @@
+@page
+@model api.Pages.User.Teachers.ExamDetailModel
+@{
+    ViewData["Title"] = "Chi tiết bài thi";
+    Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
+}
+
+<h2>@Model.Exam.Title</h2>
+<p>Lớp: @Model.Exam.IdClass | Ngày thi: @Model.Exam.ExamDate.ToString("dd/MM/yyyy")</p>
+
+<h4>Kết quả sinh viên</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Mã SV</th>
+            <th>Họ tên</th>
+            <th>Điểm</th>
+            <th>Điểm tối đa</th>
+            <th>Thời gian nộp</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var result in Model.Results)
+        {
+            <tr>
+                <td>@result.StudentId</td>
+                <td>@result.StudentId</td>
+                <td>@result.Score</td>
+                <td>@result.TotalScore</td>
+                <td>@result.Timestamp.ToString("HH:mm dd/MM/yyyy")</td>
+            </tr>
+        }
+    </tbody>
+</table>

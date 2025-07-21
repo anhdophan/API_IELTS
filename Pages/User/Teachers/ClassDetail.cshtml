@@ -1,0 +1,34 @@
+@page
+@model api.Pages.User.Teachers.ClassDetailModel
+@{
+    ViewData["Title"] = "Chi tiết lớp";
+    Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
+}
+
+<h2>Lớp: @Model.Class.Name</h2>
+<h4>Danh sách sinh viên</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Mã SV</th>
+            <th>Họ tên</th>
+            <th>Email</th>
+            <th>Điểm TB</th>
+            <th>Hành động</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var student in Model.Students)
+        {
+            <tr>
+                <td>@student.StudentId</td>
+                <td>@student.Name</td>
+                <td>@student.Email</td>
+                <td>@student.Score</td>
+                <td>
+                    <a href="/User/Teachers/StudentScore?studentId=@student.StudentId" class="btn btn-info btn-sm">Xem điểm</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

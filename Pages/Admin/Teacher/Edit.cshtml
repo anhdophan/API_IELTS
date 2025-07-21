@@ -32,8 +32,41 @@
         <input asp-for="Teacher.Password" class="form-control" />
         <span asp-validation-for="Teacher.Password" class="text-danger"></span>
     </div>
+    <div class="form-group">
+        <label asp-for="Teacher.Avatar"></label>
+        <input asp-for="Teacher.Avatar" class="form-control" readonly />
+    </div>
+    <div class="form-group">
+        <label>Upload Avatar</label>
+        <input type="file" name="AvatarUpload" class="form-control" accept="image/*" id="AvatarUploadInput" />
+        <img id="AvatarPreview" class="img-preview" style="display:none;max-width:80px;border-radius:50%;" alt="Avatar preview" />
+    </div>
 
     <button type="submit" class="btn btn-success">Save</button>
     <a asp-page="Index" class="btn btn-secondary">Cancel</a>
 </form>
 <partial name="_ValidationScriptsPartial" />
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const input = document.getElementById('AvatarUploadInput');
+            const preview = document.getElementById('AvatarPreview');
+            if (input) {
+                input.addEventListener('change', function (e) {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function (ev) {
+                            preview.src = ev.target.result;
+                            preview.style.display = 'block';
+                        };
+                        reader.readAsDataURL(file);
+                    } else {
+                        preview.src = '';
+                        preview.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+}
