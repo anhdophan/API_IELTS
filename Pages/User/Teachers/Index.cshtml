@@ -1,39 +1,191 @@
 @page
 @model api.Pages.User.Teachers.IndexModel
 @{
-    ViewData["Title"] = "Giảng viên - Dashboard";
+    ViewData["Title"] = "L&T Education - HỆ Thống Giảng Viên";
     Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
+    ViewData["TeacherName"] = Model.Teacher.Name;
+    ViewData["TeacherAvatar"] = Model.Teacher.Avatar;
 }
 
-<div class="teacher-dashboard">
-    <h2>Chào mừng, @Model.Teacher.Name!</h2>
-    <div class="dashboard-cards">
-        <a href="/User/Teachers/Classes" class="dashboard-card">
-            <i class="fas fa-users"></i>
-            <div>
-                <strong>@Model.Classes.Count</strong>
-                <span>Lớp đang dạy</span>
+<link rel="stylesheet" href="~/css/site-teacher.css" asp-append-version="true" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<section class="banner">
+    <div class="container">
+        <div class="banner-main-content">
+            @if (!string.IsNullOrEmpty(Model.Teacher.Avatar))
+            {
+                <img src="@Model.Teacher.Avatar" alt="Avatar" class="teacher-banner-avatar" />
+            }
+            <h1>Chào mừng giảng viên<br>@Model.Teacher.Name</h1>
+            <p>Đây là hệ thống quản lý giảng dạy trực tuyến của L&T Education!</p>
+            <div class="banner-info-boxes">
+                <div class="banner-info-box">
+                    <strong>@Model.Classes.Count</strong>
+                    <span>Lớp đang dạy</span>
+                </div>
+                <div class="banner-info-box">
+                    <strong>@Model.Exams.Count</strong>
+                    <span>Bài thi đã tạo</span>
+                </div>
+                <div class="banner-info-box">
+                    <strong>@Model.Questions.Count</strong>
+                    <span>Câu hỏi</span>
+                </div>
             </div>
-        </a>
-        <a href="/User/Teachers/Exams" class="dashboard-card">
-            <i class="fas fa-file-alt"></i>
-            <div>
-                <strong>@Model.Exams.Count</strong>
-                <span>Bài thi đã tạo</span>
-            </div>
-        </a>
-        <a href="/User/Teachers/Questions" class="dashboard-card">
-            <i class="fas fa-question"></i>
-            <div>
-                <strong>@Model.Questions.Count</strong>
-                <span>Câu hỏi</span>
-            </div>
-        </a>
-        <a href="/User/Teachers/Profile" class="dashboard-card">
-            <i class="fas fa-user"></i>
-            <div>
-                <span>Thông tin cá nhân</span>
-            </div>
-        </a>
+        </div>
     </div>
-</div>
+</section>
+
+<main class="main-content">
+    <div class="container">
+        <section class="icon-boxes-small">
+            <a href="/User/Teachers/Classes" class="icon-box-small">
+                <i class="fas fa-users"></i>
+                <p>Lớp học</p>
+            </a>
+            <a href="/User/Teachers/Exams" class="icon-box-small">
+                <i class="fas fa-file-alt"></i>
+                <p>Bài thi</p>
+            </a>
+            <a href="/User/Teachers/Questions" class="icon-box-small">
+                <i class="fas fa-question"></i>
+                <p>Ngân hàng câu hỏi</p>
+            </a>
+            <a href="/User/Teachers/Profile" class="icon-box-small">
+                <i class="fas fa-user-circle"></i>
+                <p>Thông tin cá nhân</p>
+            </a>
+        </section>
+
+        <section class="card-section">
+            <div class="section-header">
+                <h2>Lịch thi sắp tới</h2>
+                <a href="/User/Teachers/Exams" class="view-all">Xem tất cả</a>
+            </div>
+            <div class="notification-list">
+                <ul>
+                    @if (Model.Exams != null && Model.Exams.Any())
+                    {
+                        foreach (var exam in Model.Exams.OrderBy(e => e.ExamDate).Take(3))
+                        {
+                            <li>
+                                <div class="date">
+                                    <span>@exam.ExamDate.Day</span>Tháng @exam.ExamDate.Month
+                                </div>
+                                <div class="content">
+                                    <strong>
+                                        <a href="/User/Teachers/ExamDetail?examId=@exam.ExamId" style="color:inherit;text-decoration:underline;">
+                                            [Lịch thi] @exam.Title
+                                        </a>
+                                    </strong>
+                                    <p>Bắt đầu: @exam.StartTime.ToString("HH:mm dd/MM/yyyy")</p>
+                                    <p>Kết thúc: @exam.EndTime.ToString("HH:mm dd/MM/yyyy")</p>
+                                </div>
+                                <div class="actions">
+                                    <a href="/User/Teachers/ExamDetail?examId=@exam.ExamId">Chi tiết</a>
+                                </div>
+                            </li>
+                        }
+                    }
+                    else
+                    {
+                        <li>
+                            <div class="content">Không có lịch thi nào sắp tới.</div>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </section>
+
+        <section class="feature-cards">
+            <a href="/User/Teachers/Classes" class="feature-card">
+                <div class="icon"><i class="fas fa-chalkboard-teacher"></i></div>
+                <div class="content">
+                    <h4>Quản lý lớp học</h4>
+                    <p>Xem, chỉnh sửa danh sách lớp, sinh viên và lịch học.</p>
+                    <span class="view-more">Xem chi tiết</span>
+                </div>
+            </a>
+            <a href="/User/Teachers/Exams" class="feature-card">
+                <div class="icon"><i class="fas fa-file-alt"></i></div>
+                <div class="content">
+                    <h4>Quản lý bài thi</h4>
+                    <p>Tạo, chỉnh sửa, xem kết quả các bài thi của bạn.</p>
+                    <span class="view-more">Xem chi tiết</span>
+                </div>
+            </a>
+            <a href="/User/Teachers/Questions" class="feature-card">
+                <div class="icon"><i class="fas fa-question"></i></div>
+                <div class="content">
+                    <h4>Ngân hàng câu hỏi</h4>
+                    <p>Quản lý, thêm mới, chỉnh sửa các câu hỏi trắc nghiệm và tự luận.</p>
+                    <span class="view-more">Xem chi tiết</span>
+                </div>
+            </a>
+            <a href="/User/Teachers/Profile" class="feature-card">
+                <div class="icon"><i class="fas fa-user"></i></div>
+                <div class="content">
+                    <h4>Thông tin cá nhân</h4>
+                    <p>Cập nhật thông tin, đổi mật khẩu, thay đổi avatar.</p>
+                    <span class="view-more">Xem chi tiết</span>
+                </div>
+            </a>
+        </section>
+
+        <section class="card-section">
+            <div class="section-header">
+                <h2>Lịch dạy</h2>
+                <a href="/User/Teachers/Classes" class="view-all">Xem toàn bộ</a>
+            </div>
+            <div class="table-section">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Lớp</th>
+                            <th>Ngày học</th>
+                            <th>Giờ bắt đầu</th>
+                            <th>Giờ kết thúc</th>
+                            <th>Phòng học</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @* Bạn có thể lấy lịch dạy từ Model hoặc API, ví dụ: Model.TeachingSchedules *@
+                        <tr>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                            <td>...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card-section">
+            <div class="section-header">
+                <h2>Hoạt động giảng dạy</h2>
+                <a href="#" class="view-all">Xem tất cả</a>
+            </div>
+            <div class="colorful-grid">
+                <a href="/User/Teachers/Exams" class="grid-item-colored blue">
+                    <i class="fas fa-file-alt"></i>
+                    <h4>Chấm điểm</h4>
+                </a>
+                <a href="/User/Teachers/Questions" class="grid-item-colored pink">
+                    <i class="fas fa-question"></i>
+                    <h4>Soạn câu hỏi</h4>
+                </a>
+                <a href="/User/Teachers/Classes" class="grid-item-colored purple">
+                    <i class="fas fa-users"></i>
+                    <h4>Quản lý lớp</h4>
+                </a>
+                <a href="/User/Teachers/Profile" class="grid-item-colored orange">
+                    <i class="fas fa-user"></i>
+                    <h4>Hồ sơ</h4>
+                </a>
+            </div>
+        </section>
+    </div>
+</main>

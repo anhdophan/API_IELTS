@@ -203,5 +203,95 @@ namespace api.Controllers
             return Ok(result);
         }
         
+        [HttpGet("{teacherId}/schedule")]
+        public async Task<ActionResult<List<object>>> GetTeachingSchedule(string teacherId)
+        {
+            var teacher = await firebaseClient
+                .Child("Teachers")
+                .Child(teacherId)
+                .OnceSingleAsync<Teacher>();
+
+            if (teacher == null || teacher.ClassIds == null)
+                return Ok(new List<object>());
+
+            var scheduleList = new List<object>();
+
+            foreach (var classId in teacher.ClassIds)
+            {
+                var cls = await firebaseClient.Child("Classes").Child(classId.ToString()).OnceSingleAsync<Class>();
+                if (cls == null || cls.Schedule == null) continue;
+
+                // Duyệt từng ngày trong khoảng thời gian của lớp
+                for (var date = cls.StartDate.Date; date <= cls.EndDate.Date; date = date.AddDays(1))
+                {
+                    foreach (var sched in cls.Schedule)
+                    {
+                        if (Enum.TryParse<DayOfWeek>(sched.DayOfWeek, true, out var dow) && date.DayOfWeek == dow)
+                        {
+                            scheduleList.Add(new
+                            {
+                                ClassId = cls.ClassId,
+                                ClassName = cls.Name,
+                                Date = date,
+                                DayOfWeek = sched.DayOfWeek,
+                                StartTime = sched.StartTime,
+                                EndTime = sched.EndTime,
+                                Room = cls.Name // Tên lớp cũng là tên phòng học
+                            });
+                        }
+                    }
+                }
+            }
+
+            return Ok(scheduleList.OrderBy(s => ((DateTime)s.GetType().GetProperty("Date").GetValue(s))).ToList());
+        }
+
+        [HttpGet("{teacherId}/examschedule")]
+        public async Task<ActionResult<List<object>>> GetTeachingExamSchedule(string teacherId)
+        {
+            var teacher = await firebaseClient
+                .Child("Teachers")
+                .Child(teacherId)
+                .OnceSingleAsync<Teacher>();
+
+            if (teacher == null || teacher.ClassIds == null)
+                return Ok(new List<object>());
+
+            var allExams = new List<object>();
+
+            foreach (var classId in teacher.ClassIds)
+            {
+                var httpClient = new HttpClient();
+                var examJson = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Exam/class/{classId}");
+                List<Exam> exams;
+                try
+                {
+                    exams = JsonConvert.DeserializeObject<List<Exam>>(examJson);
+                }
+                catch
+                {
+                    var dict = JsonConvert.DeserializeObject<Dictionary<string, Exam>>(examJson);
+                    exams = dict?.Values.ToList() ?? new List<Exam>();
+                }
+                if (exams != null)
+                {
+                    foreach (var exam in exams)
+                    {
+                        allExams.Add(new
+                        {
+                            ExamId = exam.ExamId,
+                            Title = exam.Title,
+                            ExamDate = exam.ExamDate,
+                            StartTime = exam.StartTime,
+                            EndTime = exam.EndTime,
+                            ClassId = exam.IdClass,
+                            Room = exam.ClassName ?? exam.IdClass.ToString() // Tên lớp cũng là tên phòng học
+                        });
+                    }
+                }
+            }
+
+            return Ok(allExams.OrderBy(e => ((DateTime)e.GetType().GetProperty("ExamDate").GetValue(e))).ToList());
+        }
     }
 }

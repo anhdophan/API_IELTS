@@ -13,6 +13,7 @@ namespace api.Pages.User.Teachers
         public List<Class> Classes { get; set; } = new();
         public List<Exam> Exams { get; set; } = new();
         public List<Question> Questions { get; set; } = new();
+        public List<Course> Courses { get; set; } = new();
 
         public async Task OnGetAsync()
         {
@@ -22,14 +23,69 @@ namespace api.Pages.User.Teachers
             var teacherRes = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Teacher/{teacherId}");
             Teacher = JsonConvert.DeserializeObject<Teacher>(teacherRes);
 
-            var classesRes = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Class/teacher/{teacherId}");
-            Classes = JsonConvert.DeserializeObject<List<Class>>(classesRes);
+            // Lấy danh sách lớp
+            try
+            {
+                var classRes = await httpClient.GetStringAsync("https://api-ielts-cgn8.onrender.com/api/Class/all");
+                List<Class> classes = new();
+                try
+                {
+                    classes = JsonConvert.DeserializeObject<List<Class>>(classRes);
+                }
+                catch
+                {
+                    var dict = JsonConvert.DeserializeObject<Dictionary<string, Class>>(classRes);
+                    classes = dict?.Values.ToList() ?? new List<Class>();
+                }
+                Classes = classes;
+            }
+            catch
+            {
+                Classes = new List<Class>();
+            }
 
-            var examsRes = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Exam/teacher/{teacherId}");
-            Exams = JsonConvert.DeserializeObject<List<Exam>>(examsRes);
+            // Lấy danh sách bài thi
+            try
+            {
+                var examsRes = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Exam/teacher/{teacherId}");
+                Exams = JsonConvert.DeserializeObject<List<Exam>>(examsRes);
+            }
+            catch
+            {
+                Exams = new List<Exam>();
+            }
 
-            var questionsRes = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Question/teacher/{teacherId}");
-            Questions = JsonConvert.DeserializeObject<List<Question>>(questionsRes);
+            // Lấy danh sách câu hỏi
+            try
+            {
+                var questionsRes = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Question/teacher/{teacherId}");
+                Questions = JsonConvert.DeserializeObject<List<Question>>(questionsRes);
+            }
+            catch
+            {
+                Questions = new List<Question>();
+            }
+
+            // Lấy danh sách khóa học
+            try
+            {
+                var courseRes = await httpClient.GetStringAsync("https://api-ielts-cgn8.onrender.com/api/Course/all");
+                List<Course> courses = new();
+                try
+                {
+                    courses = JsonConvert.DeserializeObject<List<Course>>(courseRes);
+                }
+                catch
+                {
+                    var dict = JsonConvert.DeserializeObject<Dictionary<string, Course>>(courseRes);
+                    courses = dict?.Values.ToList() ?? new List<Course>();
+                }
+                Courses = courses;
+            }
+            catch
+            {
+                Courses = new List<Course>();
+            }
         }
     }
 }
