@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using api.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace api.Pages.User.Teachers
 {
@@ -14,14 +15,42 @@ namespace api.Pages.User.Teachers
         public List<Exam> Exams { get; set; } = new();
         public List<Question> Questions { get; set; } = new();
         public List<Course> Courses { get; set; } = new();
+        public List<TeachingScheduleInfo> TeachingSchedules { get; set; } = new();
+        public List<ExamInfo> UpcomingExams { get; set; } = new();
 
-        public async Task OnGetAsync()
+        public async Task<IActionResult> OnGetAsync()
         {
             var teacherId = HttpContext.Session.GetString("TeacherId");
+            if (string.IsNullOrEmpty(teacherId))
+                return RedirectToPage("/User/Teachers/Login");
+
             using var httpClient = new HttpClient();
 
+            // Lấy thông tin Teacher
             var teacherRes = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Teacher/{teacherId}");
             Teacher = JsonConvert.DeserializeObject<Teacher>(teacherRes);
+
+            // Lấy lịch học
+            try
+            {
+                var scheduleRes = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Teacher/{teacherId}/schedule");
+                TeachingSchedules = JsonConvert.DeserializeObject<List<TeachingScheduleInfo>>(scheduleRes) ?? new List<TeachingScheduleInfo>();
+            }
+            catch
+            {
+                TeachingSchedules = new List<TeachingScheduleInfo>();
+            }
+
+            // Lấy lịch thi
+            try
+            {
+                var examRes = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Teacher/{teacherId}/examschedule");
+                UpcomingExams = JsonConvert.DeserializeObject<List<ExamInfo>>(examRes) ?? new List<ExamInfo>();
+            }
+            catch
+            {
+                UpcomingExams = new List<ExamInfo>();
+            }
 
             // Lấy danh sách lớp
             try
@@ -86,6 +115,30 @@ namespace api.Pages.User.Teachers
             {
                 Courses = new List<Course>();
             }
+
+            return Page();
         }
+    }
+
+    public class TeachingScheduleInfo
+    {
+        public int ClassId { get; set; }
+        public string ClassName { get; set; }
+        public DateTime Date { get; set; }
+        public string DayOfWeek { get; set; }
+        public string StartTime { get; set; }
+        public string EndTime { get; set; }
+        public string Room { get; set; }
+    }
+
+    public class ExamInfo
+    {
+        public int ExamId { get; set; }
+        public string Title { get; set; }
+        public DateTime ExamDate { get; set; }
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+        public int ClassId { get; set; }
+        public string Room { get; set; }
     }
 }

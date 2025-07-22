@@ -1,5 +1,6 @@
 @page
 @model api.Pages.User.Teachers.IndexModel
+@using Newtonsoft.Json
 @{
     ViewData["Title"] = "L&T Education - HỆ Thống Giảng Viên";
     Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
@@ -65,9 +66,9 @@
             </div>
             <div class="notification-list">
                 <ul>
-                    @if (Model.Exams != null && Model.Exams.Any())
+                    @if (Model.UpcomingExams != null && Model.UpcomingExams.Any())
                     {
-                        foreach (var exam in Model.Exams.OrderBy(e => e.ExamDate).Take(3))
+                        foreach (var exam in Model.UpcomingExams.OrderBy(e => e.ExamDate).Take(3))
                         {
                             <li>
                                 <div class="date">
@@ -139,25 +140,23 @@
                 <a href="/User/Teachers/Classes" class="view-all">Xem toàn bộ</a>
             </div>
             <div class="table-section">
+                <div class="week-selector-container">
+                    <label for="weekSelector">Chọn tuần:</label>
+                    <select id="weekSelector" class="form-control"></select>
+                </div>
                 <table>
                     <thead>
                         <tr>
                             <th>Lớp</th>
                             <th>Ngày học</th>
+                            <th>Thứ</th>
                             <th>Giờ bắt đầu</th>
                             <th>Giờ kết thúc</th>
                             <th>Phòng học</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @* Bạn có thể lấy lịch dạy từ Model hoặc API, ví dụ: Model.TeachingSchedules *@
-                        <tr>
-                            <td>...</td>
-                            <td>...</td>
-                            <td>...</td>
-                            <td>...</td>
-                            <td>...</td>
-                        </tr>
+                    <tbody id="teachingScheduleTableBody">
+                        <!-- Dữ liệu sẽ được render bằng JS -->
                     </tbody>
                 </table>
             </div>
@@ -189,3 +188,69 @@
         </section>
     </div>
 </main>
+
+<script>
+    // Dữ liệu lịch dạy từ backend
+    const teachingSchedules = @Html.Raw(JsonConvert.SerializeObject(Model.TeachingSchedules));
+
+    document.addEventListener("DOMContentLoaded", function () {
+        if (!Array.isArray(teachingSchedules)) return;
+
+        // Chuyển đổi Date string thành Date object
+        teachingSchedules.forEach(s => s.Date = new Date(s.Date));
+
+        // Nhóm lịch theo tuần (bắt đầu từ thứ 2)
+        function getMonday(d) {
+            d = new Date(d);
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.setDate(diff));
+        }
+
+        const groupedByWeek = {};
+        teachingSchedules.forEach(item => {
+            const weekStart = getMonday(item.Date).toISOString().split("T")[0];
+            if (!groupedByWeek[weekStart]) groupedByWeek[weekStart] = [];
+            groupedByWeek[weekStart].push(item);
+        });
+
+        // Tạo dropdown tuần
+        const weekSelector = document.getElementById("weekSelector");
+        Object.keys(groupedByWeek).sort().forEach((weekStart, idx) => {
+            const opt = document.createElement("option");
+            opt.value = weekStart;
+            opt.textContent = `Tuần bắt đầu ${weekStart}`;
+            if (idx === 0) opt.selected = true;
+            weekSelector.appendChild(opt);
+        });
+
+        // Render bảng cho tuần đầu tiên
+        renderRows(groupedByWeek[Object.keys(groupedByWeek)[0]]);
+
+        // Lắng nghe thay đổi tuần
+        weekSelector.addEventListener("change", function (e) {
+            renderRows(groupedByWeek[e.target.value]);
+        });
+
+        function renderRows(data) {
+            const tbody = document.getElementById("teachingScheduleTableBody");
+            tbody.innerHTML = "";
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;">Không có lịch dạy trong tuần này.</td></tr>`;
+                return;
+            }
+            data.sort((a, b) => a.Date - b.Date).forEach(item => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${item.ClassName}</td>
+                    <td>${item.Date ? new Date(item.Date).toLocaleDateString("vi-VN") : ""}</td>
+                    <td>${item.DayOfWeek}</td>
+                    <td>${item.StartTime}</td>
+                    <td>${item.EndTime}</td>
+                    <td>${item.Room}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+    });
+</script>

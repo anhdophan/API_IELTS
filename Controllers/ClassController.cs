@@ -32,6 +32,14 @@ namespace api.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // Kiểm tra trùng lịch dạy
+            if (cls.TeacherId > 0)
+            {
+                var conflictMsg = await CheckTeacherScheduleConflict(cls.TeacherId, cls);
+                if (conflictMsg != null)
+                    return BadRequest(conflictMsg);
+            }
+
             var existing = await firebaseClient
                 .Child("Classes")
                 .Child(cls.ClassId.ToString())
@@ -77,6 +85,14 @@ namespace api.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
+
+            // Kiểm tra trùng lịch dạy
+            if (cls.TeacherId > 0)
+            {
+                var conflictMsg = await CheckTeacherScheduleConflict(cls.TeacherId, cls, classId);
+                if (conflictMsg != null)
+                    return BadRequest(conflictMsg);
+            }
 
             await firebaseClient
                 .Child("Classes")
@@ -426,6 +442,50 @@ namespace api.Controllers
             }
         }
 
+        private async Task<string?> CheckTeacherScheduleConflict(int teacherId, Class newOrEditClass, string? editingClassId = null)
+        {
+            // Lấy tất cả lớp mà teacher này đang dạy (trừ lớp đang chỉnh sửa nếu có)
+            var allClasses = await GetAllClassesInternal();
+            var teacherClasses = allClasses
+                .Where(c => c.TeacherId == teacherId && (editingClassId == null || c.ClassId.ToString() != editingClassId))
+                .ToList();
 
+            // Duyệt từng ngày và từng ca học của lớp mới
+            for (var date = newOrEditClass.StartDate.Date; date <= newOrEditClass.EndDate.Date; date = date.AddDays(1))
+            {
+                foreach (var sched in newOrEditClass.Schedule)
+                {
+                    if (!Enum.TryParse<DayOfWeek>(sched.DayOfWeek, true, out var dow) || date.DayOfWeek != dow)
+                        continue;
+
+                    var newStart = TimeSpan.Parse(sched.StartTime);
+                    var newEnd = TimeSpan.Parse(sched.EndTime);
+
+                    // So với từng lớp cũ của teacher
+                    foreach (var cls in teacherClasses)
+                    {
+                        // Chỉ xét ngày nằm trong khoảng của lớp cũ
+                        if (date < cls.StartDate.Date || date > cls.EndDate.Date) continue;
+
+                        foreach (var oldSched in cls.Schedule)
+                        {
+                            if (!Enum.TryParse<DayOfWeek>(oldSched.DayOfWeek, true, out var oldDow) || date.DayOfWeek != oldDow)
+                                continue;
+
+                            var oldStart = TimeSpan.Parse(oldSched.StartTime);
+                            var oldEnd = TimeSpan.Parse(oldSched.EndTime);
+
+                            // Kiểm tra trùng giờ
+                            bool isOverlap = newStart < oldEnd && oldStart < newEnd;
+                            if (isOverlap)
+                            {
+                                return $"Giảng viên đã có lịch dạy vào {date:dd/MM/yyyy} ({sched.StartTime}-{sched.EndTime}), hãy chọn giảng viên khác hoặc đổi giờ học";
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
     }
 }

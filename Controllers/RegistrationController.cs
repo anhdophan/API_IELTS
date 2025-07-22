@@ -41,6 +41,11 @@ namespace api.Controllers
                 return BadRequest("Registration not submitted.");
 
             var student = request.Student;
+            // Kiểm tra trùng email trong Registration
+            var registrations = await GetAllRegistrationsInternal();
+            if (registrations.Any(r => r.Email.Equals(student.Email, StringComparison.OrdinalIgnoreCase)))
+                return BadRequest("Email này đã được đăng ký. Vui lòng sử dụng email khác.");
+
             student.Username = student.Email;
             student.Password = student.Email + "123";
             if (student.Score == 0) student.Score = 0;
@@ -223,6 +228,11 @@ namespace api.Controllers
             {
                 return BadRequest("Vui lòng nhập đầy đủ họ tên, email và số điện thoại.");
             }
+
+            // Kiểm tra trùng email trong Registration
+            var registrations = await GetAllRegistrationsInternal();
+            if (registrations.Any(r => r.Email.Equals(request.Student.Email, StringComparison.OrdinalIgnoreCase)))
+                return BadRequest("Email này đã được đăng ký. Vui lòng sử dụng email khác.");
 
             var registration = new Registration
             {
