@@ -1,5 +1,5 @@
 @page
-@model api.Pages.User.Students.LoginModel
+@model api.Pages.User.Teachers.LoginModel
 @{
     Layout = "~/Pages/Shared/_LayoutCustomer.cshtml";
     ViewData["Title"] = "Đăng nhập";
@@ -108,7 +108,7 @@
                 <input type="password" id="password" name="password" class="form-control" required />
             </div>
             <button type="submit" class="btn btn-login">Đăng nhập</button>
-           <button type="button" onclick="location.href='/User/Teachers/Login'" class="btn btn-login" style="margin-top:10px;background:linear-gradient(to right,#2563eb,#38bdf8);">Đăng nhập cho Giảng viên</button>
+           <button type="button" onclick="location.href='/User/Students/Login'" class="btn btn-login" style="margin-top:10px;background:linear-gradient(to right,#2563eb,#38bdf8);">Đăng nhập cho Học Viên</button>
         </form>
 
         <div class="login-links">

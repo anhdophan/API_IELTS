@@ -190,43 +190,41 @@ private async Task NotifyStudentsAsync(Exam exam)
             return Ok(exams.Where(e => e.IdClass == idClass).ToList());
         }
 
-        [HttpGet("date")]
-        public async Task<ActionResult<List<Exam>>> GetExamsByDate([FromQuery] DateTime date)
-        {
-            var exams = await GetAllExamsInternal();
-            return Ok(exams.Where(e => e.ExamDate.Date == date.Date).ToList());
-        }
+        [HttpGet("teacher/{teacherId}")]
+public async Task<ActionResult<List<Exam>>> GetExamsByTeacher(int teacherId)
+{
+    // Gọi API để lấy danh sách tất cả các lớp học
+    using var httpClient = new HttpClient();
+    var classApiUrl = "https://api-ielts-cgn8.onrender.com/api/Class/all";
 
-        [HttpGet("{examId}/questions")]
-        public async Task<ActionResult<List<Question>>> GetQuestionsForExam(int examId)
-        {
-            var exam = await firebaseClient
-                .Child("Exams")
-                .Child(examId.ToString())
-                .OnceSingleAsync<Exam>();
+    List<Class> allClasses;
+    try
+    {
+        var json = await httpClient.GetStringAsync(classApiUrl);
+        allClasses = JsonConvert.DeserializeObject<List<Class>>(json);
+    }
+    catch
+    {
+        return StatusCode(500, "Không thể lấy danh sách lớp học từ API.");
+    }
 
-            if (exam == null)
-                return NotFound("Exam not found");
+    // Lọc các classId mà giáo viên này dạy
+    var classIdsTaught = allClasses
+        .Where(c => c.TeacherId == teacherId)
+        .Select(c => c.ClassId)
+        .ToHashSet();
 
-            if (exam.Questions == null || exam.Questions.Count == 0)
-                return Ok(new List<Question>());
+    // Lấy tất cả bài thi từ Firebase
+    var allExams = await GetAllExamsInternal();
 
-            var httpClient = new HttpClient();
-            var json = await httpClient.GetStringAsync("https://api-ielts-cgn8.onrender.com/api/Question/all");
+    // Lọc bài thi thuộc lớp mà giáo viên dạy
+    var teacherExams = allExams
+        .Where(e => classIdsTaught.Contains(e.IdClass))
+        .ToList();
 
-            List<Question> allQuestions;
-            try
-            {
-                allQuestions = JsonConvert.DeserializeObject<List<Question>>(json);
-            }
-            catch
-            {
-                return BadRequest("Failed to parse Question list.");
-            }
+    return Ok(teacherExams);
+}
 
-            var questionIdsInExam = exam.Questions.Select(q => q.QuestionId).ToHashSet();
-            return Ok(allQuestions.Where(q => questionIdsInExam.Contains(q.QuestionId)).ToList());
-        }
 
         private async Task<List<Result>> GetAllResultsAsync()
         {

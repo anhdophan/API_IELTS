@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
-namespace api.Pages.User.Students
+namespace api.Pages.User.Teachers
 {
     public class LoginModel : PageModel
     {
@@ -32,49 +32,46 @@ namespace api.Pages.User.Students
 
             using (var httpClient = new HttpClient())
             {
-                
-                
-                    // Đăng nhập cho Student (giữ nguyên)
-                    var response = await httpClient.GetAsync("https://api-ielts-cgn8.onrender.com/api/Student/all");
+              
+                    // Đăng nhập cho Teacher
+                    var response = await httpClient.GetAsync("https://api-ielts-cgn8.onrender.com/api/Teacher/all");
                     if (!response.IsSuccessStatusCode)
                     {
                         ModelState.AddModelError(string.Empty, "Không thể kết nối tới hệ thống.");
                         return Page();
                     }
                     var json = await response.Content.ReadAsStringAsync();
-                    List<JObject> students = new();
+                    List<JObject> teachers = new();
                     try
                     {
-                        students = JArray.Parse(json).ToObject<List<JObject>>();
+                        teachers = JArray.Parse(json).ToObject<List<JObject>>();
                     }
                     catch
                     {
                         var dict = JObject.Parse(json);
                         foreach (var item in dict.Properties())
                         {
-                            students.Add((JObject)item.Value);
+                            teachers.Add((JObject)item.Value);
                         }
                     }
-                    foreach (var student in students)
+                    foreach (var teacher in teachers)
                     {
-                        var storedUsername = student["username"]?.ToString();
-                        var storedPassword = student["password"]?.ToString();
+                        var storedUsername = teacher["username"]?.ToString();
+                        var storedPassword = teacher["password"]?.ToString();
 
                         if (storedUsername == Username && storedPassword == Password)
                         {
-                            // Gán session cho Student
-                            HttpContext.Session.SetString("StudentId", student["studentId"]?.ToString() ?? "");
-                            HttpContext.Session.SetString("StudentName", student["name"]?.ToString() ?? "");
-                            HttpContext.Session.SetString("StudentAvatar", student["avatar"]?.ToString() ?? "");
-                            HttpContext.Session.SetString("StudentEmail", student["email"]?.ToString() ?? "");
-                            HttpContext.Session.SetString("StudentClass", student["class"]?.ToString() ?? "");
+                            // Gán session cho Teacher
+                            HttpContext.Session.SetString("TeacherId", teacher["teacherId"]?.ToString() ?? "");
+                            HttpContext.Session.SetString("TeacherName", teacher["name"]?.ToString() ?? "");
+                            HttpContext.Session.SetString("TeacherAvatar", teacher["avatar"]?.ToString() ?? "");
+                            HttpContext.Session.SetString("TeacherEmail", teacher["email"]?.ToString() ?? "");
 
-                            return RedirectToPage("/User/Students/Index");
+                            return RedirectToPage("/User/Teachers/Index");
                         }
                     }
                     ModelState.AddModelError(string.Empty, "Tài khoản hoặc mật khẩu không đúng.");
                     return Page();
-                
             }
         }
     }

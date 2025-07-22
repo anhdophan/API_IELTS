@@ -19,8 +19,18 @@ namespace api.Pages.User.Teachers
             using var httpClient = new HttpClient();
 
             // Lấy danh sách lớp
-            var res = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Class/teacher/{teacherId}");
-            Classes = JsonConvert.DeserializeObject<List<Class>>(res);
+            var res = await httpClient.GetStringAsync($"https://api-ielts-cgn8.onrender.com/api/Class/filter?teacherId={teacherId}");
+            List<Class> classes = new();
+            try
+            {
+                classes = JsonConvert.DeserializeObject<List<Class>>(res);
+            }
+            catch
+            {
+                var dict = JsonConvert.DeserializeObject<Dictionary<string, Class>>(res);
+                classes = dict?.Values.ToList() ?? new List<Class>();
+            }
+            Classes = classes;
 
             // Lấy danh sách khóa học
             var courseRes = await httpClient.GetStringAsync("https://api-ielts-cgn8.onrender.com/api/Course/all");

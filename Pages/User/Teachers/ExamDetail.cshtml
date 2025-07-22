@@ -5,30 +5,69 @@
     Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
 }
 
-<h2>@Model.Exam.Title</h2>
-<p>Lớp: @Model.Exam.IdClass | Ngày thi: @Model.Exam.ExamDate.ToString("dd/MM/yyyy")</p>
+<div class="container exam-detail-container">
+    <div class="exam-header-info">
+        <h2 class="exam-title">@Model.Exam.Title</h2>
+        <p class="exam-meta">
+            <span class="exam-class-info"><i class="fas fa-users"></i> Lớp: @Model.Exam.IdClass</span>
+            <span class="exam-date-info"><i class="fas fa-calendar-alt"></i> Ngày thi: @Model.Exam.ExamDate.ToString("dd/MM/yyyy")</span>
+            <span class="exam-time-info"><i class="fas fa-clock"></i> Bắt đầu: @Model.Exam.StartTime.ToString("HH:mm") | Kết thúc: @Model.Exam.EndTime.ToString("HH:mm")</span>
+        </p>
+    </div>
 
-<h4>Kết quả sinh viên</h4>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Mã SV</th>
-            <th>Họ tên</th>
-            <th>Điểm</th>
-            <th>Điểm tối đa</th>
-            <th>Thời gian nộp</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var result in Model.Results)
-        {
-            <tr>
-                <td>@result.StudentId</td>
-                <td>@result.StudentId</td>
-                <td>@result.Score</td>
-                <td>@result.TotalScore</td>
-                <td>@result.Timestamp.ToString("HH:mm dd/MM/yyyy")</td>
-            </tr>
-        }
-    </tbody>
-</table>
+    <section class="card-section student-results-section">
+        <div class="section-header">
+            <h2>Kết quả sinh viên</h2>
+            @* Có thể thêm nút "Xuất Excel" hoặc "Xem báo cáo" ở đây *@
+            @* <a href="#" class="view-all">Xuất báo cáo</a> *@
+        </div>
+        
+        <div class="table-responsive"> @* Wrapper for responsive table *@
+            <table class="table custom-table"> @* Renamed table class for specific styling *@
+                <thead>
+                    <tr>
+                        <th>Mã SV</th>
+                        <th>Họ tên</th>
+                        <th>Điểm</th>
+                        <th>Điểm tối đa</th>
+                        <th>Thời gian nộp</th>
+                        <th class="text-center">Hành động</th> @* Add a column for actions *@
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Results != null && Model.Results.Any())
+                    {
+                        foreach (var result in Model.Results)
+                        {
+                            <tr>
+                                <td>@result.StudentId</td>
+                                <td>
+                                    @(Model.StudentNames.ContainsKey(result.StudentId) ? Model.StudentNames[result.StudentId] : "Không rõ")
+                                </td>
+                                <td class="score-column">@result.Score</td>
+                                <td>@result.TotalScore</td>
+                                <td>@result.Timestamp.ToString("HH:mm dd/MM/yyyy")</td>
+                                <td class="text-center">
+                                    <a href="/User/Teachers/ViewSubmission?resultId=@result.ResultId" class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> Xem bài
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center no-results">Không có kết quả nào để hiển thị.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="back-link-container">
+        <a href="/User/Teachers/Exams" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại danh sách bài thi</a>
+    </div>
+
+</div>
