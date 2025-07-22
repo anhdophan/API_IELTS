@@ -246,6 +246,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlci9UZWFjaGVycy9DbGFzc2VzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/User/Teachers/CreateQuestion.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlci9UZWFjaGVycy9DcmVhdGVRdWVzdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/User/Teachers/ExamDetail.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlci9UZWFjaGVycy9FeGFtRGV0YWlsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

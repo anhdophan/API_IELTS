@@ -132,6 +132,31 @@ namespace api.Controllers
                 .DeleteAsync();
             return Ok();
         }
+[HttpGet("teacher/{teacherId}")]
+public async Task<ActionResult<List<Question>>> GetQuestionsByTeacherAsync(string teacherId)
+{
+    var url = "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/Questions.json";
+
+    using var httpClient = new HttpClient();
+    var json = await httpClient.GetStringAsync(url);
+
+    List<Question> questions;
+    try
+    {
+        var dict = JsonConvert.DeserializeObject<Dictionary<string, Question>>(json);
+        questions = dict?.Values.ToList() ?? new List<Question>();
+    }
+    catch
+    {
+        questions = JsonConvert.DeserializeObject<List<Question>>(json) ?? new List<Question>();
+    }
+
+    var filtered = questions
+        .Where(q => q.CreatedById == teacherId)
+        .ToList();
+
+    return Ok(filtered);
+}
 
         // Read by level
         [HttpGet("level/{level}")]

@@ -272,6 +272,49 @@ namespace api.Controllers
                 return StatusCode(500, $"Error calculating average: {ex.Message}");
             }
         }
+        [HttpPost("student/{studentId}/average/update")]
+public async Task<IActionResult> UpdateStudentAverageScoreAsync(int studentId)
+{
+    try
+    {
+        var results = await firebaseClient
+            .Child("Results")
+            .OnceAsync<Result>();
+
+        var studentResults = results
+            .Where(r => r.Object.StudentId == studentId)
+            .Select(r => r.Object.Score)
+            .ToList();
+
+        if (!studentResults.Any())
+            return NotFound("No results found for this student.");
+
+        double average = studentResults.Average();
+
+        // Cập nhật vào Student
+        var student = await firebaseClient
+            .Child("Students")
+            .Child(studentId.ToString())
+            .OnceSingleAsync<Student>();
+
+        if (student == null)
+            return NotFound("Student not found.");
+
+        student.Score = average;
+
+        await firebaseClient
+            .Child("Students")
+            .Child(studentId.ToString())
+            .PutAsync(student);
+
+        return Ok(new { message = "Average score updated successfully", average });
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Error updating average score: {ex.Message}");
+    }
+}
+
 
         // Highest score for an Exam
         [HttpGet("exam/{examId}/highest")]

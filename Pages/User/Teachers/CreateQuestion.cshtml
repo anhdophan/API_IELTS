@@ -1,0 +1,159 @@
+@page
+@model api.Pages.User.Teachers.Questions.CreateModel
+@{
+    ViewData["Title"] = "Tạo câu hỏi";
+    Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
+}
+@section Styles {
+    <style>
+        /* Giữ nguyên style gốc từ admin */
+        .create-course-container {
+            background: #fff;
+            border-radius: 8px;
+            padding: 32px 24px;
+            margin: 32px auto;
+            max-width: 600px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .create-course-container h2 {
+            text-align: center;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 28px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            font-weight: 500;
+            color: #34495e;
+        }
+        .form-control {
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            padding: 8px 12px;
+            font-size: 1rem;
+            background: #fafbfc;
+        }
+        .btn-primary, .btn-secondary {
+            min-width: 100px;
+            font-weight: 500;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #565e64;
+            border-color: #43494e;
+        }
+        .choice-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .choice-row input[type="text"] {
+            flex: 1;
+            margin-right: 8px;
+        }
+        .choice-row button {
+            min-width: 32px;
+            padding: 0 8px;
+        }
+    </style>
+}
+<div class="create-course-container">
+    <h2>Tạo câu hỏi</h2>
+    <form method="post" id="questionForm">
+        <div class="form-group">
+            <label asp-for="Question.QuestionId"></label>
+            <input asp-for="Question.QuestionId" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Question.Content"></label>
+            <textarea asp-for="Question.Content" class="form-control"></textarea>
+        </div>
+        <div class="form-group">
+            <label asp-for="Question.Level"></label>
+            <input asp-for="Question.Level" class="form-control" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Question.IsMultipleChoice"></label>
+            <input asp-for="Question.IsMultipleChoice" type="checkbox" id="isMC" />
+        </div>
+        <div class="form-group" id="choices-group" style="display:none;">
+            <label>Choices:</label>
+            <div id="choices-list"></div>
+            <button type="button" class="btn btn-secondary" onclick="addChoice()">Add Choice</button>
+        </div>
+        <div class="form-group" id="correct-index-group" style="display:none;">
+            <label asp-for="Question.CorrectAnswerIndex"></label>
+            <input asp-for="Question.CorrectAnswerIndex" class="form-control" />
+        </div>
+        <div class="form-group" id="correct-input-group" style="display:none;">
+            <label asp-for="Question.CorrectInputAnswer"></label>
+            <input asp-for="Question.CorrectInputAnswer" class="form-control" />
+        </div>
+        <input type="hidden" name="ChoicesInput" id="ChoicesInput" />
+        <div class="form-group mt-3" style="text-align:center;">
+            <input type="submit" value="Tạo" class="btn btn-primary" />
+            <a asp-page="Index" class="btn btn-secondary">Huỷy</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+<script>
+    function toggleFields() {
+        var isMC = document.getElementById("isMC").checked;
+        document.getElementById("choices-group").style.display = isMC ? "" : "none";
+        document.getElementById("correct-index-group").style.display = isMC ? "" : "none";
+        document.getElementById("correct-input-group").style.display = isMC ? "none" : "";
+    }
+    document.getElementById("isMC").addEventListener("change", toggleFields);
+    window.onload = function() {
+        toggleFields();
+        if (document.getElementById("isMC").checked) {
+            if (document.getElementById("choices-list").children.length === 0) {
+                addChoice();
+                addChoice();
+            }
+        }
+    };
+
+    document.getElementById("questionForm").addEventListener("submit", function(e) {
+        var isMC = document.getElementById("isMC").checked;
+        if (isMC) {
+            var items = document.getElementsByName("choice-item");
+            var arr = [];
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].value.trim() !== "") arr.push(items[i].value.trim());
+            }
+            document.getElementById("ChoicesInput").value = arr.join("\n");
+        } else {
+            document.getElementById("ChoicesInput").value = "";
+        }
+    });
+
+    function addChoice(value = "") {
+        var list = document.getElementById("choices-list");
+        var div = document.createElement("div");
+        div.className = "choice-row";
+        div.innerHTML = `<input type="text" class="form-control" name="choice-item" value="${value.replace(/"/g, '&quot;')}" />
+                         <button type="button" class="btn btn-danger" onclick="removeChoice(this)">-</button>`;
+        list.appendChild(div);
+    }
+    function removeChoice(btn) {
+        var row = btn.parentNode;
+        row.parentNode.removeChild(row);
+    }
+</script>
+}

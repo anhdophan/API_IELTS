@@ -5,27 +5,49 @@
     Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
 }
 
-<h2>Lớp học của tôi</h2>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Tên lớp</th>
-            <th>Khóa học</th>
-            <th>Số sinh viên</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var cls in Model.Classes)
-        {
-            <tr>
-                <td>@cls.Name</td>
-                <td>@(Model.CourseNames.ContainsKey(cls.CourseId) ? Model.CourseNames[cls.CourseId] : cls.CourseId.ToString())</td>
-                <td>@cls.StudentIds.Count</td>
-                <td>
-                    <a href="/User/Teachers/ClassDetail?classId=@cls.ClassId" class="btn btn-primary btn-sm">Chi tiết</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="container classes-container">
+    <section class="card-section my-classes-section">
+        <div class="section-header">
+            <h2 class="section-title">Lớp học của tôi</h2>
+            @* Thêm nút hành động nếu cần, ví dụ: "Tạo lớp mới" *@
+            @* <a href="/User/Teachers/CreateClass" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Tạo lớp mới</a> *@
+        </div>
+
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead>
+                    <tr>
+                        <th>Tên lớp</th>
+                        <th>Khóa học</th>
+                        <th class="text-center">Số sinh viên</th>
+                        <th class="text-center">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Classes != null && Model.Classes.Any())
+                    {
+                        foreach (var cls in Model.Classes)
+                        {
+                            <tr>
+                                <td>@cls.Name</td>
+                                <td>@(Model.CourseNames.ContainsKey(cls.CourseId) ? Model.CourseNames[cls.CourseId] : cls.CourseId.ToString())</td>
+                                <td class="text-center student-count-cell">@(Model.StudentsInClass.ContainsKey(cls.ClassId) ? Model.StudentsInClass[cls.ClassId].Count : 0)</td>
+                                <td class="text-center">
+                                    <a href="/User/Teachers/ClassDetail?classId=@cls.ClassId" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-info-circle"></i> Chi tiết
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center no-results">Bạn chưa được phân công lớp học nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>

@@ -1005,6 +1005,15 @@ body {
     margin-top: 40px;
     margin-bottom: 20px; /* Space before footer */
 }
+.classes-container {
+    padding-top: 20px; /* Adjust padding if needed for overall page layout */
+}
+
+/* Specific styling for student count cell if you want to emphasize it */
+.student-count-cell {
+    font-weight: bold;
+    color: #007bff; /* Example: Blue color for student count */
+}
 
 /* Responsive adjustments for Exam Detail Page */
 @media (max-width: 768px) {
