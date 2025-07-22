@@ -31,7 +31,7 @@ namespace api.Pages.User.Teachers.Questions
                 return RedirectToPage("/Login");
             }
 
-            Question.CreatedById = int.Parse(teacherId);
+            Question.CreatedById = teacherId;
 
             using var httpClient = new HttpClient();
             var json = JsonConvert.SerializeObject(Question);
