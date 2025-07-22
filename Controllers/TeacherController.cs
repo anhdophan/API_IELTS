@@ -285,7 +285,7 @@ namespace api.Controllers
                             StartTime = exam.StartTime,
                             EndTime = exam.EndTime,
                             ClassId = exam.IdClass,
-                            Room = exam.ClassName ?? exam.IdClass.ToString() // Tên lớp cũng là tên phòng học
+                            Room =  exam.IdClass.ToString() // Tên lớp cũng là tên phòng học
                         });
                     }
                 }
