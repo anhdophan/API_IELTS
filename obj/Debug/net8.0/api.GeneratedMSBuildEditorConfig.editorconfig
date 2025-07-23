@@ -274,6 +274,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlci9UZWFjaGVycy9RdWVzdGlvbnMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/User/Teachers/ViewSubmission.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlci9UZWFjaGVycy9WaWV3U3VibWlzc2lvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/Pages/User/_StudentCarousel.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXMvVXNlci9fU3R1ZGVudENhcm91c2VsLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

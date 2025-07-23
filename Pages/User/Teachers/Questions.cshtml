@@ -5,37 +5,112 @@
     Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
 }
 
-<h2>Ngân hàng câu hỏi</h2>
-<a href="/User/Teachers/CreateQuestion" class="btn btn-success mb-3"><i class="fas fa-plus"></i> Thêm câu hỏi</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Nội dung</th>
-            <th>Loại</th>
-            <th>Đáp án đúng</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var q in Model.Questions)
-        {
-            <tr>
-                <td>@q.Content</td>
-                <td>@(q.IsMultipleChoice ? "Trắc nghiệm" : "Tự luận")</td>
-                <td>
-                    @if (q.IsMultipleChoice)
+<style>
+    .custom-header {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #0d6efd;
+        display: flex;
+        align-items: center;
+    }
+
+    .custom-header i {
+        margin-right: 10px;
+    }
+
+    .btn-action {
+        min-width: 180px;
+    }
+
+    .table td,
+    .table th {
+        vertical-align: middle;
+    }
+
+    .table thead th {
+        background-color: #e9f3ff;
+    }
+
+    .badge {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+        border-radius: 12px;
+    }
+
+    .table-container {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        padding: 20px;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="table-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="custom-header">
+                <i class="fas fa-question-circle"></i> Ngân hàng câu hỏi
+            </h2>
+
+            <div>
+                <a href="/User/Teachers/CreateQuestion" class="btn btn-success btn-action me-2">
+                    <i class="fas fa-plus-circle"></i> Thêm câu hỏi
+                </a>
+                <a href="?onlyMine=@(!Model.OnlyMine)" class="btn btn-outline-primary btn-action">
+                    @if (Model.OnlyMine)
                     {
-                        @q.Choices[q.CorrectAnswerIndex ?? 0]
+                        <i class="fas fa-list"></i> <i>Hiển thị tất cả</i>
                     }
                     else
                     {
-                        @q.CorrectInputAnswer
+                        <i class="fas fa-user"></i> <i>Chỉ câu hỏi tự tạo</i>
                     }
-                </td>
-                <td>
-                    <a href="/User/Teachers/EditQuestion?questionId=@q.QuestionId" class="btn btn-primary btn-sm">Sửa</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+                </a>
+            </div>
+        </div>
+
+        <table class="table table-hover table-bordered table-striped">
+            <thead class="text-center">
+                <tr>
+                    <th style="width: 45%">Nội dung</th>
+                    <th style="width: 15%">Loại</th>
+                    <th style="width: 20%">Đáp án đúng</th>
+                    <th style="width: 20%">Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var q in Model.Questions)
+                {
+                    <tr>
+                        <td>@q.Content</td>
+                        <td class="text-center">
+                            @if (q.IsMultipleChoice)
+                            {
+                                <span class="badge bg-info text-dark">Trắc nghiệm</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Tự luận</span>
+                            }
+                        </td>
+                        <td>
+                            @if (q.IsMultipleChoice)
+                            {
+                                @q.Choices[q.CorrectAnswerIndex ?? 0]
+                            }
+                            else
+                            {
+                                @q.CorrectInputAnswer
+                            }
+                        </td>
+                        <td class="text-center">
+                            <a href="/User/Teachers/EditQuestion?questionId=@q.QuestionId" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i> Sửa
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

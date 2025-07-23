@@ -5,30 +5,52 @@
     Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
 }
 
-<h2>Bài thi đã tạo</h2>
-<a href="/User/Teachers/CreateExam" class="btn btn-success mb-3"><i class="fas fa-plus"></i> Tạo bài thi mới</a>
-<table class="table">
-    <thead>
-        <tr>
-            <th>Tiêu đề</th>
-            <th>Lớp</th>
-            <th>Ngày thi</th>
-            <th>Hành động</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var exam in Model.Exams)
-        {
+<!-- Tiêu đề trang -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-danger fw-bold">📚 Bài thi đã tạo</h2>
+    <a href="/User/Teachers/CreateExam" class="btn btn-danger">
+        <i class="fas fa-plus"></i> Tạo bài thi mới
+    </a>
+</div>
+
+<!-- Bảng danh sách bài thi -->
+<div class="table-responsive">
+    <table class="table table-bordered table-hover align-middle shadow-sm bg-white rounded">
+        <thead class="table-danger text-center">
             <tr>
-                <td>@exam.Title</td>
-                <td>
-                    @(Model.ClassNames.ContainsKey(exam.IdClass) ? Model.ClassNames[exam.IdClass] : exam.IdClass.ToString())
-                </td>
-                <td>@exam.ExamDate.ToString("dd/MM/yyyy")</td>
-                <td>
-                    <a href="/User/Teachers/ExamDetail?examId=@exam.ExamId" class="btn btn-primary btn-sm">Chi tiết</a>
-                </td>
+                <th scope="col">📝 Tiêu đề</th>
+                <th scope="col">🏫 Lớp</th>
+                <th scope="col">📅 Ngày thi</th>
+                <th scope="col">⚙️ Hành động</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @if (Model.Exams != null && Model.Exams.Count > 0)
+            {
+                foreach (var exam in Model.Exams)
+                {
+                    <tr>
+                        <td>@exam.Title</td>
+                        <td>
+                            @(Model.ClassNames.ContainsKey(exam.IdClass)
+                                ? Model.ClassNames[exam.IdClass]
+                                : exam.IdClass.ToString())
+                        </td>
+                        <td>@exam.ExamDate.ToString("dd/MM/yyyy")</td>
+                        <td class="text-center">
+                            <a href="/User/Teachers/ExamDetail?examId=@exam.ExamId" class="btn btn-outline-primary btn-sm">
+                                Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4" class="text-center text-muted">Không có bài thi nào được tạo.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

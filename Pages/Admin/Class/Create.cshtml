@@ -1,4 +1,5 @@
 @page
+@using Newtonsoft.Json
 @model api.Pages.Admin.Classes.CreateModel
 @{
     ViewData["Title"] = "Create Class";
@@ -85,7 +86,7 @@
         <div class="form-group mb-3">
             <label asp-for="Class.ClassId"></label>
             <input asp-for="Class.ClassId" class="form-control" />
-            <span asp-validation-for="Class.ClassId" class="text-danger"></span>
+         
         </div>
 
         <div class="form-group mb-3">
@@ -99,7 +100,7 @@
             <select asp-for="Class.CourseId" asp-items="Model.CourseList" class="form-select">
                 <option value="">Select Course</option>
             </select>
-            <span asp-validation-for="Class.CourseId" class="text-danger"></span>
+           
         </div>
 
         <div class="form-group mb-3">
@@ -107,19 +108,19 @@
             <select asp-for="Class.TeacherId" asp-items="Model.TeacherList" class="form-select">
                 <option value="0">Chưa có giảng viên</option>
             </select>
-            <span asp-validation-for="Class.TeacherId" class="text-danger"></span>
+          
         </div>
 
         <div class="form-group mb-3">
             <label asp-for="Class.StartDate"></label>
             <input asp-for="Class.StartDate" class="form-control" type="date" />
-            <span asp-validation-for="Class.StartDate" class="text-danger"></span>
+           
         </div>
 
         <div class="form-group mb-3">
             <label asp-for="Class.EndDate"></label>
             <input asp-for="Class.EndDate" class="form-control" type="date" />
-            <span asp-validation-for="Class.EndDate" class="text-danger"></span>
+         
         </div>
 
         <div class="form-group mb-4">
@@ -133,4 +134,33 @@
             <a asp-page="Index" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
+    <div aria-live="polite" aria-atomic="true" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080">
+    <div id="errorToast" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body" id="toastMessage">
+                <!-- Lỗi sẽ hiển thị ở đây -->
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    </div>
 </div>
+
+</div>
+<script>
+    window.onload = function () {
+        const errors = @Html.Raw(JsonConvert.SerializeObject(
+            ViewData.ModelState
+                .Where(kvp => kvp.Value.Errors.Count > 0)
+                .SelectMany(kvp => kvp.Value.Errors.Select(e => e.ErrorMessage))
+                .ToList()
+        ));
+
+        if (errors.length > 0) {
+    const toastEl = document.getElementById('errorToast');
+    const toastBody = document.getElementById('toastMessage');
+    toastBody.innerHTML = errors.map(e => `<div>${e}</div>`).join('');
+    const toast = new bootstrap.Toast(toastEl);
+    toast.show();
+}
+    };
+</script>

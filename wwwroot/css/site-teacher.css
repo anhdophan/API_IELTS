@@ -1014,6 +1014,23 @@ body {
     font-weight: bold;
     color: #007bff; /* Example: Blue color for student count */
 }
+.table th, .table td {
+    vertical-align: middle;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #fff3f3;
+}
+
+.btn-danger {
+    background-color: #d9534f;
+    border-color: #d9534f;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0d6efd;
+    color: #fff;
+}
 
 /* Responsive adjustments for Exam Detail Page */
 @media (max-width: 768px) {

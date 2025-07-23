@@ -70,7 +70,9 @@ namespace api.Pages.Admin.Classes
             if (response.IsSuccessStatusCode)
                 return RedirectToPage("Index");
 
-            ModelState.AddModelError(string.Empty, "Failed to create class.");
+           // Đọc nội dung lỗi chi tiết từ API
+    var errorMsg = await response.Content.ReadAsStringAsync();
+    ModelState.AddModelError(string.Empty, errorMsg);
             return Page();
         }
 

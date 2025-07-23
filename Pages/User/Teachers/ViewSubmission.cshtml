@@ -1,0 +1,102 @@
+@page
+@model api.Pages.User.Teachers.ViewSubmissionModel
+@{
+    ViewData["Title"] = "Chi tiết bài làm";
+    Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
+}
+
+<div class="container my-5">
+    <h2 class="mb-4 text-center fw-bold text-danger">📄 Chi tiết bài làm của sinh viên</h2>
+
+    <!-- Thông tin sinh viên -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3 text-primary">🎓 Thông tin sinh viên</h5>
+                    <p><strong>Mã SV:</strong> @Model.Student?.StudentId</p>
+                    <p><strong>Họ tên:</strong> @Model.Student?.Name</p>
+                    <p><strong>Email:</strong> @Model.Student?.Email</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card shadow-sm border-0 p-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3 text-primary">📊 Thông tin bài làm</h5>
+                    <p><strong>Điểm:</strong> <span class="badge bg-success fs-5">@Model.Result?.Score / @Model.Result?.TotalScore</span></p>
+                    <p><strong>Thời gian nộp:</strong> @Model.Result?.Timestamp.ToString("HH:mm dd/MM/yyyy")</p>
+                    <div class="text-center mt-3">
+                        <canvas id="scoreChart" width="200" height="180"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chi tiết câu trả lời -->
+    <div class="mb-5">
+        <h4 class="fw-bold mb-4 text-secondary">📝 Chi tiết câu trả lời</h4>
+        @if (Model.SubmissionAnswers.Any())
+        {
+            <div class="accordion" id="answersAccordion">
+                @for (int i = 0; i < Model.SubmissionAnswers.Count; i++)
+                {
+                    var item = Model.SubmissionAnswers[i];
+                    var isCorrect = item.IsCorrect;
+                    var bgColor = isCorrect ? "bg-success-subtle" : "bg-danger-subtle";
+
+                    <div class="accordion-item mb-3 border-0 shadow-sm rounded">
+                        <div class="accordion-header p-3 fw-semibold @bgColor">
+                            <strong>Câu hỏi @i :</strong> @item.QuestionContent
+                        </div>
+                        <div class="accordion-body p-3 bg-white">
+                            <p><strong>🎯 Câu trả lời của sinh viên:</strong> <span class="text-primary">@item.StudentAnswer</span></p>
+                            <p><strong>✅ Đáp án đúng:</strong> <span class="text-success">@item.CorrectAnswer</span></p>
+                            <p><strong>📌 Điểm đạt:</strong> <span class="badge bg-@(isCorrect ? "success" : "danger")">@item.Score</span></p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="text-muted">❗ Không tìm thấy câu trả lời nào.</p>
+        }
+    </div>
+
+    <!-- Nút quay lại -->
+    <div class="text-center">
+        <a href="/User/Teachers/ExamDetail?examId=@Model.Result?.ExamId" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i> Quay lại
+        </a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const ctx = document.getElementById('scoreChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Đúng', 'Sai'],
+                datasets: [{
+                    data: [@Model.ScoreCorrect, @Model.ScoreIncorrect],
+                    backgroundColor: ['#4CAF50', '#F44336'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                },
+                cutout: '60%',
+                responsive: false,
+                maintainAspectRatio: false
+            }
+        });
+    </script>
+}
