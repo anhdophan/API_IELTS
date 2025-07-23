@@ -1,0 +1,115 @@
+@page
+@model api.Pages.User.Teachers.CreateExamModel
+@{
+    ViewData["Title"] = "Tạo bài thi";
+    Layout = "~/Pages/Shared/_LayoutTeacher.cshtml";
+}
+@section Styles {
+<style>
+    /* CSS giống admin để đồng bộ */
+    .create-exam-container {
+        background: #fff;
+        border-radius: 8px;
+        padding: 32px 24px;
+        margin: 32px auto;
+        max-width: 900px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    .create-exam-container h2 {
+        text-align: center;
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 28px;
+    }
+</style>
+}
+
+@if (!string.IsNullOrEmpty(Model.DebugMessage))
+{
+    <div class="alert alert-warning" style="white-space:pre-wrap">@Model.DebugMessage</div>
+}
+
+<div class="create-exam-container">
+    <h2>Tạo bài thi mới</h2>
+    <form method="post">
+        <div class="form-group">
+            <label asp-for="Exam.Title"></label>
+            <input asp-for="Exam.Title" class="form-control" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Exam.IdClass">Lớp</label>
+            <select asp-for="Exam.IdClass" class="form-control" asp-items="@(new SelectList(Model.AllClasses, "ClassId", "Name"))">
+                <option value="">-- Chọn lớp --</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Exam.ExamDate"></label>
+            <input asp-for="Exam.ExamDate" class="form-control" type="date" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Exam.DurationMinutes"></label>
+            <input asp-for="Exam.DurationMinutes" class="form-control" type="number" min="1" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Exam.StartTime"></label>
+            <input asp-for="Exam.StartTime" class="form-control" type="datetime-local" />
+        </div>
+
+        <div class="form-group">
+            <label asp-for="Exam.EndTime"></label>
+            <input asp-for="Exam.EndTime" class="form-control" type="datetime-local" />
+        </div>
+
+        <div class="form-group">
+            <label>Lọc câu hỏi theo mức IELTS:</label>
+            <div style="display:flex;gap:8px;">
+                <input asp-for="FilterLevel" class="form-control" style="width:120px;" placeholder="VD: 5.0" />
+                <button type="submit" asp-page-handler="Filter" class="btn btn-secondary">Lọc</button>
+                <a asp-page="./CreateExam" class="btn btn-secondary">Tất cả</a>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Chọn câu hỏi và nhập điểm:</label>
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Chọn</th>
+                        <th>ID</th>
+                        <th>Nội dung</th>
+                        <th>Level</th>
+                        <th>Điểm</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @for (int i = 0; i < Model.AllQuestions.Count; i++)
+                {
+                    var q = Model.AllQuestions[i];
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="SelectedQuestionIds" value="@q.QuestionId"
+                                   @(Model.SelectedQuestionIds.Contains(q.QuestionId) ? "checked" : "") />
+                        </td>
+                        <td>@q.QuestionId</td>
+                        <td>@q.Content</td>
+                        <td>@q.Level</td>
+                        <td>
+                            <input type="number" step="0.01" name="SelectedScores" class="form-control"
+                                   value="@(Model.SelectedScores.Count > i ? Model.SelectedScores[i] : 1)" />
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-group text-center">
+            <input type="submit" value="Tạo bài thi" class="btn btn-danger" />
+            <a asp-page="Exams" class="btn btn-secondary">Hủy</a>
+        </div>
+    </form>
+</div>

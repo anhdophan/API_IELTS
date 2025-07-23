@@ -32,90 +32,90 @@ namespace api.Controllers
 
         // Create Exam
         [HttpPost]
-public async Task<IActionResult> CreateExamAsync([FromBody] Exam exam)
-{
-    if (!ModelState.IsValid)
-        return BadRequest(ModelState);
-
-    if (exam.Questions == null || exam.Questions.Count == 0)
-        return BadRequest("Exam must contain at least one question.");
-
-    if (string.IsNullOrEmpty(exam.CreatedById))
-        exam.CreatedById = "00";
-
-    if (exam.ExamId == 0)
-        exam.ExamId = int.Parse(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().Substring(5, 8));
-
-    foreach (var eq in exam.Questions)
-    {
-        var q = await firebaseClient
-            .Child("Questions")
-            .Child(eq.QuestionId.ToString())
-            .OnceSingleAsync<Question>();
-        if (q == null)
-            return BadRequest($"Question {eq.QuestionId} does not exist.");
-    }
-
-    if (exam.DurationMinutes <= 0)
-        return BadRequest("DurationMinutes must be greater than 0.");
-    if (exam.StartTime >= exam.EndTime)
-        return BadRequest("StartTime must be before EndTime.");
-
-    if (exam.StartTime.Kind == DateTimeKind.Unspecified)
-        exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Local);
-    if (exam.EndTime.Kind == DateTimeKind.Unspecified)
-        exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Local);
-
-    exam.StartTime = exam.StartTime.ToUniversalTime();
-    exam.EndTime = exam.EndTime.ToUniversalTime();
-
-    var existing = await firebaseClient
-        .Child("Exams")
-        .Child(exam.ExamId.ToString())
-        .OnceSingleAsync<Exam>();
-
-    if (existing != null)
-        return Conflict($"Exam with ID {exam.ExamId} already exists.");
-
-    await firebaseClient
-        .Child("Exams")
-        .Child(exam.ExamId.ToString())
-        .PutAsync(exam);
-
-    // ✅ GỌI GỬI THÔNG BÁO SAU KHI TẠO EXAM
-    _ = Task.Run(async () => await NotifyStudentsAsync(exam));
-
-    return Ok(exam);
-}
-private async Task NotifyStudentsAsync(Exam exam)
-{
-    var studentApiUrl = $"https://api-ielts-cgn8.onrender.com/api/Class/{exam.IdClass}/students";
-    using var httpClient = new HttpClient();
-    var json = await httpClient.GetStringAsync(studentApiUrl);
-
-    var students = JsonConvert.DeserializeObject<List<Student>>(json);
-    if (students == null || students.Count == 0)
-        return;
-
-    var timestamp = DateTime.UtcNow;
-    foreach (var student in students)
-    {
-        var noti = new Notification
+        public async Task<IActionResult> CreateExamAsync([FromBody] Exam exam)
         {
-            NotificationId = Guid.NewGuid().ToString("N"),
-            Title = "📢 Bài thi mới",
-            Message = $"Bạn có bài thi mới: {exam.Title} vào ngày {exam.ExamDate:dd/MM/yyyy}",
-            Timestamp = timestamp,
-            IsRead = false
-        };
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-        await firebaseClient
-            .Child("Notifications")
-            .Child(student.StudentId.ToString())
-            .Child(noti.NotificationId)
-            .PutAsync(noti);
-    }
-}
+            if (exam.Questions == null || exam.Questions.Count == 0)
+                return BadRequest("Exam must contain at least one question.");
+
+            if (string.IsNullOrEmpty(exam.CreatedById))
+                exam.CreatedById = "00";
+
+            if (exam.ExamId == 0)
+                exam.ExamId = int.Parse(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString().Substring(5, 8));
+
+            foreach (var eq in exam.Questions)
+            {
+                var q = await firebaseClient
+                    .Child("Questions")
+                    .Child(eq.QuestionId.ToString())
+                    .OnceSingleAsync<Question>();
+                if (q == null)
+                    return BadRequest($"Question {eq.QuestionId} does not exist.");
+            }
+
+            if (exam.DurationMinutes <= 0)
+                return BadRequest("DurationMinutes must be greater than 0.");
+            if (exam.StartTime >= exam.EndTime)
+                return BadRequest("StartTime must be before EndTime.");
+
+            if (exam.StartTime.Kind == DateTimeKind.Unspecified)
+                exam.StartTime = DateTime.SpecifyKind(exam.StartTime, DateTimeKind.Local);
+            if (exam.EndTime.Kind == DateTimeKind.Unspecified)
+                exam.EndTime = DateTime.SpecifyKind(exam.EndTime, DateTimeKind.Local);
+
+            exam.StartTime = exam.StartTime.ToUniversalTime();
+            exam.EndTime = exam.EndTime.ToUniversalTime();
+
+            var existing = await firebaseClient
+                .Child("Exams")
+                .Child(exam.ExamId.ToString())
+                .OnceSingleAsync<Exam>();
+
+            if (existing != null)
+                return Conflict($"Exam with ID {exam.ExamId} already exists.");
+
+            await firebaseClient
+                .Child("Exams")
+                .Child(exam.ExamId.ToString())
+                .PutAsync(exam);
+
+            // ✅ GỌI GỬI THÔNG BÁO SAU KHI TẠO EXAM
+            _ = Task.Run(async () => await NotifyStudentsAsync(exam));
+
+            return Ok(exam);
+        }
+        private async Task NotifyStudentsAsync(Exam exam)
+        {
+            var studentApiUrl = $"https://api-ielts-cgn8.onrender.com/api/Class/{exam.IdClass}/students";
+            using var httpClient = new HttpClient();
+            var json = await httpClient.GetStringAsync(studentApiUrl);
+
+            var students = JsonConvert.DeserializeObject<List<Student>>(json);
+            if (students == null || students.Count == 0)
+                return;
+
+            var timestamp = DateTime.UtcNow;
+            foreach (var student in students)
+            {
+                var noti = new Notification
+                {
+                    NotificationId = Guid.NewGuid().ToString("N"),
+                    Title = "📢 Bài thi mới",
+                    Message = $"Bạn có bài thi mới: {exam.Title} vào ngày {exam.ExamDate:dd/MM/yyyy}",
+                    Timestamp = timestamp,
+                    IsRead = false
+                };
+
+                await firebaseClient
+                    .Child("Notifications")
+                    .Child(student.StudentId.ToString())
+                    .Child(noti.NotificationId)
+                    .PutAsync(noti);
+            }
+        }
 
 
         [HttpPut("{examId}")]
@@ -191,39 +191,39 @@ private async Task NotifyStudentsAsync(Exam exam)
         }
 
         [HttpGet("teacher/{teacherId}")]
-public async Task<ActionResult<List<Exam>>> GetExamsByTeacher(int teacherId)
-{
-    // Gọi API để lấy danh sách tất cả các lớp học
-    using var httpClient = new HttpClient();
-    var classApiUrl = "https://api-ielts-cgn8.onrender.com/api/Class/all";
+        public async Task<ActionResult<List<Exam>>> GetExamsByTeacher(int teacherId)
+        {
+            // Gọi API để lấy danh sách tất cả các lớp học
+            using var httpClient = new HttpClient();
+            var classApiUrl = "https://api-ielts-cgn8.onrender.com/api/Class/all";
 
-    List<Class> allClasses;
-    try
-    {
-        var json = await httpClient.GetStringAsync(classApiUrl);
-        allClasses = JsonConvert.DeserializeObject<List<Class>>(json);
-    }
-    catch
-    {
-        return StatusCode(500, "Không thể lấy danh sách lớp học từ API.");
-    }
+            List<Class> allClasses;
+            try
+            {
+                var json = await httpClient.GetStringAsync(classApiUrl);
+                allClasses = JsonConvert.DeserializeObject<List<Class>>(json);
+            }
+            catch
+            {
+                return StatusCode(500, "Không thể lấy danh sách lớp học từ API.");
+            }
 
-    // Lọc các classId mà giáo viên này dạy
-    var classIdsTaught = allClasses
-        .Where(c => c.TeacherId == teacherId)
-        .Select(c => c.ClassId)
-        .ToHashSet();
+            // Lọc các classId mà giáo viên này dạy
+            var classIdsTaught = allClasses
+                .Where(c => c.TeacherId == teacherId)
+                .Select(c => c.ClassId)
+                .ToHashSet();
 
-    // Lấy tất cả bài thi từ Firebase
-    var allExams = await GetAllExamsInternal();
+            // Lấy tất cả bài thi từ Firebase
+            var allExams = await GetAllExamsInternal();
 
-    // Lọc bài thi thuộc lớp mà giáo viên dạy
-    var teacherExams = allExams
-        .Where(e => classIdsTaught.Contains(e.IdClass))
-        .ToList();
+            // Lọc bài thi thuộc lớp mà giáo viên dạy
+            var teacherExams = allExams
+                .Where(e => classIdsTaught.Contains(e.IdClass))
+                .ToList();
 
-    return Ok(teacherExams);
-}
+            return Ok(teacherExams);
+        }
 
 
         private async Task<List<Result>> GetAllResultsAsync()
@@ -458,6 +458,37 @@ public async Task<ActionResult<List<Exam>>> GetExamsByTeacher(int teacherId)
                 message = $"Đã gửi thông báo bài thi mới cho {studentsInClass.Count} sinh viên."
             });
         }
+        [HttpGet("{examId}/questions")]
+public async Task<ActionResult<List<Question>>> GetQuestionsByExamId(int examId)
+{
+    // Lấy đề thi
+    var exam = await firebaseClient
+        .Child("Exams")
+        .Child(examId.ToString())
+        .OnceSingleAsync<Exam>();
+
+    if (exam == null)
+        return NotFound($"Không tìm thấy đề thi với ID: {examId}");
+
+    if (exam.Questions == null || !exam.Questions.Any())
+        return Ok(new List<Question>()); // Không có câu hỏi nào
+
+    var questions = new List<Question>();
+
+    foreach (var eq in exam.Questions)
+    {
+        var q = await firebaseClient
+            .Child("Questions")
+            .Child(eq.QuestionId.ToString())
+            .OnceSingleAsync<Question>();
+
+        if (q != null)
+            questions.Add(q);
+    }
+
+    return Ok(questions);
+}
+
 
     }
 }

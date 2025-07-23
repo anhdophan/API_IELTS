@@ -5,7 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System;
+using System.Linq;
 using Microsoft.AspNetCore.Http;
 using api.Models;
 
@@ -16,64 +16,52 @@ namespace api.Pages.User.Teachers
         [BindProperty]
         public Question Question { get; set; } = new();
 
-        public void OnGet()
-        {
-        }
+        public void OnGet() { }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Gán CreatedById từ Session (ví dụ: session "TeacherId")
             var teacherId = HttpContext.Session.GetString("TeacherId");
             if (string.IsNullOrEmpty(teacherId))
                 return RedirectToPage("/User/Teachers/Login");
-            var createdById = HttpContext.Session.GetString("TeacherId");
-           
-            Question.CreatedById = createdById;
-            
 
-            // Lấy chuỗi đáp án từ form
-            var choicesInputRaw = Request.Form["ChoicesInput"].ToString();
+            Question.CreatedById = teacherId;
 
-            if (Question.IsMultipleChoice)
-            {
-                // Parse danh sách đáp án từ textarea
-                if (!string.IsNullOrEmpty(choicesInputRaw))
-                {
-                    Question.Choices = choicesInputRaw
-                        .Split(new[] { "\r\n", "\n", "\r" }, StringSplitOptions.RemoveEmptyEntries)
-                        .Select(s => s.Trim())
-                        .Where(s => !string.IsNullOrWhiteSpace(s))
-                        .ToList();
-                }
+           if (Question.IsMultipleChoice)
+{
+    var choicesInputRaw = Request.Form["ChoicesInput"].ToString();
+    if (!string.IsNullOrWhiteSpace(choicesInputRaw))
+    {
+        Question.Choices = choicesInputRaw
+            .Split(new[] { "\r\n", "\n", "\r" }, System.StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .ToList();
+    }
 
-                // Parse chỉ số đáp án đúng
-                var correctIndexStr = Request.Form["CorrectAnswerIndex"];
-                if (int.TryParse(correctIndexStr, out int correctIndex))
-                {
-                    Question.CorrectAnswerIndex = correctIndex;
-                }
-            }
-            else
-            {
-                // Nếu là tự luận, lấy đáp án từ trường input
-                Question.CorrectInputAnswer = Request.Form["CorrectInputAnswer"];
-                Question.Choices = new List<string>(); // Rõ ràng là không có choices
-                Question.CorrectAnswerIndex = null;
-            }
+    // Tự luận không có field này
+    Question.CorrectInputAnswer = null;
+}
+else
+{
+    Question.Choices = new List<string>();
+    Question.CorrectAnswerIndex = null;
 
-            // Gửi POST đến API
+    // Gán đúng giá trị từ form
+    var inputAnswer = Request.Form["Question.CorrectInputAnswer"];
+    Question.CorrectInputAnswer = !string.IsNullOrWhiteSpace(inputAnswer) ? inputAnswer.ToString().Trim() : null;
+}
+
             using var httpClient = new HttpClient();
             var jsonContent = JsonConvert.SerializeObject(Question);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
             var response = await httpClient.PostAsync("https://api-ielts-cgn8.onrender.com/api/Question", content);
+
             if (response.IsSuccessStatusCode)
-            {
-                return RedirectToPage("./Questions"); // hoặc nơi bạn muốn chuyển tới
-            }
+                return RedirectToPage("./Questions");
 
             ModelState.AddModelError(string.Empty, "Tạo câu hỏi thất bại. Vui lòng thử lại.");
             return Page();
         }
+
     }
 }
