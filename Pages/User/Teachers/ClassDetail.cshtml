@@ -162,14 +162,94 @@
                 </td>
                 <td>@student.Email</td>
                 <td>@student.Score.ToString("F2")</td>
-                <td><a href="/Result/ByStudent?studentId=@student.StudentId" class="btn btn-link">Xem điểm</a></td>
+                <td>
+    <button class="btn btn-outline-info btn-sm"
+            onclick="openResultModal('@student.StudentId', '@student.Name')">
+        📈 Xem kết quả
+    </button>
+</td>
+
             </tr>
         }
     </tbody>
 </table>
 </div>
+<!-- Modal xem kết quả -->
+<div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">📊 Kết quả chi tiết của sinh viên: <span id="modalStudentName"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Đề thi</th>
+                            <th>Điểm</th>
+                            <th>Tổng điểm</th>
+                            <th>Nhận xét</th>
+                            <th>Thời gian</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultTableBody"></tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button id="updateAverageBtn" class="btn btn-success">Cập nhật điểm trung bình</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
+    <script>
+    let selectedStudentId = null;
+
+    async function openResultModal(studentId, studentName) {
+        selectedStudentId = studentId;
+        document.getElementById("modalStudentName").textContent = studentName;
+
+        const response = await fetch(`/api/Result/student/${studentId}/detailed`);
+        const data = await response.json();
+
+        const tbody = document.getElementById("resultTableBody");
+        tbody.innerHTML = "";
+
+        data.forEach(r => {
+            const row = `
+                <tr>
+                    <td>${r.examTitle}</td>
+                    <td>${r.score}</td>
+                    <td>${r.totalScore}</td>
+                    <td>${r.remark || ""}</td>
+                    <td>${new Date(r.timestamp).toLocaleString()}</td>
+                </tr>`;
+            tbody.innerHTML += row;
+        });
+
+        new bootstrap.Modal(document.getElementById('resultModal')).show();
+    }
+
+    document.getElementById("updateAverageBtn").addEventListener("click", async () => {
+        if (!selectedStudentId) return;
+
+        const res = await fetch(`/api/Result/student/${selectedStudentId}/average/update`, {
+            method: "POST"
+        });
+
+        if (res.ok) {
+            alert("✅ Đã cập nhật điểm trung bình thành công!");
+            location.reload(); // reload lại để cập nhật điểm mới
+        } else {
+            const msg = await res.text();
+            alert("❌ Lỗi khi cập nhật: " + msg);
+        }
+    });
+</script>
+
 <script>
     const allStudents = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.Students.Select(s => new {
         studentId = s.StudentId,

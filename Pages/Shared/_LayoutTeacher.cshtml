@@ -17,6 +17,197 @@
       @RenderSection("Styles", required: false)
     
 </head>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+
+<!-- Chat Box UI -->
+<div id="chat-popup" style="position:fixed; bottom:20px; right:20px; width:300px; background:#fff; border:1px solid #ccc; border-radius:8px; display:none; z-index:9999;">
+    <div style="background:#007bff; color:white; padding:8px; border-top-left-radius:8px; border-top-right-radius:8px;">
+        <span id="chat-title">Chat</span>
+        <button onclick="toggleChat()" style="float:right; background:transparent; border:none; color:white;">×</button>
+    </div>
+    <div id="chat-messages" style="height:250px; overflow-y:auto; padding:10px;"></div>
+    <div style="padding:8px;">
+        <input type="text" id="chat-input" placeholder="Gửi tin nhắn..." style="width:80%;" />
+        <div id="classmates-list" style="padding:8px; max-height:100px; overflow-y:auto; border-top:1px solid #ccc;">
+    <strong>Bạn cùng lớp:</strong>
+    <div id="user-list-container"></div>
+</div>
+
+        <button onclick="sendMessage()" style="width:18%;">Gửi</button>
+    </div>
+</div>
+
+<!-- Chat Toggle Button -->
+<button onclick="toggleChat()" style="position:fixed; bottom:20px; right:20px; z-index:9998; background:#007bff; color:white; padding:10px 15px; border:none; border-radius:50%;">
+    💬
+</button>
+
+<script>
+    const currentUserId = '@(Context.Session.GetString("StudentId") ?? Context.Session.GetString("TeacherId") ?? "admin")';
+    const currentUserName = '@(Context.Session.GetString("StudentName") ?? Context.Session.GetString("TeacherName") ?? "Admin")';
+    const userRole = '@(Context.Session.GetString("StudentId") != null ? "student" : (Context.Session.GetString("TeacherId") != null ? "teacher" : "admin"))';
+const classId = '@(Context.Session.GetString("StudentClass") ?? Context.Session.GetString("TeacherClass"))';
+// Nếu teacher dạy nhiều lớp → danh sách lưu tại Session
+const teacherClassList = @(Context.Session.GetString("TeacherClasses") ?? "[]");
+const teacherClassIds = JSON.parse(teacherClassList); 
+
+
+
+    // Firebase config
+    const firebaseConfig = {
+        apiKey: "AIzaSyD...",
+        authDomain: "ielts-7d51b.firebaseapp.com",
+        databaseURL: "https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/",
+        projectId: "ielts-7d51b",
+        storageBucket: "ielts-7d51b.appspot.com",
+        messagingSenderId: "xxxxxxxxxx",
+        appId: "1:xxxx:web:xxxx"
+    };
+    firebase.initializeApp(firebaseConfig);
+    // Tự động lưu user vào Firebase Database
+firebase.database().ref("users/" + currentUserId).set({
+    userId: currentUserId,
+    name: currentUserName,
+    role: userRole,
+    classId: classId
+});
+
+// Đánh dấu user online
+firebase.database().ref("presence/online/" + currentUserId).set(true);
+firebase.database().ref("presence/online/" + currentUserId).onDisconnect().remove();
+
+    const db = firebase.database();
+
+    let currentChatPath = ""; // Will be 'chats/class/10' or 'chats/private/user1-user2'
+
+    function toggleChat() {
+    const popup = document.getElementById("chat-popup");
+    const isVisible = popup.style.display === "block";
+    popup.style.display = isVisible ? "none" : "block";
+
+    if (!isVisible) {
+        if (currentChatPath === "") openClassChat(); // default
+        loadClassmates(); // Load danh sách bạn
+    }
+}
+
+function loadClassmates() {
+    const container = document.getElementById("user-list-container");
+    container.innerHTML = "Đang tải...";
+
+    db.ref("users")
+        .once("value")
+        .then(snapshot => {
+            container.innerHTML = "";
+
+            const classGroups = {}; // { classId: [students...] }
+
+            snapshot.forEach(child => {
+                const user = child.val();
+                if (user.userId === currentUserId) return;
+                if (user.role !== "student") return;
+
+                if (teacherClassIds.includes(user.classId)) {
+                    if (!classGroups[user.classId]) classGroups[user.classId] = [];
+                    classGroups[user.classId].push(user);
+                }
+            });
+
+            // Hiển thị theo từng lớp
+            for (const classId in classGroups) {
+                const classDiv = document.createElement("div");
+                classDiv.innerHTML = `<strong>Lớp ${classId}</strong>`;
+                container.appendChild(classDiv);
+
+                classGroups[classId].forEach(user => {
+                    const userDiv = document.createElement("div");
+                    userDiv.style.marginLeft = "10px";
+
+                    const statusRef = db.ref("presence/online/" + user.userId);
+                    statusRef.once("value", snap => {
+                        const online = snap.exists();
+                        userDiv.innerHTML = `
+                            <a href="#" onclick="openPrivateChat('${user.userId}', '${user.name}')">
+                                <span style="color:${online ? 'green' : 'gray'}">●</span> ${user.name}
+                                <span id="badge-${user.userId}" style="background:red; color:white; border-radius:10px; padding:0 6px; font-size:12px; margin-left:5px; display:none;">0</span>
+                            </a>
+                        `;
+                        container.appendChild(userDiv);
+                    });
+                });
+            }
+        });
+}
+
+
+   function openClassChat() {
+    currentChatPath = `chats/class/${classId}`;
+    const roleLabel = userRole === 'teacher' ? "Lớp đang dạy" : "Lớp";
+    document.getElementById("chat-title").innerText = `${roleLabel} ${classId}`;
+    listenForMessages();
+}
+
+
+   function openPrivateChat(withUserId, withUserName) {
+    const ids = [currentUserId, withUserId].sort().join("-");
+    currentChatPath = `chats/private/${ids}`;
+    document.getElementById("chat-title").innerText = `Chat với ${withUserName}`;
+    listenForMessages();
+
+    const badge = document.getElementById("badge-" + withUserId);
+    if (badge) {
+        badge.style.display = "none";
+        badge.textContent = "0";
+    }
+}
+
+
+    function sendMessage() {
+        const input = document.getElementById("chat-input");
+        const message = input.value.trim();
+        if (!message) return;
+
+        db.ref(currentChatPath).push({
+            senderId: currentUserId,
+            senderName: currentUserName,
+            content: message,
+            timestamp: new Date().toISOString()
+        });
+
+        input.value = "";
+    }
+
+    function listenForMessages() {
+    const msgBox = document.getElementById("chat-messages");
+    msgBox.innerHTML = "";
+    db.ref(currentChatPath).off();
+
+    db.ref(currentChatPath).on("child_added", (snapshot) => {
+        const msg = snapshot.val();
+        const div = document.createElement("div");
+        div.innerHTML = `<b>${msg.senderName}:</b> ${msg.content}`;
+        msgBox.appendChild(div);
+        msgBox.scrollTop = msgBox.scrollHeight;
+
+        // Tăng badge nếu là tin nhắn riêng và người gửi không phải mình
+        if (msg.senderId !== currentUserId && currentChatPath.includes("private")) {
+            const ids = currentChatPath.split("/").pop().split("-");
+            const friendId = ids.find(id => id !== currentUserId);
+            const badge = document.getElementById("badge-" + friendId);
+            if (badge) {
+                let count = parseInt(badge.textContent || "0");
+                badge.textContent = count + 1;
+                badge.style.display = "inline-block";
+            }
+        }
+    });
+}
+
+</script>
+
+
 <body>
     <header class="main-header"> @* Added main-header class for consistency *@
         <div class="top-bar">

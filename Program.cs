@@ -28,11 +28,13 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowAll", builder =>
     {
         builder
-            .AllowAnyOrigin()
+            .SetIsOriginAllowed(_ => true) // CORS an toàn cho dev
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials(); // 👈 Rất quan trọng cho SignalR
     });
 });
+
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddSession();
@@ -69,11 +71,11 @@ app.UseRouting();
 
 // ✅ Kích hoạt CORS
 app.UseCors("AllowAll");
-
+app.MapHub<ChatHub>("/chatHub");
 app.UseAuthorization();
 app.MapControllers();
 app.MapRazorPages();
-app.MapHub<ChatHub>("/chatHub");
+
 
 app.UseEndpoints(endpoints =>
 {

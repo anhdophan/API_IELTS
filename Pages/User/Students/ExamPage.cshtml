@@ -250,20 +250,42 @@
                 </td>
             </tr>
         </table>
+<div class="exam-status">
+    @if (Model.Result != null)
+    {
+        <span class="badge badge-success"><i class="fas fa-check"></i> Đã hoàn thành</span>
+    }
+    else if (Model.IsExpired)
+    {
+        <span class="badge badge-danger"><i class="fas fa-clock"></i> Bài thi đã hết hạn</span>
+    }
+    else if (Model.IsNotStarted)
+    {
+        <span class="badge badge-secondary"><i class="fas fa-lock"></i> Bài thi chưa mở</span>
+    }
+    else
+    {
+        <span class="badge badge-warning"><i class="fas fa-clock"></i> Chưa làm bài</span>
+    }
+</div>
 
-        <div class="submission-actions">
-            @if (Model.Result == null)
-            {
-                <a href="/User/Students/DoExam?examId=@Model.Exam.ExamId" class="btn btn-yellow">
-                    <i class="fas fa-edit"></i> Bắt đầu làm bài
-                </a>
-            }
-            else
-            {
-                <a href="/User/Students/Index" class="btn btn-yellow">
-                    <i class="fas fa-arrow-left"></i> Quay lại danh sách
-                </a>
-            }
-        </div>
+
+     <div class="submission-actions mt-4">
+    @if (Model.Result == null && !Model.IsExpired && !Model.IsNotStarted)
+    {
+        <a href="/User/Students/DoExam?examId=@Model.Exam.ExamId" class="btn btn-yellow">
+            <i class="fas fa-edit"></i> Bắt đầu làm bài
+        </a>
+    }
+    else
+    {
+        <a href="/User/Students/Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại danh sách
+        </a>
+    }
+</div>
+
+
+
     </div>
 </div>

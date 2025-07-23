@@ -1,14 +1,17 @@
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
-using System.Threading.Tasks;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using api.Services;
 
 namespace api.Hubs
 {
     public class ChatHub : Hub
     {
-        private static ConcurrentDictionary<string, string> userConnections = new();
-        private static ConcurrentDictionary<string, List<int>> studentClasses = new();
+        private static readonly ConcurrentDictionary<string, List<string>> userConnections = new();
+        private static readonly ConcurrentDictionary<string, List<int>> studentClasses = new();
+        private static readonly HashSet<string> onlineUsers = new();
 
         public override async Task OnConnectedAsync()
         {
@@ -18,16 +21,35 @@ namespace api.Hubs
 
             if (!string.IsNullOrEmpty(userId))
             {
-                userConnections[userId] = Context.ConnectionId;
+                lock (userConnections)
+                {
+                    if (!userConnections.ContainsKey(userId))
+                        userConnections[userId] = new List<string>();
 
-                // Chỉ thêm class nếu không phải admin
+                    userConnections[userId].Add(Context.ConnectionId);
+                }
+
+                lock (onlineUsers)
+                {
+                    onlineUsers.Add(userId);
+                }
+
+                await Clients.All.SendAsync("UserOnline", userId);
+
+                // Thêm user vào các nhóm lớp
                 if (userId != "admin" && !string.IsNullOrEmpty(classIdsRaw))
                 {
-                    var classes = classIdsRaw.Split(',')
-                                             .Select(c => int.TryParse(c, out var id) ? id : -1)
-                                             .Where(id => id != -1)
-                                             .ToList();
-                    studentClasses[userId] = classes;
+                    var classIds = classIdsRaw.Split(',')
+                        .Select(id => int.TryParse(id, out var parsed) ? parsed : -1)
+                        .Where(id => id != -1)
+                        .ToList();
+
+                    studentClasses[userId] = classIds;
+
+                    foreach (var classId in classIds)
+                    {
+                        await Groups.AddToGroupAsync(Context.ConnectionId, $"class_{classId}");
+                    }
                 }
             }
 
@@ -35,40 +57,83 @@ namespace api.Hubs
         }
 
         public override async Task OnDisconnectedAsync(System.Exception exception)
-        {
-            var user = userConnections.FirstOrDefault(kvp => kvp.Value == Context.ConnectionId).Key;
-            if (!string.IsNullOrEmpty(user))
-            {
-                userConnections.TryRemove(user, out _);
-                studentClasses.TryRemove(user, out _);
-            }
+{
+    string disconnectedUser = null;
+    bool shouldNotifyOffline = false;
 
-            await base.OnDisconnectedAsync(exception);
-        }
+    lock (userConnections)
+    {
+        disconnectedUser = userConnections
+            .FirstOrDefault(kvp => kvp.Value.Contains(Context.ConnectionId)).Key;
 
-        public async Task SendPrivateMessage(string senderId, string receiverId, string message)
+        if (!string.IsNullOrEmpty(disconnectedUser))
         {
-            // Cho phép admin chat với bất kỳ ai và ngược lại
-            if (senderId == "admin" || receiverId == "admin")
+            userConnections[disconnectedUser].Remove(Context.ConnectionId);
+
+            if (userConnections[disconnectedUser].Count == 0)
             {
-                if (userConnections.TryGetValue(receiverId, out var connectionId))
+                userConnections.TryRemove(disconnectedUser, out _);
+                lock (onlineUsers)
                 {
-                    await Clients.Client(connectionId).SendAsync("ReceiveMessage", senderId, message);
+                    onlineUsers.Remove(disconnectedUser);
                 }
-                return;
+                studentClasses.TryRemove(disconnectedUser, out _);
+                shouldNotifyOffline = true;
             }
+        }
+    }
 
-            // Kiểm tra 2 học sinh có chung lớp
-            if (!studentClasses.ContainsKey(senderId) || !studentClasses.ContainsKey(receiverId))
-                return;
+    if (shouldNotifyOffline && !string.IsNullOrEmpty(disconnectedUser))
+    {
+        await Clients.All.SendAsync("UserOffline", disconnectedUser);
+    }
 
-            var senderClasses = studentClasses[senderId];
-            var receiverClasses = studentClasses[receiverId];
-            var hasSharedClass = senderClasses.Intersect(receiverClasses).Any();
+    await base.OnDisconnectedAsync(exception);
+}
 
-            if (hasSharedClass && userConnections.TryGetValue(receiverId, out var connId))
+
+   public async Task SendPrivateMessage(string senderId, string receiverId, string message)
+{
+    await ChatStorageService.SavePrivateMessageAsync(senderId, receiverId, message);
+
+    if (senderId == "admin" || receiverId == "admin")
+    {
+        if (userConnections.TryGetValue(receiverId, out var connections))
+        {
+            foreach (var connId in connections)
             {
                 await Clients.Client(connId).SendAsync("ReceiveMessage", senderId, message);
+            }
+        }
+        return;
+    }
+
+    if (studentClasses.TryGetValue(senderId, out var senderClasses) &&
+        studentClasses.TryGetValue(receiverId, out var receiverClasses))
+    {
+        var shared = senderClasses.Intersect(receiverClasses).Any();
+        if (shared && userConnections.TryGetValue(receiverId, out var receiverConnections))
+        {
+            foreach (var connId in receiverConnections)
+            {
+                await Clients.Client(connId).SendAsync("ReceiveMessage", senderId, message);
+            }
+        }
+    }
+}
+
+public async Task SendGroupMessage(string senderId, int classId, string message)
+{
+    await ChatStorageService.SaveGroupMessageAsync(senderId, classId, message);
+    await Clients.Group($"class_{classId}").SendAsync("ReceiveGroupMessage", senderId, message);
+}
+
+
+        public List<string> GetOnlineUsers()
+        {
+            lock (onlineUsers)
+            {
+                return onlineUsers.ToList();
             }
         }
     }

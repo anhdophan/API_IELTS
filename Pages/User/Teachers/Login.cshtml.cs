@@ -63,9 +63,32 @@ namespace api.Pages.User.Teachers
                         {
                             // Gán session cho Teacher
                             HttpContext.Session.SetString("TeacherId", teacher["teacherId"]?.ToString() ?? "");
+                            var teacherId = teacher["teacherId"]?.ToString() ?? "";
                             HttpContext.Session.SetString("TeacherName", teacher["name"]?.ToString() ?? "");
                             HttpContext.Session.SetString("TeacherAvatar", teacher["avatar"]?.ToString() ?? "");
                             HttpContext.Session.SetString("TeacherEmail", teacher["email"]?.ToString() ?? "");
+                            // ✅ Gọi API lấy danh sách lớp giáo viên đang dạy
+                            var classResponse = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Teacher/{teacherId}/classes");
+                            if (classResponse.IsSuccessStatusCode)
+                            {
+                                var classJson = await classResponse.Content.ReadAsStringAsync();
+                                var classList = JArray.Parse(classJson);
+
+                                var classIdList = new List<string>();
+                                foreach (var c in classList)
+                                {
+                                    var classId = c["classId"]?.ToString();
+                                    if (!string.IsNullOrEmpty(classId))
+                                        classIdList.Add(classId);
+                                }
+
+                                // ✅ Lưu vào Session: danh sách classId của giáo viên
+                                HttpContext.Session.SetString("TeacherClasses", Newtonsoft.Json.JsonConvert.SerializeObject(classIdList));
+
+                                // ✅ Lưu class đầu tiên để dùng cho chat nhóm mặc định
+                                if (classIdList.Count > 0)
+                                    HttpContext.Session.SetString("TeacherClass", classIdList[0]);
+                            }
 
                             return RedirectToPage("/User/Teachers/Index");
                         }

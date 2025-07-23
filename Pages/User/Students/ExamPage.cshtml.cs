@@ -9,38 +9,42 @@ using System.Linq;
 namespace api.Pages.User.Students
 {
     public class ExamPageModel : PageModel
+{
+    public Exam Exam { get; set; }
+    public Result Result { get; set; }
+    public bool IsExpired { get; set; }
+    public bool IsNotStarted { get; set; }
+
+    public async Task<IActionResult> OnGetAsync(int examId)
     {
-        public Exam Exam { get; set; }
-        public Result Result { get; set; }
+        var studentIdStr = HttpContext.Session.GetString("StudentId");
+        if (string.IsNullOrEmpty(studentIdStr))
+            return RedirectToPage("/User/Students/Login");
 
-        public async Task<IActionResult> OnGetAsync(int examId)
+        int studentId = int.Parse(studentIdStr);
+
+        using var httpClient = new HttpClient();
+
+        var examRes = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Exam/{examId}");
+        if (!examRes.IsSuccessStatusCode)
+            return NotFound("Không tìm thấy bài thi.");
+
+        var examJson = await examRes.Content.ReadAsStringAsync();
+        Exam = JsonConvert.DeserializeObject<Exam>(examJson);
+
+        var resultRes = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Result/student/{studentId}/exam/{examId}");
+        if (resultRes.IsSuccessStatusCode)
         {
-            // Lấy StudentId từ Session hoặc TempData
-            var studentIdStr = HttpContext.Session.GetString("StudentId");
-            if (string.IsNullOrEmpty(studentIdStr))
-                return RedirectToPage("/User/Students/Login");
-
-            int studentId = int.Parse(studentIdStr);
-
-            using var httpClient = new HttpClient();
-
-            // Lấy thông tin Exam
-            var examRes = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Exam/{examId}");
-            if (!examRes.IsSuccessStatusCode)
-                return NotFound("Không tìm thấy bài thi.");
-
-            var examJson = await examRes.Content.ReadAsStringAsync();
-            Exam = JsonConvert.DeserializeObject<Exam>(examJson);
-
-            // Kiểm tra đã làm bài chưa
-            var resultRes = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Result/student/{studentId}/exam/{examId}");
-            if (resultRes.IsSuccessStatusCode)
-            {
-                var resultJson = await resultRes.Content.ReadAsStringAsync();
-                Result = JsonConvert.DeserializeObject<Result>(resultJson);
-            }
-
-            return Page();
+            var resultJson = await resultRes.Content.ReadAsStringAsync();
+            Result = JsonConvert.DeserializeObject<Result>(resultJson);
         }
+
+        var nowVN = DateTime.UtcNow.AddHours(7); // Giờ Việt Nam
+        IsExpired = Exam.EndTime < nowVN;
+        IsNotStarted = Exam.StartTime > nowVN;
+
+        return Page();
     }
+}
+
 }
