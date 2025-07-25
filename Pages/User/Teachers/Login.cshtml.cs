@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using Firebase.Database.Query;
 
 namespace api.Pages.User.Teachers
 {
@@ -69,26 +70,41 @@ namespace api.Pages.User.Teachers
                             HttpContext.Session.SetString("TeacherEmail", teacher["email"]?.ToString() ?? "");
                             // ✅ Gọi API lấy danh sách lớp giáo viên đang dạy
                             var classResponse = await httpClient.GetAsync($"https://api-ielts-cgn8.onrender.com/api/Teacher/{teacherId}/classes");
-                            if (classResponse.IsSuccessStatusCode)
+                        if (classResponse.IsSuccessStatusCode)
+                        {
+                            var classJson = await classResponse.Content.ReadAsStringAsync();
+                            var classList = JArray.Parse(classJson);
+
+                            var classIdList = new List<string>();
+                            foreach (var c in classList)
                             {
-                                var classJson = await classResponse.Content.ReadAsStringAsync();
-                                var classList = JArray.Parse(classJson);
-
-                                var classIdList = new List<string>();
-                                foreach (var c in classList)
-                                {
-                                    var classId = c["classId"]?.ToString();
-                                    if (!string.IsNullOrEmpty(classId))
-                                        classIdList.Add(classId);
-                                }
-
-                                // ✅ Lưu vào Session: danh sách classId của giáo viên
-                                HttpContext.Session.SetString("TeacherClasses", Newtonsoft.Json.JsonConvert.SerializeObject(classIdList));
-
-                                // ✅ Lưu class đầu tiên để dùng cho chat nhóm mặc định
-                                if (classIdList.Count > 0)
-                                    HttpContext.Session.SetString("TeacherClass", classIdList[0]);
+                                var classId = c["classId"]?.ToString();
+                                if (!string.IsNullOrEmpty(classId))
+                                    classIdList.Add(classId);
                             }
+
+                            // ✅ Lưu vào Session: danh sách classId của giáo viên
+                            HttpContext.Session.SetString("TeacherClasses", Newtonsoft.Json.JsonConvert.SerializeObject(classIdList));
+
+                            // ✅ Lưu class đầu tiên để dùng cho chat nhóm mặc định
+                            if (classIdList.Count > 0)
+                                HttpContext.Session.SetString("TeacherClass", classIdList[0]);
+                                var firebaseClient = new Firebase.Database.FirebaseClient("https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/");
+
+                                await firebaseClient
+                                    .Child("users")
+                                    .Child(teacherId)
+                                    .PutAsync(new
+                                    {
+                                        userId = teacherId,
+                                        name = teacher["name"]?.ToString(),
+                                        email = teacher["email"]?.ToString(),
+                                        avatar = teacher["avatar"]?.ToString(),
+                                        role = "teacher",
+                                        classIds = classIdList
+                                    });
+                            }
+
 
                             return RedirectToPage("/User/Teachers/Index");
                         }

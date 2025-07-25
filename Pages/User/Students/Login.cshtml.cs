@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using Firebase.Database.Query;
 
 namespace api.Pages.User.Students
 {
@@ -68,6 +69,20 @@ namespace api.Pages.User.Students
                             HttpContext.Session.SetString("StudentAvatar", student["avatar"]?.ToString() ?? "");
                             HttpContext.Session.SetString("StudentEmail", student["email"]?.ToString() ?? "");
                             HttpContext.Session.SetString("StudentClass", student["class"]?.ToString() ?? "");
+                            var firebaseClient = new Firebase.Database.FirebaseClient("https://ielts-7d51b-default-rtdb.asia-southeast1.firebasedatabase.app/");
+
+                            await firebaseClient
+                                .Child("users")
+                                .Child(student["studentId"]?.ToString())
+                                .PutAsync(new
+                                {
+                                    userId = student["studentId"]?.ToString(),
+                                    name = student["name"]?.ToString(),
+                                    email = student["email"]?.ToString(),
+                                    avatar = student["avatar"]?.ToString(),
+                                    role = "student",
+                                    classIds = new List<string> { student["class"]?.ToString() }
+                                });
 
                             return RedirectToPage("/User/Students/Index");
                         }

@@ -33,7 +33,7 @@ namespace api.Pages.User.Students
                 return Page();
             }
             var json = await res.Content.ReadAsStringAsync();
-            Student = JsonConvert.DeserializeObject<Student>(json);
+            Student = JsonConvert.DeserializeObject<Student>(json); 
             return Page();
         }
 
