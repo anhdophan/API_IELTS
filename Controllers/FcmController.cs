@@ -13,11 +13,6 @@ namespace api.Controllers
       private readonly FirebaseClient firebaseClient = FirebaseService.Client;
 
 
-        public FcmController()
-        {
-            firebaseClient = FirebaseService.Client;
-        }
-
         [HttpPost("register-token")]
         public async Task<IActionResult> RegisterFcmToken([FromBody] TokenRequest request)
         {

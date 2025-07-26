@@ -1,3 +1,4 @@
+using Firebase.Database.Query;
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
@@ -30,6 +31,19 @@ namespace api.Services
                 _initialized = true;
             }
         }
+          public async Task<string> SendNotificationToStudentAsync(string studentId, string title, string body)
+          {
+          var tokenSnapshot = await FirebaseService.Client
+          .Child("Tokens")
+          .Child(studentId)
+          .Child("fcmToken")
+          .OnceSingleAsync<string>();
+
+          if (string.IsNullOrEmpty(tokenSnapshot))
+          throw new Exception("FCM Token not found");
+
+          return await SendNotificationToDeviceAsync(tokenSnapshot, title, body);
+          }
 
         public async Task<string> SendNotificationToDeviceAsync(string fcmToken, string title, string body)
         {
