@@ -65,7 +65,6 @@ D:/Web_Mobi_Project/API/api/bin/Debug/net8.0/System.Reactive.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.MvcApplicationPartsAssemblyInfo.cache
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.RazorAssemblyInfo.cache
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.RazorAssemblyInfo.cs
-/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.sourcelink.json
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/staticwebassets.build.json
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/staticwebassets.development.json
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/staticwebassets/msbuild.api.Microsoft.AspNetCore.StaticWebAssets.props
