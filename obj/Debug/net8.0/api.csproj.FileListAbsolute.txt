@@ -80,3 +80,14 @@ D:/Web_Mobi_Project/API/api/bin/Debug/net8.0/System.Reactive.dll
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.pdb
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/api.genruntimeconfig.cache
 /media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/obj/Debug/net8.0/ref/api.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Configs/firebase-adminsdk.json
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/FirebaseAdmin.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Google.Api.Gax.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Google.Api.Gax.Rest.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Google.Apis.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Google.Apis.Auth.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Google.Apis.Core.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/Microsoft.Bcl.AsyncInterfaces.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/System.CodeDom.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/System.Management.dll
+/media/dophan/1C46C0B846C09444/Web_Mobi_Project/API/api/bin/Debug/net8.0/runtimes/win/lib/net7.0/System.Management.dll

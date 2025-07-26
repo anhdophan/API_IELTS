@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Firebase.Database;
 using Firebase.Database.Query;
 using System.Threading.Tasks;
+using api.Services;
 
 namespace api.Controllers
 {
@@ -9,12 +10,12 @@ namespace api.Controllers
     [Route("api/[controller]")]
     public class FcmController : ControllerBase
     {
-        private readonly FirebaseClient firebaseClient;
+      private readonly FirebaseClient firebaseClient = FirebaseService.Client;
+
 
         public FcmController()
         {
-            // Khởi tạo FirebaseClient nếu chưa có DI
-            firebaseClient = new FirebaseClient("https://<your-project-id>.firebaseio.com/");
+            firebaseClient = FirebaseService.Client;
         }
 
         [HttpPost("register-token")]
