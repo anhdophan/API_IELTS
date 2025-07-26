@@ -3,6 +3,7 @@ using Firebase.Database;
 using Firebase.Database.Query;
 using System.Threading.Tasks;
 using api.Services;
+using Newtonsoft.Json;
 
 namespace api.Controllers
 {
@@ -13,20 +14,33 @@ namespace api.Controllers
       private readonly FirebaseClient firebaseClient = FirebaseService.Client;
 
 
-        [HttpPost("register-token")]
-        public async Task<IActionResult> RegisterFcmToken([FromBody] TokenRequest request)
-        {
-            if (string.IsNullOrEmpty(request.StudentId) || string.IsNullOrEmpty(request.FcmToken))
-                return BadRequest("Missing StudentId or FcmToken");
+       [HttpPost("register-token")]
+public async Task<IActionResult> RegisterFcmToken([FromBody] TokenRequest request)
+{
+    if (string.IsNullOrWhiteSpace(request.StudentId) || string.IsNullOrWhiteSpace(request.FcmToken))
+    {
+        return BadRequest(new { error = "Missing StudentId or FcmToken" });
+    }
 
-            await firebaseClient
-                .Child("Tokens")
-                .Child(request.StudentId)
-                .Child("fcmToken")
-                .PutAsync(request.FcmToken);
+    Console.WriteLine($"✅ Saving token: StudentId={request.StudentId}, Token={request.FcmToken}");
 
-            return Ok(new { message = "Token saved successfully" });
-        }
+    try
+    {
+      await firebaseClient
+  .Child("Tokens")
+  .Child(request.StudentId.ToString())
+  .Child("fcmToken")
+  .PutAsync(JsonConvert.SerializeObject(request.FcmToken));
+
+        return Ok(new { message = "Token saved successfully" });
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Firebase error: {ex.Message}");
+        return StatusCode(500, new { error = ex.Message });
+    }
+}
+
     }
 
     public class TokenRequest
