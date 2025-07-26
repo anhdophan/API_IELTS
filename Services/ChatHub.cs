@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using api.Services;
+using Firebase.Database.Query;
 
 namespace api.Hubs
 {
@@ -12,7 +13,12 @@ namespace api.Hubs
         private static readonly ConcurrentDictionary<string, List<string>> userConnections = new();
         private static readonly ConcurrentDictionary<string, List<int>> studentClasses = new();
         private static readonly HashSet<string> onlineUsers = new();
+        private readonly FirebaseMessagingService _firebaseService;
 
+        public ChatHub(FirebaseMessagingService firebaseService)
+        {
+            _firebaseService = firebaseService;
+        }
         public override async Task OnConnectedAsync()
         {
             var httpContext = Context.GetHttpContext();
@@ -57,76 +63,101 @@ namespace api.Hubs
         }
 
         public override async Task OnDisconnectedAsync(System.Exception exception)
-{
-    string disconnectedUser = null;
-    bool shouldNotifyOffline = false;
-
-    lock (userConnections)
-    {
-        disconnectedUser = userConnections
-            .FirstOrDefault(kvp => kvp.Value.Contains(Context.ConnectionId)).Key;
-
-        if (!string.IsNullOrEmpty(disconnectedUser))
         {
-            userConnections[disconnectedUser].Remove(Context.ConnectionId);
+            string disconnectedUser = null;
+            bool shouldNotifyOffline = false;
 
-            if (userConnections[disconnectedUser].Count == 0)
+            lock (userConnections)
             {
-                userConnections.TryRemove(disconnectedUser, out _);
-                lock (onlineUsers)
-                {
-                    onlineUsers.Remove(disconnectedUser);
+                disconnectedUser = userConnections
+                    .FirstOrDefault(kvp => kvp.Value.Contains(Context.ConnectionId)).Key;
+
+                if (!string.IsNullOrEmpty(disconnectedUser))
+                {   
+                    userConnections[disconnectedUser].Remove(Context.ConnectionId);
+
+                    if (userConnections[disconnectedUser].Count == 0)
+                    {
+                        userConnections.TryRemove(disconnectedUser, out _);
+                        lock (onlineUsers)
+                        {
+                            onlineUsers.Remove(disconnectedUser);
+                        }
+                        studentClasses.TryRemove(disconnectedUser, out _);
+                        shouldNotifyOffline = true;
+                    }
                 }
-                studentClasses.TryRemove(disconnectedUser, out _);
-                shouldNotifyOffline = true;
             }
-        }
-    }
 
-    if (shouldNotifyOffline && !string.IsNullOrEmpty(disconnectedUser))
-    {
-        await Clients.All.SendAsync("UserOffline", disconnectedUser);
-    }
-
-    await base.OnDisconnectedAsync(exception);
-}
-
-
-   public async Task SendPrivateMessage(string senderId, string receiverId, string message)
-{
-    await ChatStorageService.SavePrivateMessageAsync(senderId, receiverId, message);
-
-    if (senderId == "admin" || receiverId == "admin")
-    {
-        if (userConnections.TryGetValue(receiverId, out var connections))
-        {
-            foreach (var connId in connections)
+            if (shouldNotifyOffline && !string.IsNullOrEmpty(disconnectedUser))
             {
-                await Clients.Client(connId).SendAsync("ReceiveMessage", senderId, message);
+                await Clients.All.SendAsync("UserOffline", disconnectedUser);
             }
-        }
-        return;
-    }
 
-    if (studentClasses.TryGetValue(senderId, out var senderClasses) &&
-        studentClasses.TryGetValue(receiverId, out var receiverClasses))
-    {
-        var shared = senderClasses.Intersect(receiverClasses).Any();
-        if (shared && userConnections.TryGetValue(receiverId, out var receiverConnections))
+            await base.OnDisconnectedAsync(exception);
+        }
+
+
+        public async Task SendPrivateMessage(string senderId, string receiverId, string message)
         {
-            foreach (var connId in receiverConnections)
+            await ChatStorageService.SavePrivateMessageAsync(senderId, receiverId, message);
+
+            bool isOnline = userConnections.TryGetValue(receiverId, out var receiverConnections);
+            if (isOnline)
             {
-                await Clients.Client(connId).SendAsync("ReceiveMessage", senderId, message);
+                foreach (var connId in receiverConnections)
+                {
+                    await Clients.Client(connId).SendAsync("ReceiveMessage", senderId, message);
+                }
+            }
+            else
+            {
+                // Lấy FCM Token của receiver từ Firebase hoặc DB của bạn
+                var token = await FirebaseService.Client
+                    .Child("FcmTokens")
+                    .Child(receiverId)
+                    .OnceSingleAsync<string>();
+
+                if (!string.IsNullOrEmpty(token))
+                {
+                    await _firebaseService.SendNotificationToDeviceAsync(
+                        token,
+                        title: $"Tin nhắn mới từ {senderId}",
+                        body: message
+                    );
+                }
             }
         }
-    }
-}
+        public async Task SendGroupMessage(string senderId, int classId, string message)
+        {
+            await ChatStorageService.SaveGroupMessageAsync(senderId, classId, message);
+            await Clients.Group($"class_{classId}").SendAsync("ReceiveGroupMessage", senderId, message);
 
-public async Task SendGroupMessage(string senderId, int classId, string message)
-{
-    await ChatStorageService.SaveGroupMessageAsync(senderId, classId, message);
-    await Clients.Group($"class_{classId}").SendAsync("ReceiveGroupMessage", senderId, message);
-}
+            // Để push notification cho người offline
+            var allInClass = studentClasses
+                .Where(kvp => kvp.Value.Contains(classId))
+                .Select(kvp => kvp.Key);
+
+            foreach (var studentId in allInClass)
+            {
+                if (!onlineUsers.Contains(studentId))
+                {
+                    var token = await FirebaseService.Client
+                        .Child("FcmTokens")
+                        .Child(studentId)
+                        .OnceSingleAsync<string>();
+
+                    if (!string.IsNullOrEmpty(token))
+                    {
+                        await _firebaseService.SendNotificationToDeviceAsync(
+                            token,
+                            title: "Tin nhắn nhóm mới",
+                            body: message
+                        );
+                    }
+                }
+            }
+        }
 
 
         public List<string> GetOnlineUsers()

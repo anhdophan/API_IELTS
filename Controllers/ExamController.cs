@@ -9,6 +9,7 @@ using api.Services;
 using api.Models;
 using System.Net.Http;
 using Newtonsoft.Json;
+using FirebaseAdmin.Messaging;
 
 namespace api.Controllers
 {
@@ -88,23 +89,121 @@ namespace api.Controllers
             return Ok(exam);
         }
         private async Task NotifyStudentsAsync(Exam exam)
+{
+    var studentApiUrl = $"https://api-ielts-cgn8.onrender.com/api/Class/{exam.IdClass}/students";
+    using var httpClient = new HttpClient();
+    var json = await httpClient.GetStringAsync(studentApiUrl);
+
+    var students = JsonConvert.DeserializeObject<List<Student>>(json);
+    if (students == null || students.Count == 0)
+        return;
+
+    var timestamp = DateTime.UtcNow;
+    var firebaseMessaging = FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance;
+
+    foreach (var student in students)
+    {
+        // Nội dung thông báo
+        var noti = new Models.Notification
         {
-            var studentApiUrl = $"https://api-ielts-cgn8.onrender.com/api/Class/{exam.IdClass}/students";
-            using var httpClient = new HttpClient();
-            var json = await httpClient.GetStringAsync(studentApiUrl);
+            NotificationId = Guid.NewGuid().ToString("N"),
+            Title = "📢 Bài thi mới",
+            Message = $"Bạn có bài thi mới: {exam.Title} vào ngày {exam.ExamDate:dd/MM/yyyy}",
+            Timestamp = timestamp,
+            IsRead = false
+        };
 
-            var students = JsonConvert.DeserializeObject<List<Student>>(json);
-            if (students == null || students.Count == 0)
-                return;
+        // 🔹 Ghi vào Realtime Database
+        await firebaseClient
+            .Child("Notifications")
+            .Child(student.StudentId.ToString())
+            .Child(noti.NotificationId)
+            .PutAsync(noti);
 
-            var timestamp = DateTime.UtcNow;
-            foreach (var student in students)
+        // 🔹 Gửi Push Notification nếu có fcmToken
+        var tokenSnapshot = await firebaseClient
+            .Child("Tokens")
+            .Child(student.StudentId.ToString())
+            .Child("fcmToken")
+            .OnceSingleAsync<string>();
+
+        if (!string.IsNullOrEmpty(tokenSnapshot))
+        {
+            var message = new FirebaseAdmin.Messaging.Message
             {
-                var noti = new Notification
+                Token = tokenSnapshot,
+                Notification = new FirebaseAdmin.Messaging.Notification
+                {
+                    Title = noti.Title,
+                    Body = noti.Message
+                },
+                Data = new Dictionary<string, string>
+                {
+                    { "type", "exam" },
+                    { "examId", exam.ExamId.ToString() },
+                    { "classId", exam.IdClass.ToString() }
+                },
+                Android = new FirebaseAdmin.Messaging.AndroidConfig
+                {
+                    Priority = Priority.High,
+                    Notification = new AndroidNotification
+                    {
+                        ClickAction = "FLUTTER_NOTIFICATION_CLICK"
+                    }
+                },
+                Apns = new FirebaseAdmin.Messaging.ApnsConfig
+                {
+                    Aps = new FirebaseAdmin.Messaging.Aps
+                    {
+                        ContentAvailable = true
+                    }
+                }
+            };
+
+            try
+            {
+                await firebaseMessaging.SendAsync(message);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Lỗi gửi FCM cho studentId {student.StudentId}: {ex.Message}");
+            }
+        }
+    }
+}
+
+        [HttpPost("{examId}/notify")]
+        public async Task<IActionResult> NotifyStudentsAboutExam(int examId)
+        {
+            var exam = await firebaseClient
+                .Child("Exams")
+                .Child(examId.ToString())
+                .OnceSingleAsync<Exam>();
+
+            if (exam == null)
+                return NotFound("Exam not found");
+
+            // Lấy danh sách sinh viên trong lớp
+            var studentApiUrl = $"https://api-ielts-cgn8.onrender.com/api/Class/{exam.IdClass}/students";
+            List<Student> studentsInClass;
+            using (var httpClient = new HttpClient())
+            {
+                var json = await httpClient.GetStringAsync(studentApiUrl);
+                studentsInClass = JsonConvert.DeserializeObject<List<Student>>(json);
+            }
+
+            if (studentsInClass == null || studentsInClass.Count == 0)
+                return BadRequest("No students found for the class");
+
+            // Gửi thông báo đến từng sinh viên
+            var timestamp = DateTime.UtcNow;
+            foreach (var student in studentsInClass)
+            {
+                var noti = new Models.Notification
                 {
                     NotificationId = Guid.NewGuid().ToString("N"),
-                    Title = "📢 Bài thi mới",
-                    Message = $"Bạn có bài thi mới: {exam.Title} vào ngày {exam.ExamDate:dd/MM/yyyy}",
+                    Title = "Bài thi mới đã được tạo",
+                    Message = $"Bạn có bài thi mới: {exam.Title}, ngày thi: {exam.ExamDate:dd/MM/yyyy}.",
                     Timestamp = timestamp,
                     IsRead = false
                 };
@@ -115,8 +214,12 @@ namespace api.Controllers
                     .Child(noti.NotificationId)
                     .PutAsync(noti);
             }
-        }
 
+            return Ok(new
+            {
+                message = $"Đã gửi thông báo bài thi mới cho {studentsInClass.Count} sinh viên."
+            });
+        }
 
         [HttpPut("{examId}")]
         public async Task<IActionResult> UpdateExamAsync(string examId, [FromBody] Exam exam)
@@ -410,54 +513,7 @@ namespace api.Controllers
             return Ok(result);
         }
 
-        [HttpPost("{examId}/notify")]
-        public async Task<IActionResult> NotifyStudentsAboutExam(int examId)
-        {
-            var exam = await firebaseClient
-                .Child("Exams")
-                .Child(examId.ToString())
-                .OnceSingleAsync<Exam>();
 
-            if (exam == null)
-                return NotFound("Exam not found");
-
-            // Lấy danh sách sinh viên trong lớp
-            var studentApiUrl = $"https://api-ielts-cgn8.onrender.com/api/Class/{exam.IdClass}/students";
-            List<Student> studentsInClass;
-            using (var httpClient = new HttpClient())
-            {
-                var json = await httpClient.GetStringAsync(studentApiUrl);
-                studentsInClass = JsonConvert.DeserializeObject<List<Student>>(json);
-            }
-
-            if (studentsInClass == null || studentsInClass.Count == 0)
-                return BadRequest("No students found for the class");
-
-            // Gửi thông báo đến từng sinh viên
-            var timestamp = DateTime.UtcNow;
-            foreach (var student in studentsInClass)
-            {
-                var noti = new Notification
-                {
-                    NotificationId = Guid.NewGuid().ToString("N"),
-                    Title = "Bài thi mới đã được tạo",
-                    Message = $"Bạn có bài thi mới: {exam.Title}, ngày thi: {exam.ExamDate:dd/MM/yyyy}.",
-                    Timestamp = timestamp,
-                    IsRead = false
-                };
-
-                await firebaseClient
-                    .Child("Notifications")
-                    .Child(student.StudentId.ToString())
-                    .Child(noti.NotificationId)
-                    .PutAsync(noti);
-            }
-
-            return Ok(new
-            {
-                message = $"Đã gửi thông báo bài thi mới cho {studentsInClass.Count} sinh viên."
-            });
-        }
         [HttpGet("{examId}/questions")]
 public async Task<ActionResult<List<Question>>> GetQuestionsByExamId(int examId)
 {

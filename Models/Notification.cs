@@ -7,11 +7,18 @@ using api.Models;
 using api.Services;
 using Microsoft.Extensions.Logging;
 
-public class Notification
+namespace api.Models
 {
-    public string NotificationId { get; set; }
-    public string Title { get; set; }
-    public string Message { get; set; }
-    public DateTime Timestamp { get; set; }
-    public bool IsRead { get; set; } = false;
+    public class Notification
+    {
+        public string NotificationId { get; set; }
+        public string Title { get; set; }
+        public string Message { get; set; }
+        public DateTime Timestamp { get; set; }
+        public bool IsRead { get; set; } = false;
+
+        // Optional: dùng để phân loại về sau
+        public string Type { get; set; } = "exam"; // hoặc "chat", "announcement",...
+    }
+
 }
