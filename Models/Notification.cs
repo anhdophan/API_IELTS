@@ -18,7 +18,7 @@ namespace api.Models
         public bool IsRead { get; set; } = false;
 
         // Optional: dùng để phân loại về sau
-        public string Type { get; set; } = "exam"; // hoặc "chat", "announcement",...
+        public string Type { get; set; }  // hoặc "chat", "announcement",...
     }
 
 }
