@@ -88,47 +88,77 @@ namespace api.Controllers
 
             return Ok(exam);
         }
-        private async Task NotifyStudentsAsync(Exam exam)
+       private async Task NotifyStudentsAsync(Exam exam)
 {
     var studentApiUrl = $"https://api-ielts-cgn8.onrender.com/api/Class/{exam.IdClass}/students";
     using var httpClient = new HttpClient();
     var json = await httpClient.GetStringAsync(studentApiUrl);
 
-    var students = JsonConvert.DeserializeObject<List<Student>>(json);
-    if (students == null || students.Count == 0)
+    List<Student> students;
+    try
+    {
+        students = JsonConvert.DeserializeObject<List<Student>>(json);
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine("❌ Lỗi deserialize danh sách sinh viên: " + ex.Message);
         return;
+    }
+
+    if (students == null || students.Count == 0)
+    {
+        Console.WriteLine("❗ Không có sinh viên trong lớp.");
+        return;
+    }
 
     var timestamp = DateTime.UtcNow;
     var firebaseMessaging = FirebaseAdmin.Messaging.FirebaseMessaging.DefaultInstance;
 
     foreach (var student in students)
     {
-        // Nội dung thông báo
-        var noti = new Models.Notification
+        if (student == null || string.IsNullOrEmpty(student.StudentId.ToString()))
         {
-            NotificationId = Guid.NewGuid().ToString("N"),
-            Title = "📢 Bài thi mới",
-            Message = $"Bạn có bài thi mới: {exam.Title} vào ngày {exam.ExamDate:dd/MM/yyyy}",
-            Timestamp = timestamp,
-            IsRead = false
-        };
+            Console.WriteLine("⚠️ Sinh viên null hoặc thiếu StudentId.");
+            continue;
+        }
 
-        // 🔹 Ghi vào Realtime Database
-        await firebaseClient
-            .Child("Notifications")
-            .Child(student.StudentId.ToString())
-            .Child(noti.NotificationId)
-            .PutAsync(noti);
-
-        // 🔹 Gửi Push Notification nếu có fcmToken
-        var tokenSnapshot = await firebaseClient
-            .Child("Tokens")
-            .Child(student.StudentId.ToString())
-            .Child("fcmToken")
-            .OnceSingleAsync<string>();
-
-        if (!string.IsNullOrEmpty(tokenSnapshot))
+        try
         {
+            var noti = new Models.Notification
+            {
+                NotificationId = Guid.NewGuid().ToString("N"),
+                Title = "📢 Bài thi mới",
+                Message = $"Bạn có bài thi mới: {exam.Title} vào ngày {exam.ExamDate:dd/MM/yyyy}",
+                Timestamp = timestamp,
+                IsRead = false
+            };
+
+            await firebaseClient
+                .Child("Notifications")
+                .Child(student.StudentId.ToString())
+                .Child(noti.NotificationId)
+                .PutAsync(noti);
+
+            var tokenSnapshot = await firebaseClient
+                .Child("Tokens")
+                .Child(student.StudentId.ToString())
+                .Child("fcmToken")
+                .OnceSingleAsync<string>();
+
+            if (string.IsNullOrEmpty(tokenSnapshot))
+            {
+                Console.WriteLine($"⚠️ Không tìm thấy fcmToken cho studentId {student.StudentId}");
+                continue;
+            }
+if (string.IsNullOrEmpty(tokenSnapshot))
+{
+    Console.WriteLine($"⚠️ Token rỗng cho studentId {student.StudentId}");
+}
+else
+{
+    Console.WriteLine($"✅ Đang gửi FCM cho studentId {student.StudentId} với token {tokenSnapshot}");
+}
+
             var message = new FirebaseAdmin.Messaging.Message
             {
                 Token = tokenSnapshot,
@@ -160,17 +190,15 @@ namespace api.Controllers
                 }
             };
 
-            try
-            {
-                await firebaseMessaging.SendAsync(message);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Lỗi gửi FCM cho studentId {student.StudentId}: {ex.Message}");
-            }
+            await firebaseMessaging.SendAsync(message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Lỗi gửi FCM cho studentId {student?.StudentId}: {ex.Message}");
         }
     }
 }
+
 
         [HttpPost("{examId}/notify")]
         public async Task<IActionResult> NotifyStudentsAboutExam(int examId)
