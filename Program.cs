@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using System.IO;
 using System;
 using api.Hubs;
+using api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +36,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddSingleton<FirebaseMessagingService>();
 
 builder.Services.AddSwaggerGen();
 builder.Services.AddSession();
